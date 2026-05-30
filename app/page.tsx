@@ -65,6 +65,9 @@ export default function HomePage() {
     DEFAULT_TARGET_LANGUAGE,
   );
   const [scenario, setScenario] = useState<ScenarioId>(DEFAULT_SCENARIO);
+  const [customDescription, setCustomDescription] = useState<string | undefined>(
+    undefined,
+  );
   const [messages, setMessages] = useState<DisplayMessage[]>([]);
   const [input, setInput] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
@@ -170,8 +173,12 @@ export default function HomePage() {
     setPendingLanguageChange(null);
   }
 
-  async function startScenario(scenarioId: ScenarioId): Promise<void> {
+  async function startScenario(
+    scenarioId: ScenarioId,
+    customDesc?: string,
+  ): Promise<void> {
     setScenario(scenarioId);
+    setCustomDescription(customDesc);
     setMessages([]);
     setInput("");
     setError(null);
@@ -186,6 +193,7 @@ export default function HomePage() {
           nativeLanguage,
           targetLanguage,
           scenario: scenarioId,
+          customDescription: customDesc,
           startScenario: true,
         }),
       });
@@ -250,6 +258,7 @@ export default function HomePage() {
           nativeLanguage,
           targetLanguage,
           scenario,
+          customDescription,
         }),
       });
 
@@ -303,7 +312,10 @@ export default function HomePage() {
     }
   }
 
-  const scenarioLabel: string = getScenario(scenario).label;
+  const scenarioLabel: string =
+    scenario === "custom" && customDescription
+      ? `Custom: ${customDescription}`
+      : getScenario(scenario).label;
   const displayMessages: DisplayMessage[] = getDisplayMessages(messages);
   const awaitingAcknowledgment: boolean = messages.some(
     (message) => message.role === "user" && message.awaitingAcknowledgment,
@@ -441,6 +453,10 @@ export default function HomePage() {
           <textarea
             ref={composerRef}
             rows={1}
+            lang={targetLanguage === "no" ? "nb" : targetLanguage}
+            autoComplete="off"
+            autoCorrect="on"
+            spellCheck
             value={input}
             onChange={(event) => setInput(event.target.value)}
             onKeyDown={handleComposerKeyDown}

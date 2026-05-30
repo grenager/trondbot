@@ -7,7 +7,16 @@ import {
 import type { LanguageCode } from "./types";
 import type { ScenarioId } from "./scenarios";
 
-function scenarioSection(scenarioId: ScenarioId): string {
+function scenarioSection(
+  scenarioId: ScenarioId,
+  customDescription?: string,
+): string {
+  if (scenarioId === "custom" && customDescription) {
+    return `Current scenario: Custom
+${customDescription}
+Stay in this role throughout the conversation. Guide the dialogue naturally within this scenario.`;
+  }
+
   const scenario = getScenario(scenarioId);
   return `Current scenario: ${scenario.label}
 ${scenario.description}
@@ -19,6 +28,7 @@ export function buildSystemPrompt(
   targetLanguage: LanguageCode,
   scenarioId: ScenarioId,
   opening: boolean = false,
+  customDescription?: string,
 ): string {
   const nativeLabel: string = getLanguageLabel(nativeLanguage);
   const targetLabel: string = getLanguageLabel(targetLanguage);
@@ -39,7 +49,7 @@ Begin in character with a natural, welcoming opening line in ${targetLabel}.`
 
 The user's native language is ${nativeLabel}. They are learning ${targetLabel}.
 
-${scenarioSection(scenarioId)}
+${scenarioSection(scenarioId, customDescription)}
 
 ${openingInstructions}
 

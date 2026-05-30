@@ -1,21 +1,21 @@
 import type { Language, LanguageCode } from "./types";
 
 export const LANGUAGES: readonly Language[] = [
-  { code: "en", label: "English" },
-  { code: "es", label: "Spanish" },
-  { code: "fr", label: "French" },
-  { code: "de", label: "German" },
-  { code: "it", label: "Italian" },
-  { code: "pt", label: "Portuguese" },
-  { code: "ja", label: "Japanese" },
-  { code: "ko", label: "Korean" },
-  { code: "zh", label: "Chinese" },
-  { code: "ar", label: "Arabic" },
-  { code: "hi", label: "Hindi" },
-  { code: "ru", label: "Russian" },
-  { code: "nl", label: "Dutch" },
-  { code: "sv", label: "Swedish" },
-  { code: "no", label: "Norwegian" },
+  { code: "en", label: "English", flag: "🇺🇸" },
+  { code: "es", label: "Spanish", flag: "🇪🇸" },
+  { code: "fr", label: "French", flag: "🇫🇷" },
+  { code: "de", label: "German", flag: "🇩🇪" },
+  { code: "it", label: "Italian", flag: "🇮🇹" },
+  { code: "pt", label: "Portuguese", flag: "🇵🇹" },
+  { code: "ja", label: "Japanese", flag: "🇯🇵" },
+  { code: "ko", label: "Korean", flag: "🇰🇷" },
+  { code: "zh", label: "Chinese", flag: "🇨🇳" },
+  { code: "ar", label: "Arabic", flag: "🇸🇦" },
+  { code: "hi", label: "Hindi", flag: "🇮🇳" },
+  { code: "ru", label: "Russian", flag: "🇷🇺" },
+  { code: "nl", label: "Dutch", flag: "🇳🇱" },
+  { code: "sv", label: "Swedish", flag: "🇸🇪" },
+  { code: "no", label: "Norwegian", flag: "🇳🇴" },
 ] as const;
 
 export const DEFAULT_NATIVE_LANGUAGE: LanguageCode = "en";

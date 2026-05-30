@@ -20,6 +20,7 @@ export type LanguageCode =
 export interface Language {
   code: LanguageCode;
   label: string;
+  flag: string;
 }
 
 export interface Token {
@@ -60,6 +61,7 @@ export interface ChatRequestBody {
   nativeLanguage: LanguageCode;
   targetLanguage: LanguageCode;
   scenario: ScenarioId;
+  customDescription?: string;
   startScenario?: boolean;
 }
 

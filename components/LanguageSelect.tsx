@@ -30,7 +30,7 @@ export default function LanguageSelect({
       >
         {LANGUAGES.map((language) => (
           <option key={language.code} value={language.code}>
-            {language.label}
+            {language.flag} {language.label}
           </option>
         ))}
       </select>

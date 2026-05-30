@@ -6,7 +6,8 @@ export type ScenarioId =
   | "new-friend"
   | "vacation-plans"
   | "talk-about-school"
-  | "job-interview";
+  | "job-interview"
+  | "custom";
 
 export interface Scenario {
   id: ScenarioId;
@@ -62,6 +63,11 @@ export const SCENARIOS: readonly Scenario[] = [
     label: "Job interview",
     description:
       "You are a job interviewer. Ask professional interview questions, follow up on answers, and keep a polite but evaluative tone.",
+  },
+  {
+    id: "custom",
+    label: "Custom…",
+    description: "",
   },
 ] as const;
 
