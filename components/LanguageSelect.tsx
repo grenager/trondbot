@@ -5,6 +5,7 @@ interface LanguageSelectProps {
   id: string;
   label: string;
   value: LanguageCode;
+  disabled?: boolean;
   onChange: (code: LanguageCode) => void;
 }
 
@@ -12,6 +13,7 @@ export default function LanguageSelect({
   id,
   label,
   value,
+  disabled = false,
   onChange,
 }: LanguageSelectProps) {
   return (
@@ -22,8 +24,9 @@ export default function LanguageSelect({
       <select
         id={id}
         value={value}
+        disabled={disabled}
         onChange={(event) => onChange(event.target.value as LanguageCode)}
-        className="rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm text-stone-800 shadow-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
+        className="rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm text-stone-800 shadow-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-stone-50"
       >
         {LANGUAGES.map((language) => (
           <option key={language.code} value={language.code}>

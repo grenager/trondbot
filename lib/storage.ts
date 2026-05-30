@@ -63,6 +63,9 @@ function isDisplayMessage(value: unknown): value is DisplayMessage {
   }
 
   if (value.role === "user") {
+    if (value.accepted !== undefined && typeof value.accepted !== "boolean") {
+      return false;
+    }
     if (value.correction === undefined) {
       return true;
     }

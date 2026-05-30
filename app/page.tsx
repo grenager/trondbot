@@ -1,7 +1,8 @@
 "use client";
 
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { FormEvent, KeyboardEvent, useEffect, useRef, useState } from "react";
 import ChatMessage from "@/components/ChatMessage";
+import ConfirmDialog from "@/components/ConfirmDialog";
 import LanguageSelect from "@/components/LanguageSelect";
 import ScenarioMenu from "@/components/ScenarioMenu";
 import {
@@ -24,6 +25,12 @@ import type {
   ScenarioOpeningResponse,
   UserMessageWithCorrection,
 } from "@/lib/types";
+
+const MAX_COMPOSER_LINES = 3;
+
+type PendingLanguageChange =
+  | { kind: "native"; value: LanguageCode }
+  | { kind: "target"; value: LanguageCode };
 
 function toApiMessages(displayMessages: DisplayMessage[]): ApiChatMessage[] {
   return displayMessages.map((message) => {
@@ -51,7 +58,30 @@ export default function HomePage() {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [hydrated, setHydrated] = useState<boolean>(false);
+  const [pendingLanguageChange, setPendingLanguageChange] =
+    useState<PendingLanguageChange | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const composerRef = useRef<HTMLTextAreaElement>(null);
+
+  function resizeComposer(): void {
+    const textarea: HTMLTextAreaElement | null = composerRef.current;
+    if (!textarea) {
+      return;
+    }
+
+    textarea.style.height = "auto";
+    const styles: CSSStyleDeclaration = getComputedStyle(textarea);
+    const lineHeight: number =
+      Number.parseFloat(styles.lineHeight) || 20;
+    const padding: number =
+      Number.parseFloat(styles.paddingTop) +
+      Number.parseFloat(styles.paddingBottom);
+    const maxHeight: number = lineHeight * MAX_COMPOSER_LINES + padding;
+
+    textarea.style.height = `${Math.min(textarea.scrollHeight, maxHeight)}px`;
+    textarea.style.overflowY =
+      textarea.scrollHeight > maxHeight ? "auto" : "hidden";
+  }
 
   useEffect(() => {
     const stored = loadStoredState();
@@ -70,8 +100,63 @@ export default function HomePage() {
   }, [hydrated, nativeLanguage, targetLanguage, scenario, messages]);
 
   useEffect(() => {
+    resizeComposer();
+  }, [input]);
+
+  useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
+
+  function handleComposerKeyDown(
+    event: KeyboardEvent<HTMLTextAreaElement>,
+  ): void {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      event.currentTarget.form?.requestSubmit();
+    }
+  }
+
+  function requestLanguageChange(
+    kind: PendingLanguageChange["kind"],
+    nextLanguage: LanguageCode,
+    currentLanguage: LanguageCode,
+  ): void {
+    if (nextLanguage === currentLanguage) {
+      return;
+    }
+
+    if (messages.length === 0) {
+      if (kind === "native") {
+        setNativeLanguage(nextLanguage);
+      } else {
+        setTargetLanguage(nextLanguage);
+      }
+      return;
+    }
+
+    setPendingLanguageChange({ kind, value: nextLanguage });
+  }
+
+  function confirmLanguageChange(): void {
+    if (!pendingLanguageChange) {
+      return;
+    }
+
+    if (pendingLanguageChange.kind === "native") {
+      setNativeLanguage(pendingLanguageChange.value);
+    } else {
+      setTargetLanguage(pendingLanguageChange.value);
+    }
+
+    setMessages([]);
+    setInput("");
+    setError(null);
+    setPendingLanguageChange(null);
+  }
+
+  function cancelLanguageChange(): void {
+    setPendingLanguageChange(null);
+  }
 
   async function startScenario(scenarioId: ScenarioId): Promise<void> {
     setScenario(scenarioId);
@@ -172,10 +257,9 @@ export default function HomePage() {
 
       const agentResponse: AgentResponse = data as AgentResponse;
 
-      const userWithCorrection: UserMessageWithCorrection = {
-        ...userMessage,
-        correction: agentResponse.correction,
-      };
+      const userWithCorrection: UserMessageWithCorrection = agentResponse.correction
+        ? { ...userMessage, correction: agentResponse.correction }
+        : { ...userMessage, accepted: true };
 
       const assistantMessage: AssistantMessage = {
         role: "assistant",
@@ -200,6 +284,15 @@ export default function HomePage() {
 
   return (
     <main className="mx-auto flex h-dvh max-w-2xl flex-col px-4 py-6">
+      <ConfirmDialog
+        open={pendingLanguageChange !== null}
+        title="Start a new chat?"
+        message="Changing languages starts a fresh conversation with a new tutor. Your current chat will be cleared."
+        confirmLabel="Start new chat"
+        cancelLabel="Keep current chat"
+        onConfirm={confirmLanguageChange}
+        onCancel={cancelLanguageChange}
+      />
       <header className="mb-6 shrink-0">
         <div className="mb-4 flex items-center justify-between gap-4">
           <h1 className="text-xl font-semibold tracking-tight text-stone-900">
@@ -212,13 +305,19 @@ export default function HomePage() {
             id="native-language"
             label="I speak"
             value={nativeLanguage}
-            onChange={setNativeLanguage}
+            disabled={loading}
+            onChange={(code) =>
+              requestLanguageChange("native", code, nativeLanguage)
+            }
           />
           <LanguageSelect
             id="target-language"
             label="I want to learn"
             value={targetLanguage}
-            onChange={setTargetLanguage}
+            disabled={loading}
+            onChange={(code) =>
+              requestLanguageChange("target", code, targetLanguage)
+            }
           />
         </div>
       </header>
@@ -241,6 +340,7 @@ export default function HomePage() {
                 <ChatMessage
                   key={`${message.role}-${index}-${message.content.slice(0, 20)}`}
                   message={message}
+                  language={targetLanguage}
                 />
               ))}
             </>
@@ -263,15 +363,17 @@ export default function HomePage() {
 
         <form
           onSubmit={handleSubmit}
-          className="flex shrink-0 gap-2 border-t border-stone-100 p-4"
+          className="flex shrink-0 items-end gap-2 border-t border-stone-100 p-4"
         >
-          <input
-            type="text"
+          <textarea
+            ref={composerRef}
+            rows={1}
             value={input}
             onChange={(event) => setInput(event.target.value)}
+            onKeyDown={handleComposerKeyDown}
             placeholder="Type a message…"
             disabled={loading}
-            className="flex-1 rounded-lg border border-stone-200 px-3 py-2 text-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 disabled:bg-stone-50"
+            className="flex-1 resize-none rounded-lg border border-stone-200 px-3 py-2 text-sm leading-5 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 disabled:bg-stone-50"
           />
           <button
             type="submit"

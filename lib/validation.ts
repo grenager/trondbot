@@ -30,6 +30,42 @@ function isCorrection(value: unknown): value is Correction {
   );
 }
 
+export function parseJsonFromModelText(text: string): unknown {
+  const trimmed: string = text.trim();
+  const fencedMatch: RegExpMatchArray | null = trimmed.match(
+    /^```(?:json)?\s*([\s\S]*?)\s*```$/,
+  );
+  const jsonText: string = fencedMatch?.[1]?.trim() ?? trimmed;
+  return JSON.parse(jsonText);
+}
+
+function normalizeForComparison(text: string): string {
+  return text
+    .trim()
+    .replace(/^["'""'']+|["'""'']+$/g, "")
+    .toLowerCase()
+    .replace(/\s+/g, " ");
+}
+
+function isTrivialCorrection(original: string, corrected: string): boolean {
+  return normalizeForComparison(original) === normalizeForComparison(corrected);
+}
+
+function parseOptionalCorrection(
+  value: unknown,
+  userMessage?: string,
+): Correction | undefined {
+  if (!isCorrection(value)) {
+    return undefined;
+  }
+
+  if (userMessage && isTrivialCorrection(userMessage, value.corrected)) {
+    return undefined;
+  }
+
+  return value;
+}
+
 function parseAgentReply(raw: unknown): AgentReply | null {
   if (!isRecord(raw)) {
     return null;
@@ -50,17 +86,23 @@ function parseAgentReply(raw: unknown): AgentReply | null {
   };
 }
 
-export function parseAgentResponse(raw: unknown): AgentResponse | null {
+export function parseAgentResponse(
+  raw: unknown,
+  userMessage?: string,
+): AgentResponse | null {
   if (!isRecord(raw)) {
     return null;
   }
 
-  const correction: unknown = raw.correction;
   const reply: AgentReply | null = parseAgentReply(raw.reply);
-
-  if (!isCorrection(correction) || !reply) {
+  if (!reply) {
     return null;
   }
+
+  const correction: Correction | undefined = parseOptionalCorrection(
+    raw.correction,
+    userMessage,
+  );
 
   return {
     correction,

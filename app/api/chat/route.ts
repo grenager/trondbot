@@ -1,6 +1,12 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { NextResponse } from "next/server";
 import { buildSystemPrompt } from "@/lib/prompt";
+import {
+  CHAT_TURN_TOOL_NAME,
+  chatTurnTool,
+  SCENARIO_OPENING_TOOL_NAME,
+  scenarioOpeningTool,
+} from "@/lib/tools";
 import type {
   AgentResponse,
   ChatRequestBody,
@@ -9,11 +15,64 @@ import type {
 import {
   isChatRequestBody,
   parseAgentResponse,
+  parseJsonFromModelText,
   parseScenarioOpeningResponse,
   toAnthropicMessages,
 } from "@/lib/validation";
 
 const MODEL: string = "claude-sonnet-4-20250514";
+
+function logChatError(reason: string, detail: unknown): void {
+  console.error(`[api/chat] ${reason}`, detail);
+}
+
+function parseFromToolInput(
+  content: Anthropic.Messages.ContentBlock[],
+  toolName: string,
+): unknown | null {
+  const toolBlock = content.find(
+    (block): block is Anthropic.Messages.ToolUseBlock =>
+      block.type === "tool_use" && block.name === toolName,
+  );
+  return toolBlock?.input ?? null;
+}
+
+function parseFromTextContent(
+  content: Anthropic.Messages.ContentBlock[],
+): unknown | null {
+  const textBlock = content.find(
+    (block): block is Anthropic.Messages.TextBlock => block.type === "text",
+  );
+  if (!textBlock) {
+    return null;
+  }
+
+  try {
+    return parseJsonFromModelText(textBlock.text);
+  } catch (error: unknown) {
+    logChatError("Failed to parse model text as JSON", {
+      text: textBlock.text.slice(0, 500),
+      error: error instanceof Error ? error.message : error,
+    });
+    return null;
+  }
+}
+
+function extractStructuredResponse(
+  content: Anthropic.Messages.ContentBlock[],
+  toolName: string,
+): unknown | null {
+  const fromTool: unknown | null = parseFromToolInput(content, toolName);
+  if (fromTool !== null) {
+    return fromTool;
+  }
+
+  logChatError("Tool use block missing, falling back to text JSON", {
+    toolName,
+    blockTypes: content.map((block) => block.type),
+  });
+  return parseFromTextContent(content);
+}
 
 export async function POST(request: Request): Promise<NextResponse> {
   const apiKey: string | undefined = process.env.ANTHROPIC_API_KEY;
@@ -49,6 +108,8 @@ export async function POST(request: Request): Promise<NextResponse> {
           chatBody.scenario,
           true,
         ),
+        tools: [scenarioOpeningTool],
+        tool_choice: { type: "tool", name: SCENARIO_OPENING_TOOL_NAME },
         messages: [
           {
             role: "user",
@@ -57,20 +118,13 @@ export async function POST(request: Request): Promise<NextResponse> {
         ],
       });
 
-      const textBlock = response.content.find((block) => block.type === "text");
-      if (!textBlock || textBlock.type !== "text") {
+      const parsed: unknown | null = extractStructuredResponse(
+        response.content,
+        SCENARIO_OPENING_TOOL_NAME,
+      );
+      if (parsed === null) {
         return NextResponse.json(
-          { error: "No text response from model" },
-          { status: 502 },
-        );
-      }
-
-      let parsed: unknown;
-      try {
-        parsed = JSON.parse(textBlock.text);
-      } catch {
-        return NextResponse.json(
-          { error: "Model returned invalid JSON" },
+          { error: "No structured response from model" },
           { status: 502 },
         );
       }
@@ -78,6 +132,7 @@ export async function POST(request: Request): Promise<NextResponse> {
       const opening: ScenarioOpeningResponse | null =
         parseScenarioOpeningResponse(parsed);
       if (!opening) {
+        logChatError("Opening response failed schema validation", parsed);
         return NextResponse.json(
           { error: "Model response did not match expected schema" },
           { status: 502 },
@@ -88,6 +143,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     } catch (error: unknown) {
       const message: string =
         error instanceof Error ? error.message : "Unknown error";
+      logChatError("Scenario start failed", message);
       return NextResponse.json({ error: message }, { status: 500 });
     }
   }
@@ -109,29 +165,28 @@ export async function POST(request: Request): Promise<NextResponse> {
         chatBody.targetLanguage,
         chatBody.scenario,
       ),
+      tools: [chatTurnTool],
+      tool_choice: { type: "tool", name: CHAT_TURN_TOOL_NAME },
       messages: toAnthropicMessages(chatBody.messages),
     });
 
-    const textBlock = response.content.find((block) => block.type === "text");
-    if (!textBlock || textBlock.type !== "text") {
+    const parsed: unknown | null = extractStructuredResponse(
+      response.content,
+      CHAT_TURN_TOOL_NAME,
+    );
+    if (parsed === null) {
       return NextResponse.json(
-        { error: "No text response from model" },
+        { error: "No structured response from model" },
         { status: 502 },
       );
     }
 
-    let parsed: unknown;
-    try {
-      parsed = JSON.parse(textBlock.text);
-    } catch {
-      return NextResponse.json(
-        { error: "Model returned invalid JSON" },
-        { status: 502 },
-      );
-    }
-
-    const agentResponse: AgentResponse | null = parseAgentResponse(parsed);
+    const agentResponse: AgentResponse | null = parseAgentResponse(
+      parsed,
+      lastMessage.content,
+    );
     if (!agentResponse) {
+      logChatError("Chat turn failed schema validation", parsed);
       return NextResponse.json(
         { error: "Model response did not match expected schema" },
         { status: 502 },
@@ -142,6 +197,7 @@ export async function POST(request: Request): Promise<NextResponse> {
   } catch (error: unknown) {
     const message: string =
       error instanceof Error ? error.message : "Unknown error";
+    logChatError("Chat turn failed", message);
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

@@ -38,7 +38,7 @@ export interface AgentReply {
 }
 
 export interface AgentResponse {
-  correction: Correction;
+  correction?: Correction;
   reply: AgentReply;
 }
 
@@ -69,6 +69,7 @@ export interface ScenarioOpeningResponse {
 
 export interface UserMessageWithCorrection extends UserMessage {
   correction?: Correction;
+  accepted?: boolean;
 }
 
 export type DisplayMessage = UserMessageWithCorrection | AssistantMessage;
