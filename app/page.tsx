@@ -45,6 +45,18 @@ function toApiMessages(displayMessages: DisplayMessage[]): ApiChatMessage[] {
   });
 }
 
+function getDisplayMessages(allMessages: DisplayMessage[]): DisplayMessage[] {
+  const unackedIndex: number = allMessages.findIndex(
+    (message) => message.role === "user" && message.awaitingAcknowledgment,
+  );
+
+  if (unackedIndex === -1) {
+    return allMessages;
+  }
+
+  return allMessages.slice(0, unackedIndex + 1);
+}
+
 export default function HomePage() {
   const [nativeLanguage, setNativeLanguage] = useState<LanguageCode>(
     DEFAULT_NATIVE_LANGUAGE,
@@ -224,8 +236,7 @@ export default function HomePage() {
       content: trimmedInput,
     };
 
-    const nextMessages: DisplayMessage[] = [...messages, userMessage];
-    setMessages(nextMessages);
+    const apiMessages: DisplayMessage[] = [...messages, userMessage];
     setInput("");
     setLoading(true);
     setError(null);
@@ -235,7 +246,7 @@ export default function HomePage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          messages: toApiMessages(nextMessages),
+          messages: toApiMessages(apiMessages),
           nativeLanguage,
           targetLanguage,
           scenario,
@@ -257,30 +268,84 @@ export default function HomePage() {
 
       const agentResponse: AgentResponse = data as AgentResponse;
 
-      const userWithCorrection: UserMessageWithCorrection = agentResponse.correction
-        ? { ...userMessage, correction: agentResponse.correction }
-        : { ...userMessage, accepted: true };
-
-      const assistantMessage: AssistantMessage = {
-        role: "assistant",
-        content: agentResponse.reply.text,
-        tokens: agentResponse.reply.tokens,
-      };
-
-      setMessages([...messages, userWithCorrection, assistantMessage]);
+      if (agentResponse.correction) {
+        const userAwaitingAck: UserMessageWithCorrection = {
+          ...userMessage,
+          correction: agentResponse.correction,
+          awaitingAcknowledgment: true,
+          pendingReply: agentResponse.reply,
+        };
+        setMessages((previous) => [...previous, userAwaitingAck]);
+      } else {
+        const userAccepted: UserMessageWithCorrection = {
+          ...userMessage,
+          accepted: true,
+        };
+        const assistantMessage: AssistantMessage = {
+          role: "assistant",
+          content: agentResponse.reply.text,
+          tokens: agentResponse.reply.tokens,
+        };
+        setMessages((previous) => [
+          ...previous,
+          userAccepted,
+          assistantMessage,
+        ]);
+      }
     } catch (submitError: unknown) {
       const message: string =
         submitError instanceof Error
           ? submitError.message
           : "Failed to send message";
       setError(message);
-      setMessages(messages);
     } finally {
       setLoading(false);
     }
   }
 
   const scenarioLabel: string = getScenario(scenario).label;
+  const displayMessages: DisplayMessage[] = getDisplayMessages(messages);
+  const awaitingAcknowledgment: boolean = messages.some(
+    (message) => message.role === "user" && message.awaitingAcknowledgment,
+  );
+
+  function acknowledgeCorrection(): void {
+    setMessages((previous) => {
+      const messageIndex: number = previous.findIndex(
+        (message) => message.role === "user" && message.awaitingAcknowledgment,
+      );
+      const message: DisplayMessage | undefined = previous[messageIndex];
+      if (
+        messageIndex === -1 ||
+        !message ||
+        message.role !== "user" ||
+        !message.awaitingAcknowledgment ||
+        !message.correction ||
+        !message.pendingReply
+      ) {
+        return previous;
+      }
+
+      const updatedUser: UserMessageWithCorrection = {
+        role: "user",
+        content: message.correction.corrected,
+        originalContent: message.content,
+      };
+
+      const assistantMessage: AssistantMessage = {
+        role: "assistant",
+        content: message.pendingReply.text,
+        tokens: message.pendingReply.tokens,
+      };
+
+      return [
+        ...previous.slice(0, messageIndex),
+        updatedUser,
+        assistantMessage,
+        ...previous.slice(messageIndex + 1),
+      ];
+    });
+  }
 
   return (
     <main className="mx-auto flex h-dvh max-w-2xl flex-col px-4 py-6">
@@ -298,14 +363,17 @@ export default function HomePage() {
           <h1 className="text-xl font-semibold tracking-tight text-stone-900">
             Trondbot
           </h1>
-          <ScenarioMenu disabled={loading} onSelect={startScenario} />
+          <ScenarioMenu
+            disabled={loading || awaitingAcknowledgment}
+            onSelect={startScenario}
+          />
         </div>
         <div className="grid grid-cols-2 gap-4">
           <LanguageSelect
             id="native-language"
             label="I speak"
             value={nativeLanguage}
-            disabled={loading}
+            disabled={loading || awaitingAcknowledgment}
             onChange={(code) =>
               requestLanguageChange("native", code, nativeLanguage)
             }
@@ -314,7 +382,7 @@ export default function HomePage() {
             id="target-language"
             label="I want to learn"
             value={targetLanguage}
-            disabled={loading}
+            disabled={loading || awaitingAcknowledgment}
             onChange={(code) =>
               requestLanguageChange("target", code, targetLanguage)
             }
@@ -324,7 +392,7 @@ export default function HomePage() {
 
       <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-stone-200 bg-white shadow-sm">
         <div className="flex-1 space-y-4 overflow-y-auto p-4">
-          {messages.length === 0 ? (
+          {displayMessages.length === 0 ? (
             <p className="py-12 text-center text-sm text-stone-400">
               Choose <span className="font-medium text-stone-500">New</span> to
               pick a scenario, or start chatting in your target language. Hover
@@ -336,19 +404,24 @@ export default function HomePage() {
               <p className="text-center text-xs text-stone-400">
                 Scenario: {scenarioLabel}
               </p>
-              {messages.map((message, index) => (
+              {displayMessages.map((message, index) => (
                 <ChatMessage
                   key={`${message.role}-${index}-${message.content.slice(0, 20)}`}
                   message={message}
                   language={targetLanguage}
+                  onAcknowledgeCorrection={
+                    message.role === "user" && message.awaitingAcknowledgment
+                      ? acknowledgeCorrection
+                      : undefined
+                  }
                 />
               ))}
             </>
           )}
-          {loading ? (
-            <div className="flex justify-start">
-              <div className="rounded-2xl rounded-bl-md bg-stone-100 px-4 py-2.5 text-sm text-stone-500">
-                Thinking…
+          {loading && !awaitingAcknowledgment ? (
+            <div className="flex justify-end">
+              <div className="rounded-2xl rounded-br-md bg-stone-100 px-4 py-2.5 text-sm text-stone-500">
+                Checking…
               </div>
             </div>
           ) : null}
@@ -371,13 +444,17 @@ export default function HomePage() {
             value={input}
             onChange={(event) => setInput(event.target.value)}
             onKeyDown={handleComposerKeyDown}
-            placeholder="Type a message…"
-            disabled={loading}
+            placeholder={
+              awaitingAcknowledgment
+                ? "Acknowledge the correction to continue…"
+                : "Type a message…"
+            }
+            disabled={loading || awaitingAcknowledgment}
             className="flex-1 resize-none rounded-lg border border-stone-200 px-3 py-2 text-sm leading-5 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 disabled:bg-stone-50"
           />
           <button
             type="submit"
-            disabled={loading || !input.trim()}
+            disabled={loading || awaitingAcknowledgment || !input.trim()}
             className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-stone-300"
           >
             Send

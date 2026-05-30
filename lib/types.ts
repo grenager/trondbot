@@ -70,6 +70,9 @@ export interface ScenarioOpeningResponse {
 export interface UserMessageWithCorrection extends UserMessage {
   correction?: Correction;
   accepted?: boolean;
+  awaitingAcknowledgment?: boolean;
+  pendingReply?: AgentReply;
+  originalContent?: string;
 }
 
 export type DisplayMessage = UserMessageWithCorrection | AssistantMessage;

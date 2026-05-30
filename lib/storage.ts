@@ -6,6 +6,7 @@ import {
 import { isScenarioId } from "./scenarios";
 import type { ScenarioId } from "./scenarios";
 import type {
+  AgentReply,
   Correction,
   DisplayMessage,
   LanguageCode,
@@ -53,6 +54,17 @@ function isCorrection(value: unknown): value is Correction {
   );
 }
 
+function isAgentReply(value: unknown): value is AgentReply {
+  if (!isRecord(value)) {
+    return false;
+  }
+  return (
+    typeof value.text === "string" &&
+    Array.isArray(value.tokens) &&
+    value.tokens.every(isToken)
+  );
+}
+
 function isDisplayMessage(value: unknown): value is DisplayMessage {
   if (!isRecord(value)) {
     return false;
@@ -66,10 +78,19 @@ function isDisplayMessage(value: unknown): value is DisplayMessage {
     if (value.accepted !== undefined && typeof value.accepted !== "boolean") {
       return false;
     }
-    if (value.correction === undefined) {
-      return true;
+    if (
+      value.awaitingAcknowledgment !== undefined &&
+      typeof value.awaitingAcknowledgment !== "boolean"
+    ) {
+      return false;
     }
-    return isCorrection(value.correction);
+    if (value.pendingReply !== undefined && !isAgentReply(value.pendingReply)) {
+      return false;
+    }
+    if (value.correction !== undefined && !isCorrection(value.correction)) {
+      return false;
+    }
+    return true;
   }
 
   if (value.role === "assistant") {

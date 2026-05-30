@@ -54,18 +54,16 @@ export default function SpeakButton({
 
   const colorClass: string =
     variant === "user"
-      ? "text-blue-200 hover:text-white"
-      : variant === "correction"
-        ? "text-stone-400 hover:text-stone-600"
-        : "text-stone-400 hover:text-stone-600";
+      ? "text-white/60 hover:text-white"
+      : "text-stone-300 hover:text-stone-500";
 
   return (
     <button
       type="button"
       onClick={handleClick}
       aria-label={speaking ? "Stop audio" : "Play message"}
-      className={`shrink-0 rounded p-1 transition-colors ${colorClass} ${
-        speaking ? "opacity-100" : "opacity-70 hover:opacity-100"
+      className={`absolute bottom-1 right-1.5 rounded p-0.5 transition-colors ${colorClass} ${
+        speaking ? "opacity-100" : "opacity-70"
       }`}
     >
       <svg
@@ -76,12 +74,11 @@ export default function SpeakButton({
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
-        className="h-4 w-4"
+        className="h-3.5 w-3.5"
         aria-hidden="true"
       >
         <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
         <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
-        <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
       </svg>
     </button>
   );

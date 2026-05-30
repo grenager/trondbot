@@ -34,9 +34,11 @@ Open [http://localhost:3000](http://localhost:3000).
 
 1. Push this repo to GitHub.
 2. Create a new Railway project from the repo.
-3. Set the environment variable:
-   - `ANTHROPIC_API_KEY` — your Anthropic API key
-4. Railway auto-detects Next.js and runs `npm run build` + `npm start`.
+3. Set the environment variable on the **service** (not just the project):
+   - Name: `ANTHROPIC_API_KEY`
+   - Value: your key from [console.anthropic.com](https://console.anthropic.com/) — paste with **no quotes** and no extra spaces
+4. Redeploy after saving the variable (Railway → Deployments → Redeploy).
+5. Railway auto-detects Next.js and runs `npm run build` + `npm start`.
 
 No database or additional services required.
 

@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { NextResponse } from "next/server";
+import { getAnthropicApiKey } from "@/lib/env";
 import { buildSystemPrompt } from "@/lib/prompt";
 import {
   CHAT_TURN_TOOL_NAME,
@@ -75,10 +76,21 @@ function extractStructuredResponse(
 }
 
 export async function POST(request: Request): Promise<NextResponse> {
-  const apiKey: string | undefined = process.env.ANTHROPIC_API_KEY;
+  const apiKey: string | undefined = getAnthropicApiKey();
   if (!apiKey) {
     return NextResponse.json(
       { error: "ANTHROPIC_API_KEY is not configured" },
+      { status: 500 },
+    );
+  }
+
+  if (!apiKey.startsWith("sk-ant-")) {
+    logChatError("ANTHROPIC_API_KEY looks malformed", {
+      prefix: apiKey.slice(0, 8),
+      length: apiKey.length,
+    });
+    return NextResponse.json(
+      { error: "ANTHROPIC_API_KEY is invalid. Check Railway variables." },
       { status: 500 },
     );
   }
@@ -144,6 +156,12 @@ export async function POST(request: Request): Promise<NextResponse> {
       const message: string =
         error instanceof Error ? error.message : "Unknown error";
       logChatError("Scenario start failed", message);
+      if (message.includes("authentication_error") || message.includes("401")) {
+        return NextResponse.json(
+          { error: "Invalid Anthropic API key. Check ANTHROPIC_API_KEY in Railway." },
+          { status: 500 },
+        );
+      }
       return NextResponse.json({ error: message }, { status: 500 });
     }
   }
@@ -198,6 +216,12 @@ export async function POST(request: Request): Promise<NextResponse> {
     const message: string =
       error instanceof Error ? error.message : "Unknown error";
     logChatError("Chat turn failed", message);
+    if (message.includes("authentication_error") || message.includes("401")) {
+      return NextResponse.json(
+        { error: "Invalid Anthropic API key. Check ANTHROPIC_API_KEY in Railway." },
+        { status: 500 },
+      );
+    }
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
