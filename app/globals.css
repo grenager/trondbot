@@ -6,6 +6,12 @@ html {
   font-size: 16.5px;
 }
 
+@media (max-width: 640px) {
+  html {
+    font-size: 18px;
+  }
+}
+
 body {
   @apply bg-stone-50 text-stone-900 antialiased;
   @apply fixed inset-0 overflow-hidden;
