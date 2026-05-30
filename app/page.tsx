@@ -360,7 +360,7 @@ export default function HomePage() {
   }
 
   return (
-    <main className="mx-auto flex h-dvh max-w-2xl flex-col px-4 py-6">
+    <main className="mx-auto flex h-dvh max-w-2xl flex-col overflow-hidden px-4 py-6">
       <ConfirmDialog
         open={pendingLanguageChange !== null}
         title="Start a new chat?"

@@ -4,5 +4,6 @@
 
 body {
   @apply bg-stone-50 text-stone-900 antialiased;
+  @apply fixed inset-0 overflow-hidden;
   font-size: 17px;
 }

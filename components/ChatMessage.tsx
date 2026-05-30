@@ -47,6 +47,14 @@ export default function ChatMessage({
           />
         </div>
         {message.accepted ? <AcceptedBadge /> : null}
+        {message.originalContent ? (
+          <div
+            className="mt-1.5 flex items-center gap-1 self-end text-xs font-medium text-stone-400"
+            aria-label="Message was corrected"
+          >
+            <span>Corrected</span>
+          </div>
+        ) : null}
       </div>
     );
   }
