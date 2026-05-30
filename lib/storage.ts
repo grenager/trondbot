@@ -90,6 +90,12 @@ function isDisplayMessage(value: unknown): value is DisplayMessage {
     if (value.correction !== undefined && !isCorrection(value.correction)) {
       return false;
     }
+    if (
+      value.originalContent !== undefined &&
+      typeof value.originalContent !== "string"
+    ) {
+      return false;
+    }
     return true;
   }
 

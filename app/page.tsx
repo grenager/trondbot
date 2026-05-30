@@ -3,6 +3,7 @@
 import { FormEvent, KeyboardEvent, useEffect, useRef, useState } from "react";
 import ChatMessage from "@/components/ChatMessage";
 import ConfirmDialog from "@/components/ConfirmDialog";
+import AboutModal from "@/components/AboutModal";
 import LanguageSelect from "@/components/LanguageSelect";
 import ScenarioMenu from "@/components/ScenarioMenu";
 import {
@@ -346,6 +347,7 @@ export default function HomePage() {
         role: "user",
         content: message.correction.corrected,
         originalContent: message.content,
+        correction: message.correction,
       };
 
       const assistantMessage: AssistantMessage = {
@@ -380,6 +382,7 @@ export default function HomePage() {
             <h1 className="text-xl font-semibold tracking-tight text-stone-900">
               Trondbot
             </h1>
+            <AboutModal />
             <a
               href="https://github.com/grenager/trondbot"
               target="_blank"

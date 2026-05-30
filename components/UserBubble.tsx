@@ -52,29 +52,47 @@ export default function UserBubble({
         </p>
       ) : null}
 
-      {wasCorrected ? (
-        <p className="mt-1.5 self-end text-xs text-stone-400">Corrected</p>
+      {wasCorrected && !isAwaitingAck ? (
+        <div className="relative mt-1.5 self-end">
+          <button
+            type="button"
+            onClick={() => setShowExplanation((current) => !current)}
+            className="text-xs text-stone-400 underline decoration-dotted underline-offset-2 hover:text-stone-600"
+          >
+            Corrected
+          </button>
+          {showExplanation && message.correction ? (
+            <div className="absolute right-0 top-full z-10 mt-2 w-72 rounded-lg bg-stone-800 px-3 py-2.5 text-xs leading-relaxed text-white shadow-lg">
+              <p className="mb-1.5 text-stone-300">
+                <span className="font-medium text-stone-100">Original:</span>{" "}
+                {message.originalContent}
+              </p>
+              <p>{message.correction.explanation}</p>
+            </div>
+          ) : null}
+        </div>
       ) : null}
 
       {isAwaitingAck && message.correction ? (
         <div className="mt-2 flex flex-col items-end gap-1.5">
-          <div
-            className="flex max-w-[85%] cursor-pointer items-center gap-1.5"
-            onClick={() => setShowExplanation((current) => !current)}
-          >
-            <p className="text-xs text-stone-500">
-              Did you mean (
-              <span className="cursor-pointer text-blue-500 underline">
-                details
-              </span>
-              ):
-            </p>
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setShowExplanation((current) => !current)}
+              className="text-xs text-stone-400 underline decoration-dotted underline-offset-2 hover:text-stone-600"
+            >
+              Corrected
+            </button>
+            {showExplanation ? (
+              <div className="absolute right-0 top-full z-10 mt-2 w-72 rounded-lg bg-stone-800 px-3 py-2.5 text-xs leading-relaxed text-white shadow-lg">
+                <p className="mb-1.5 text-stone-300">
+                  <span className="font-medium text-stone-100">Original:</span>{" "}
+                  {message.content}
+                </p>
+                <p>{message.correction.explanation}</p>
+              </div>
+            ) : null}
           </div>
-          {showExplanation ? (
-            <p className="max-w-[85%] text-xs leading-relaxed text-stone-500">
-              {message.correction.explanation}
-            </p>
-          ) : null}
           <div className="relative max-w-[85%] rounded-2xl rounded-br-md border-2 border-blue-300 bg-blue-50 px-4 py-2.5 pr-8 text-sm text-blue-900">
             {message.correction.corrected}
             <SpeakButton

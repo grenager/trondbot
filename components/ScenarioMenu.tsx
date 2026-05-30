@@ -76,7 +76,7 @@ export default function ScenarioMenu({ disabled, onSelect }: ScenarioMenuProps) 
           onClick={() => setOpen((current) => !current)}
           className="rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm font-medium text-stone-700 shadow-sm transition-colors hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          New
+          + Chat
         </button>
         {open ? (
           <div className="absolute right-0 z-20 mt-2 w-56 overflow-hidden rounded-lg border border-stone-200 bg-white py-1 shadow-lg">
