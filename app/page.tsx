@@ -383,7 +383,7 @@ export default function HomePage() {
         <div className="grid grid-cols-2 gap-4">
           <LanguageSelect
             id="native-language"
-            label="I speak"
+            label="My comfort language is"
             value={nativeLanguage}
             disabled={loading || awaitingAcknowledgment}
             onChange={(code) =>
@@ -392,7 +392,7 @@ export default function HomePage() {
           />
           <LanguageSelect
             id="target-language"
-            label="I want to learn"
+            label="I want to chat in"
             value={targetLanguage}
             disabled={loading || awaitingAcknowledgment}
             onChange={(code) =>
@@ -432,8 +432,10 @@ export default function HomePage() {
           )}
           {loading && !awaitingAcknowledgment ? (
             <div className="flex justify-end">
-              <div className="rounded-2xl rounded-br-md bg-stone-100 px-4 py-2.5 text-sm text-stone-500">
-                Checking…
+              <div className="flex items-center gap-1 rounded-2xl rounded-br-md bg-stone-100 px-4 py-3">
+                <span className="h-2 w-2 animate-bounce rounded-full bg-stone-400 [animation-delay:0ms]" />
+                <span className="h-2 w-2 animate-bounce rounded-full bg-stone-400 [animation-delay:150ms]" />
+                <span className="h-2 w-2 animate-bounce rounded-full bg-stone-400 [animation-delay:300ms]" />
               </div>
             </div>
           ) : null}
