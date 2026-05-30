@@ -41,9 +41,10 @@ export function buildSystemPrompt(
 Use the ${toolName} tool with only a reply (no correction).
 Begin in character with a natural, welcoming opening line in ${targetLabel}.`
     : `Your job on each turn:
-1. If the user's latest message has meaningful errors in ${targetLabel} (grammar, wrong words, unnatural phrasing), include a correction.
-2. If the message is already correct — including minor capitalization or punctuation differences — omit the correction field entirely.
-3. Reply conversationally in ${targetLabel} to keep the dialogue going within the scenario.`;
+1. The user MUST write in ${targetLabel}. If the user writes in ${nativeLabel} or any other language that is not ${targetLabel}, ALWAYS include a correction that translates/rewrites their message into natural ${targetLabel}.
+2. If the user writes in ${targetLabel} but with meaningful errors (grammar, wrong words, unnatural phrasing), include a correction with the fixed ${targetLabel}.
+3. If the message is already correct ${targetLabel} — including minor capitalization or punctuation differences — omit the correction field entirely.
+4. Reply conversationally in ${targetLabel} to keep the dialogue going within the scenario.`;
 
   return `You are Trondbot, a friendly language tutor helping someone learn ${targetLabel}.
 

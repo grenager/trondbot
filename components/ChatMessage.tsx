@@ -1,67 +1,35 @@
 import type { DisplayMessage, LanguageCode } from "@/lib/types";
-import AcceptedBadge from "./AcceptedBadge";
-import CorrectionAcknowledgment from "./CorrectionAcknowledgment";
 import HoverWord from "./HoverWord";
 import SpeakButton from "./SpeakButton";
+import UserBubble from "./UserBubble";
 
 interface ChatMessageProps {
   message: DisplayMessage;
   language: LanguageCode;
+  loading?: boolean;
   onAcknowledgeCorrection?: () => void;
 }
 
 export default function ChatMessage({
   message,
   language,
+  loading = false,
   onAcknowledgeCorrection,
 }: ChatMessageProps) {
   if (message.role === "user") {
-    if (
-      message.awaitingAcknowledgment &&
-      message.correction &&
-      onAcknowledgeCorrection
-    ) {
-      return (
-        <CorrectionAcknowledgment
-          original={message.content}
-          correction={message.correction}
-          language={language}
-          onAcknowledge={onAcknowledgeCorrection}
-        />
-      );
-    }
-
     return (
-      <div className="flex flex-col items-end">
-        {message.originalContent ? (
-          <p className="mb-1 max-w-[85%] text-xs text-stone-400">
-            {message.originalContent}
-          </p>
-        ) : null}
-        <div className="relative max-w-[85%] rounded-2xl rounded-br-md bg-blue-600 px-4 py-2.5 pr-8 text-sm text-white">
-          {message.content}
-          <SpeakButton
-            text={message.content}
-            language={language}
-            variant="user"
-          />
-        </div>
-        {message.accepted ? <AcceptedBadge /> : null}
-        {message.originalContent ? (
-          <div
-            className="mt-1.5 flex items-center gap-1 self-end text-xs font-medium text-stone-400"
-            aria-label="Message was corrected"
-          >
-            <span>Corrected</span>
-          </div>
-        ) : null}
-      </div>
+      <UserBubble
+        message={message}
+        language={language}
+        loading={loading}
+        onAcknowledgeCorrection={onAcknowledgeCorrection}
+      />
     );
   }
 
   return (
     <div className="flex justify-start">
-      <div className="relative max-w-[85%] rounded-2xl rounded-bl-md bg-white px-4 py-2.5 pr-8 text-sm leading-relaxed text-stone-800 shadow-sm ring-1 ring-stone-100">
+      <div className="relative max-w-[85%] rounded-2xl rounded-bl-md bg-stone-100 px-4 py-2.5 pr-8 text-sm leading-relaxed text-stone-800">
         {message.tokens.map((token, index) => (
           <span key={`${token.word}-${index}`}>
             <HoverWord token={token} />
