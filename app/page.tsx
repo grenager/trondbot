@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, KeyboardEvent, useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import ChatMessage from "@/components/ChatMessage";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import AboutModal from "@/components/AboutModal";
@@ -360,6 +361,14 @@ export default function HomePage() {
       <header className="mb-6 shrink-0">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-2">
+            <Image
+              src="/trondbot-icon.png"
+              alt=""
+              width={32}
+              height={32}
+              className="h-8 w-8 shrink-0 rounded-full object-cover"
+              priority
+            />
             <h1 className="text-xl font-semibold tracking-tight text-stone-900">
               Trondbot
             </h1>

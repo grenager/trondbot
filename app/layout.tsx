@@ -10,6 +10,9 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: "Trondbot",
   description: "Simple language learning AI chat",
+  icons: {
+    icon: "/trondbot-icon.png",
+  },
 };
 
 export default function RootLayout({
