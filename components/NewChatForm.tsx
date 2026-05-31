@@ -53,6 +53,11 @@ export default function NewChatForm({
       className="flex w-full max-w-xs flex-col gap-4"
     >
       <h2 className="text-lg font-semibold text-stone-900">Start a New Chat</h2>
+      <p className="text-sm leading-relaxed text-stone-500">
+        The best way to learn a language is by speaking it. Trondbot makes that
+        possible by giving you word-level translations of everything the agent
+        says, as well as corrections on what you say.
+      </p>
       <LanguageSelect
         id="setup-native-language"
         label="My comfort language is"
