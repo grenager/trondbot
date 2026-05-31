@@ -4,18 +4,10 @@ export const SCENARIO_OPENING_TOOL_NAME = "scenario_opening";
 export const chatTurnTool = {
   name: CHAT_TURN_TOOL_NAME,
   description:
-    "Return a correction only if the user's message needs fixing, plus your conversational reply with word-level translations.",
+    "Always return a conversational reply with word-level translations. Include a correction only when the user's message needs fixing.",
   input_schema: {
     type: "object" as const,
     properties: {
-      correction: {
-        type: "object" as const,
-        properties: {
-          corrected: { type: "string" as const },
-          explanation: { type: "string" as const },
-        },
-        required: ["corrected", "explanation"],
-      },
       reply: {
         type: "object" as const,
         properties: {
@@ -33,6 +25,14 @@ export const chatTurnTool = {
           },
         },
         required: ["text", "tokens"],
+      },
+      correction: {
+        type: "object" as const,
+        properties: {
+          corrected: { type: "string" as const },
+          explanation: { type: "string" as const },
+        },
+        required: ["corrected", "explanation"],
       },
     },
     required: ["reply"],

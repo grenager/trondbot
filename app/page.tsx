@@ -1,10 +1,12 @@
 "use client";
 
 import { FormEvent, KeyboardEvent, useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import ChatMessage from "@/components/ChatMessage";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import AboutModal from "@/components/AboutModal";
 import NewChatForm from "@/components/NewChatForm";
+import TypingIndicator from "@/components/TypingIndicator";
 import {
   DEFAULT_NATIVE_LANGUAGE,
   DEFAULT_TARGET_LANGUAGE,
@@ -359,6 +361,14 @@ export default function HomePage() {
       <header className="mb-6 shrink-0">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-2">
+            <Image
+              src="/trondbot-icon.png"
+              alt=""
+              width={32}
+              height={32}
+              className="h-8 w-8 shrink-0 rounded-full object-cover"
+              priority
+            />
             <h1 className="text-xl font-semibold tracking-tight text-stone-900">
               Trondbot
             </h1>
@@ -387,7 +397,7 @@ export default function HomePage() {
             onClick={handleNewChatClick}
             className="rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm font-medium text-stone-700 shadow-sm transition-colors hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            New
+            + Chat
           </button>
         </div>
       </header>
@@ -406,19 +416,19 @@ export default function HomePage() {
           </div>
         ) : (
           <>
+            <div className="shrink-0 border-b border-stone-100 px-4 py-3 text-center">
+              <p className="text-xs font-medium uppercase tracking-wide text-stone-400">
+                Scenario
+              </p>
+              <p className="mt-0.5 text-sm font-semibold text-stone-800">
+                {scenarioLabel}
+              </p>
+            </div>
             <div className="flex-1 space-y-4 overflow-y-auto p-4">
-              {displayMessages.length === 0 ? (
-                <p className="py-12 text-center text-sm text-stone-400">
-                  Choose{" "}
-                  <span className="font-medium text-stone-500">New</span> to
-                  start a new chat.
-                </p>
-              ) : (
-                <>
-                  <p className="text-center text-xs text-stone-400">
-                    Scenario: {scenarioLabel}
-                  </p>
-                  {displayMessages.map((message, index) => (
+              {loading && displayMessages.length === 0 ? (
+                <TypingIndicator />
+              ) : displayMessages.length > 0 ? (
+                displayMessages.map((message, index) => (
                     <ChatMessage
                       key={`${message.role}-${index}-${message.content.slice(0, 20)}`}
                       message={message}
@@ -436,9 +446,8 @@ export default function HomePage() {
                           : undefined
                       }
                     />
-                  ))}
-                </>
-              )}
+                  ))
+              ) : null}
               <div ref={messagesEndRef} />
             </div>
 
