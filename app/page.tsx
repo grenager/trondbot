@@ -5,6 +5,7 @@ import ChatMessage from "@/components/ChatMessage";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import AboutModal from "@/components/AboutModal";
 import NewChatForm from "@/components/NewChatForm";
+import TypingIndicator from "@/components/TypingIndicator";
 import {
   DEFAULT_NATIVE_LANGUAGE,
   DEFAULT_TARGET_LANGUAGE,
@@ -406,13 +407,19 @@ export default function HomePage() {
           </div>
         ) : (
           <>
+            <div className="shrink-0 border-b border-stone-100 px-4 py-3 text-center">
+              <p className="text-xs font-medium uppercase tracking-wide text-stone-400">
+                Scenario
+              </p>
+              <p className="mt-0.5 text-sm font-semibold text-stone-800">
+                {scenarioLabel}
+              </p>
+            </div>
             <div className="flex-1 space-y-4 overflow-y-auto p-4">
-              {displayMessages.length === 0 ? null : (
-                <>
-                  <p className="text-center text-xs text-stone-400">
-                    Scenario: {scenarioLabel}
-                  </p>
-                  {displayMessages.map((message, index) => (
+              {loading && displayMessages.length === 0 ? (
+                <TypingIndicator />
+              ) : displayMessages.length > 0 ? (
+                displayMessages.map((message, index) => (
                     <ChatMessage
                       key={`${message.role}-${index}-${message.content.slice(0, 20)}`}
                       message={message}
@@ -430,9 +437,8 @@ export default function HomePage() {
                           : undefined
                       }
                     />
-                  ))}
-                </>
-              )}
+                  ))
+              ) : null}
               <div ref={messagesEndRef} />
             </div>
 

@@ -13,11 +13,24 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
 
-function isToken(value: unknown): value is Token {
+function normalizeToken(value: unknown): Token | null {
   if (!isRecord(value)) {
-    return false;
+    return null;
   }
-  return typeof value.word === "string" && typeof value.gloss === "string";
+
+  const word: unknown = value.word;
+  const gloss: unknown =
+    value.gloss ?? value.translation ?? value.meaning;
+
+  if (typeof word !== "string" || typeof gloss !== "string") {
+    return null;
+  }
+
+  if (word.trim().length === 0 || gloss.trim().length === 0) {
+    return null;
+  }
+
+  return { word, gloss };
 }
 
 function isCorrection(value: unknown): value is Correction {
@@ -75,7 +88,9 @@ function parseAgentReply(raw: unknown): AgentReply | null {
     return null;
   }
 
-  const tokens: Token[] = raw.tokens.filter(isToken);
+  const tokens: Token[] = raw.tokens
+    .map(normalizeToken)
+    .filter((token): token is Token => token !== null);
   if (tokens.length === 0) {
     return null;
   }

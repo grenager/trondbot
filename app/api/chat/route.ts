@@ -22,6 +22,9 @@ import {
 } from "@/lib/validation";
 
 const MODEL: string = "claude-sonnet-4-20250514";
+const MAX_TOKENS: number = 2048;
+const RETRY_SYSTEM_SUFFIX: string =
+  "\n\nIMPORTANT: Your previous response was invalid because it was missing the required reply object with text and tokens. Always include reply on every turn.";
 
 function logChatError(reason: string, detail: unknown): void {
   console.error(`[api/chat] ${reason}`, detail);
@@ -111,41 +114,48 @@ export async function POST(request: Request): Promise<NextResponse> {
 
   if (chatBody.startScenario) {
     try {
-      const response = await anthropic.messages.create({
-        model: MODEL,
-        max_tokens: 1024,
-        system: buildSystemPrompt(
-          chatBody.nativeLanguage,
-          chatBody.targetLanguage,
-          chatBody.scenario,
-          true,
-          chatBody.customDescription,
-        ),
-        tools: [scenarioOpeningTool],
-        tool_choice: { type: "tool", name: SCENARIO_OPENING_TOOL_NAME },
-        messages: [
-          {
-            role: "user",
-            content: "Begin the scenario now.",
-          },
-        ],
-      });
-
-      const parsed: unknown | null = extractStructuredResponse(
-        response.content,
-        SCENARIO_OPENING_TOOL_NAME,
+      const systemPrompt: string = buildSystemPrompt(
+        chatBody.nativeLanguage,
+        chatBody.targetLanguage,
+        chatBody.scenario,
+        true,
+        chatBody.customDescription,
       );
-      if (parsed === null) {
-        return NextResponse.json(
-          { error: "No structured response from model" },
-          { status: 502 },
+
+      let opening: ScenarioOpeningResponse | null = null;
+      for (let attempt = 0; attempt < 2; attempt += 1) {
+        const response = await anthropic.messages.create({
+          model: MODEL,
+          max_tokens: MAX_TOKENS,
+          system:
+            attempt === 0 ? systemPrompt : `${systemPrompt}${RETRY_SYSTEM_SUFFIX}`,
+          tools: [scenarioOpeningTool],
+          tool_choice: { type: "tool", name: SCENARIO_OPENING_TOOL_NAME },
+          messages: [
+            {
+              role: "user",
+              content: "Begin the scenario now.",
+            },
+          ],
+        });
+
+        const parsed: unknown | null = extractStructuredResponse(
+          response.content,
+          SCENARIO_OPENING_TOOL_NAME,
         );
+        if (parsed === null) {
+          continue;
+        }
+
+        opening = parseScenarioOpeningResponse(parsed);
+        if (opening) {
+          break;
+        }
+
+        logChatError("Opening response failed schema validation", parsed);
       }
 
-      const opening: ScenarioOpeningResponse | null =
-        parseScenarioOpeningResponse(parsed);
       if (!opening) {
-        logChatError("Opening response failed schema validation", parsed);
         return NextResponse.json(
           { error: "Model response did not match expected schema" },
           { status: 502 },
@@ -176,38 +186,44 @@ export async function POST(request: Request): Promise<NextResponse> {
   }
 
   try {
-    const response = await anthropic.messages.create({
-      model: MODEL,
-      max_tokens: 1024,
-      system: buildSystemPrompt(
-        chatBody.nativeLanguage,
-        chatBody.targetLanguage,
-        chatBody.scenario,
-        false,
-        chatBody.customDescription,
-      ),
-      tools: [chatTurnTool],
-      tool_choice: { type: "tool", name: CHAT_TURN_TOOL_NAME },
-      messages: toAnthropicMessages(chatBody.messages),
-    });
-
-    const parsed: unknown | null = extractStructuredResponse(
-      response.content,
-      CHAT_TURN_TOOL_NAME,
+    const systemPrompt: string = buildSystemPrompt(
+      chatBody.nativeLanguage,
+      chatBody.targetLanguage,
+      chatBody.scenario,
+      false,
+      chatBody.customDescription,
     );
-    if (parsed === null) {
-      return NextResponse.json(
-        { error: "No structured response from model" },
-        { status: 502 },
+    const anthropicMessages = toAnthropicMessages(chatBody.messages);
+
+    let agentResponse: AgentResponse | null = null;
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      const response = await anthropic.messages.create({
+        model: MODEL,
+        max_tokens: MAX_TOKENS,
+        system:
+          attempt === 0 ? systemPrompt : `${systemPrompt}${RETRY_SYSTEM_SUFFIX}`,
+        tools: [chatTurnTool],
+        tool_choice: { type: "tool", name: CHAT_TURN_TOOL_NAME },
+        messages: anthropicMessages,
+      });
+
+      const parsed: unknown | null = extractStructuredResponse(
+        response.content,
+        CHAT_TURN_TOOL_NAME,
       );
+      if (parsed === null) {
+        continue;
+      }
+
+      agentResponse = parseAgentResponse(parsed, lastMessage.content);
+      if (agentResponse) {
+        break;
+      }
+
+      logChatError("Chat turn failed schema validation", parsed);
     }
 
-    const agentResponse: AgentResponse | null = parseAgentResponse(
-      parsed,
-      lastMessage.content,
-    );
     if (!agentResponse) {
-      logChatError("Chat turn failed schema validation", parsed);
       return NextResponse.json(
         { error: "Model response did not match expected schema" },
         { status: 502 },
