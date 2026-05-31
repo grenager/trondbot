@@ -387,7 +387,7 @@ export default function HomePage() {
             onClick={handleNewChatClick}
             className="rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm font-medium text-stone-700 shadow-sm transition-colors hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            New
+            + Chat
           </button>
         </div>
       </header>
@@ -407,13 +407,7 @@ export default function HomePage() {
         ) : (
           <>
             <div className="flex-1 space-y-4 overflow-y-auto p-4">
-              {displayMessages.length === 0 ? (
-                <p className="py-12 text-center text-sm text-stone-400">
-                  Choose{" "}
-                  <span className="font-medium text-stone-500">New</span> to
-                  start a new chat.
-                </p>
-              ) : (
+              {displayMessages.length === 0 ? null : (
                 <>
                   <p className="text-center text-xs text-stone-400">
                     Scenario: {scenarioLabel}
