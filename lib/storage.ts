@@ -20,7 +20,7 @@ const LANGUAGE_CODES: ReadonlySet<LanguageCode> = new Set(
   LANGUAGES.map((language) => language.code),
 );
 
-export const DEFAULT_SCENARIO: ScenarioId = "ask-about-your-day";
+export const DEFAULT_SCENARIO: ScenarioId = "new-friend";
 
 export interface StoredChatState {
   nativeLanguage: LanguageCode;

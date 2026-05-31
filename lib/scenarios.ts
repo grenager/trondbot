@@ -17,6 +17,12 @@ export interface Scenario {
 
 export const SCENARIOS: readonly Scenario[] = [
   {
+    id: "new-friend",
+    label: "Getting to know you",
+    description:
+      "You are a new friend meeting the student for the first time. Ask getting-to-know-you questions and share a little about yourself.",
+  },
+  {
     id: "restaurant-waiter",
     label: "Restaurant waiter",
     description:
@@ -39,12 +45,6 @@ export const SCENARIOS: readonly Scenario[] = [
     label: "Ask about your day",
     description:
       "You are a warm conversation partner who asks about the student's day, listens, and asks follow-up questions.",
-  },
-  {
-    id: "new-friend",
-    label: "New friend get to know you",
-    description:
-      "You are a new friend meeting the student for the first time. Ask getting-to-know-you questions and share a little about yourself.",
   },
   {
     id: "vacation-plans",
