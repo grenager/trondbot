@@ -404,7 +404,7 @@ export default function HomePage() {
 
       <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-stone-200 bg-white shadow-sm">
         {showSetupForm ? (
-          <div className="flex flex-1 items-center justify-center overflow-y-auto p-6">
+          <div className="flex flex-1 flex-col items-center overflow-y-auto p-6">
             <NewChatForm
               initialNativeLanguage={nativeLanguage}
               initialTargetLanguage={targetLanguage}
