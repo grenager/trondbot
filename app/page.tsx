@@ -188,6 +188,12 @@ export default function HomePage() {
     setShowNewChatConfirm(false);
   }
 
+  function handleCreditsPurchase(creditsToAdd: number): void {
+    const newCredits: number = credits + creditsToAdd;
+    setCredits(newCredits);
+    saveCredits(newCredits);
+  }
+
   async function startScenario(
     scenarioId: ScenarioId,
     customDesc: string | undefined,
@@ -400,7 +406,12 @@ export default function HomePage() {
         onCancel={cancelNewChat}
       />
       <AboutModal open={showAbout} onClose={() => setShowAbout(false)} />
-      <CreditsModal open={showCreditsModal} credits={credits} onClose={() => setShowCreditsModal(false)} />
+      <CreditsModal
+        open={showCreditsModal}
+        credits={credits}
+        onClose={() => setShowCreditsModal(false)}
+        onPurchase={handleCreditsPurchase}
+      />
       <header className="mb-2 shrink-0 px-3">
         <div className="flex items-center justify-between">
           <button
