@@ -118,7 +118,7 @@ export default function NewChatForm({
         Start Chatting Now
       </button>
       <p className="text-center text-xs leading-relaxed text-stone-400">
-        Free of charge. No account needed to chat.
+        First 100 messages are free. Afterwards you can buy 100 credits for $2.
       </p>
     </form>
   );

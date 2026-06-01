@@ -14,7 +14,9 @@ import type {
 } from "./types";
 
 export const STORAGE_KEY = "trondbot-state";
+export const CREDITS_KEY = "trondbot-credits";
 export const MAX_STORED_MESSAGES = 50;
+export const INITIAL_FREE_CREDITS = 100;
 
 const LANGUAGE_CODES: ReadonlySet<LanguageCode> = new Set(
   LANGUAGES.map((language) => language.code),
@@ -196,6 +198,33 @@ export function saveStoredState(state: StoredChatState): void {
       messages: state.messages.slice(-MAX_STORED_MESSAGES),
     };
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+  } catch {
+    // Ignore quota or privacy-mode errors.
+  }
+}
+
+export function loadCredits(): number {
+  if (typeof window === "undefined") {
+    return INITIAL_FREE_CREDITS;
+  }
+  try {
+    const raw: string | null = window.localStorage.getItem(CREDITS_KEY);
+    if (raw === null) {
+      return INITIAL_FREE_CREDITS;
+    }
+    const value: number = Number.parseInt(raw, 10);
+    return Number.isFinite(value) ? Math.max(0, value) : INITIAL_FREE_CREDITS;
+  } catch {
+    return INITIAL_FREE_CREDITS;
+  }
+}
+
+export function saveCredits(credits: number): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+  try {
+    window.localStorage.setItem(CREDITS_KEY, String(Math.max(0, credits)));
   } catch {
     // Ignore quota or privacy-mode errors.
   }

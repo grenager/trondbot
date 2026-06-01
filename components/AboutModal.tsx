@@ -43,6 +43,15 @@ export default function AboutModal({ open, onClose }: AboutModalProps) {
           >
             @grenager
           </a>
+          <span className="mx-2 text-stone-300">·</span>
+          <a
+            href="https://github.com/grenager/trondbot"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-500 hover:text-blue-700"
+          >
+            Like us on GitHub
+          </a>
         </div>
         <button
           type="button"
