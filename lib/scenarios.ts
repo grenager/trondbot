@@ -10,6 +10,8 @@ export type ScenarioId =
   | "recent-news"
   | "about-your-job"
   | "job-interview"
+  | "tell-a-story"
+  | "tell-you-a-story"
   | "custom";
 
 export interface Scenario {
@@ -84,6 +86,18 @@ export const SCENARIOS: readonly Scenario[] = [
     label: "Practice a job interview",
     description:
       "You are a job interviewer. Ask professional interview questions, follow up on answers, and keep a polite but evaluative tone.",
+  },
+  {
+    id: "tell-a-story",
+    label: "Tell me a story",
+    description:
+      "You are a warm storyteller. Tell the student an engaging short story in simple language, pause at natural moments to ask what they think happens next, and invite them to react or ask questions.",
+  },
+  {
+    id: "tell-you-a-story",
+    label: "Tell you a story",
+    description:
+      "You are an attentive listener. Invite the student to tell you a story one sentence at a time. After each sentence, ask a short follow-up question that helps them continue. Keep the story moving until they reach a natural ending, then react warmly to how it turned out.",
   },
   {
     id: "custom",
