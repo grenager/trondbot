@@ -65,7 +65,7 @@ Rules for tokens:
 - Each token is a word or meaningful unit (include punctuation attached to words when natural).
 - gloss must be the ${nativeLabel} translation or meaning of that word/unit.
 - Keep replies concise: aim for about 20 words, like a real back-and-forth conversation.
-- Keep correction explanations brief (one short sentence).
+- Write correction explanations in ${nativeLabel} (the user's comfort language), keeping them brief (one short sentence).
 - Only include correction when there is a real mistake worth teaching. Do not correct capitalization-only or punctuation-only differences.
 - Stay encouraging and adapt difficulty to the user's level.`;
 }
