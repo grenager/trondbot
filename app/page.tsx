@@ -25,6 +25,7 @@ import {
   saveCredits,
   saveStoredState,
 } from "@/lib/storage";
+import { trackNewChat, trackSendMessage } from "@/lib/analytics";
 import type {
   AgentResponse,
   AssistantMessage,
@@ -218,6 +219,7 @@ export default function HomePage() {
     setError(null);
     setShowSetupForm(false);
     setLoading(true);
+    trackNewChat(nativeLang, targetLang, scenarioId);
 
     try {
       const response = await fetch("/api/chat", {
@@ -284,6 +286,7 @@ export default function HomePage() {
     setInput("");
     setLoading(true);
     setError(null);
+    trackSendMessage(nativeLanguage, targetLanguage, scenario);
 
     const newCredits: number = Math.max(0, credits - 1);
     setCredits(newCredits);

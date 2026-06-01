@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { trackCreditPurchase } from "@/lib/analytics";
 import { MAX_TOTAL_CREDITS } from "@/lib/storage";
 
 interface CreditPurchaseOption {
@@ -14,24 +15,6 @@ const PURCHASE_OPTIONS: readonly CreditPurchaseOption[] = [
   { credits: 250, priceUsd: 5, label: "Buy 250 credits ($5)" },
   { credits: 500, priceUsd: 10, label: "Buy 500 credits ($10)" },
 ] as const;
-
-declare global {
-  interface Window {
-    gtag?: (
-      command: "event" | "config" | "js",
-      targetOrEventName: string | Date,
-      params?: Record<string, string | number>,
-    ) => void;
-  }
-}
-
-function trackCreditPurchase(credits: number, priceUsd: number): void {
-  window.gtag?.("event", "purchase_credits", {
-    credit_amount: credits,
-    value: priceUsd,
-    currency: "USD",
-  });
-}
 
 interface CreditsModalProps {
   open: boolean;

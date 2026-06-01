@@ -17,7 +17,7 @@ export const STORAGE_KEY = "trondbot-state";
 export const CREDITS_KEY = "trondbot-credits";
 export const MAX_STORED_MESSAGES = 50;
 export const INITIAL_FREE_CREDITS = 100;
-export const MAX_TOTAL_CREDITS = 500;
+export const MAX_TOTAL_CREDITS = 100;
 
 const LANGUAGE_CODES: ReadonlySet<LanguageCode> = new Set(
   LANGUAGES.map((language) => language.code),
