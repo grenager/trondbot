@@ -17,6 +17,7 @@ export const STORAGE_KEY = "trondbot-state";
 export const CREDITS_KEY = "trondbot-credits";
 export const MAX_STORED_MESSAGES = 50;
 export const INITIAL_FREE_CREDITS = 100;
+export const MAX_TOTAL_CREDITS = 100;
 
 const LANGUAGE_CODES: ReadonlySet<LanguageCode> = new Set(
   LANGUAGES.map((language) => language.code),
@@ -213,7 +214,9 @@ export function loadCredits(): number {
       return INITIAL_FREE_CREDITS;
     }
     const value: number = Number.parseInt(raw, 10);
-    return Number.isFinite(value) ? Math.max(0, value) : INITIAL_FREE_CREDITS;
+    return Number.isFinite(value)
+      ? Math.min(MAX_TOTAL_CREDITS, Math.max(0, value))
+      : INITIAL_FREE_CREDITS;
   } catch {
     return INITIAL_FREE_CREDITS;
   }
@@ -224,7 +227,10 @@ export function saveCredits(credits: number): void {
     return;
   }
   try {
-    window.localStorage.setItem(CREDITS_KEY, String(Math.max(0, credits)));
+    window.localStorage.setItem(
+      CREDITS_KEY,
+      String(Math.min(MAX_TOTAL_CREDITS, Math.max(0, credits))),
+    );
   } catch {
     // Ignore quota or privacy-mode errors.
   }

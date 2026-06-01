@@ -21,9 +21,11 @@ import {
   DEFAULT_SCENARIO,
   loadCredits,
   loadStoredState,
+  MAX_TOTAL_CREDITS,
   saveCredits,
   saveStoredState,
 } from "@/lib/storage";
+import { trackNewChat, trackSendMessage } from "@/lib/analytics";
 import type {
   AgentResponse,
   AssistantMessage,
@@ -188,6 +190,20 @@ export default function HomePage() {
     setShowNewChatConfirm(false);
   }
 
+  function handleCreditsPurchase(creditsToAdd: number): number {
+    const creditsAdded: number = Math.min(
+      creditsToAdd,
+      MAX_TOTAL_CREDITS - credits,
+    );
+    if (creditsAdded <= 0) {
+      return 0;
+    }
+    const newCredits: number = credits + creditsAdded;
+    setCredits(newCredits);
+    saveCredits(newCredits);
+    return creditsAdded;
+  }
+
   async function startScenario(
     scenarioId: ScenarioId,
     customDesc: string | undefined,
@@ -203,6 +219,7 @@ export default function HomePage() {
     setError(null);
     setShowSetupForm(false);
     setLoading(true);
+    trackNewChat(nativeLang, targetLang, scenarioId);
 
     try {
       const response = await fetch("/api/chat", {
@@ -269,6 +286,7 @@ export default function HomePage() {
     setInput("");
     setLoading(true);
     setError(null);
+    trackSendMessage(nativeLanguage, targetLanguage, scenario);
 
     const newCredits: number = Math.max(0, credits - 1);
     setCredits(newCredits);
@@ -400,7 +418,12 @@ export default function HomePage() {
         onCancel={cancelNewChat}
       />
       <AboutModal open={showAbout} onClose={() => setShowAbout(false)} />
-      <CreditsModal open={showCreditsModal} credits={credits} onClose={() => setShowCreditsModal(false)} />
+      <CreditsModal
+        open={showCreditsModal}
+        credits={credits}
+        onClose={() => setShowCreditsModal(false)}
+        onPurchase={handleCreditsPurchase}
+      />
       <header className="mb-2 shrink-0 px-3">
         <div className="flex items-center justify-between">
           <button
