@@ -10,9 +10,11 @@ import TypingIndicator from "@/components/TypingIndicator";
 import {
   DEFAULT_NATIVE_LANGUAGE,
   DEFAULT_TARGET_LANGUAGE,
+  LANGUAGES,
 } from "@/lib/languages";
 import type { ScenarioId } from "@/lib/scenarios";
 import { getScenario } from "@/lib/scenarios";
+import type { Language } from "@/lib/types";
 import {
   DEFAULT_SCENARIO,
   loadStoredState,
@@ -29,6 +31,27 @@ import type {
 } from "@/lib/types";
 
 const MAX_COMPOSER_LINES = 3;
+const ACCURACY_WINDOW = 20;
+
+function getFlag(code: LanguageCode): string {
+  const lang: Language | undefined = LANGUAGES.find((l) => l.code === code);
+  return lang?.flag ?? "";
+}
+
+function computeAccuracy(messages: DisplayMessage[]): number | null {
+  const userMessages: DisplayMessage[] = messages.filter(
+    (m): m is UserMessageWithCorrection =>
+      m.role === "user" && (!!m.accepted || !!m.correction),
+  );
+  const recent: DisplayMessage[] = userMessages.slice(-ACCURACY_WINDOW);
+  if (recent.length === 0) {
+    return null;
+  }
+  const correct: number = recent.filter(
+    (m) => m.role === "user" && !!(m as UserMessageWithCorrection).accepted,
+  ).length;
+  return Math.round((correct / recent.length) * 100);
+}
 
 
 function toApiMessages(displayMessages: DisplayMessage[]): ApiChatMessage[] {
@@ -74,6 +97,7 @@ export default function HomePage() {
   const [hydrated, setHydrated] = useState<boolean>(false);
   const [showSetupForm, setShowSetupForm] = useState<boolean>(true);
   const [showNewChatConfirm, setShowNewChatConfirm] = useState<boolean>(false);
+  const [showAbout, setShowAbout] = useState<boolean>(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const composerRef = useRef<HTMLTextAreaElement>(null);
 
@@ -348,7 +372,7 @@ export default function HomePage() {
   }
 
   return (
-    <main className="mx-auto flex h-dvh max-w-2xl flex-col overflow-hidden px-4 py-6">
+    <main className="mx-auto flex h-dvh max-w-2xl flex-col overflow-hidden py-3">
       <ConfirmDialog
         open={showNewChatConfirm}
         title="Start a new chat?"
@@ -358,21 +382,28 @@ export default function HomePage() {
         onConfirm={confirmNewChat}
         onCancel={cancelNewChat}
       />
-      <header className="mb-6 shrink-0">
+      <AboutModal open={showAbout} onClose={() => setShowAbout(false)} />
+      <header className="mb-2 shrink-0 px-3">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <Image
-              src="/trondbot-icon.png"
-              alt=""
-              width={32}
-              height={32}
-              className="h-8 w-8 shrink-0 rounded-full object-cover"
-              priority
-            />
-            <h1 className="text-xl font-semibold tracking-tight text-stone-900">
-              Trondbot
-            </h1>
-            <AboutModal />
+            <button
+              type="button"
+              onClick={() => setShowAbout(true)}
+              className="flex items-center gap-2"
+              aria-label="About Trondbot"
+            >
+              <Image
+                src="/trondbot-icon.png"
+                alt=""
+                width={32}
+                height={32}
+                className="h-8 w-8 shrink-0 rounded-full object-cover"
+                priority
+              />
+              <h1 className="text-xl font-semibold tracking-tight text-stone-900">
+                Trondbot
+              </h1>
+            </button>
             <a
               href="https://github.com/grenager/trondbot"
               target="_blank"
@@ -402,7 +433,7 @@ export default function HomePage() {
         </div>
       </header>
 
-      <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-stone-200 bg-white shadow-sm">
+      <section className="flex min-h-0 flex-1 flex-col overflow-hidden">
         {showSetupForm ? (
           <div className="flex flex-1 flex-col items-center overflow-y-auto p-6">
             <NewChatForm
@@ -416,15 +447,21 @@ export default function HomePage() {
           </div>
         ) : (
           <>
-            <div className="shrink-0 border-b border-stone-100 px-4 py-3 text-center">
-              <p className="text-xs font-medium uppercase tracking-wide text-stone-400">
-                Scenario
+            <div className="shrink-0 border-b border-stone-100 px-3 py-2 text-center">
+              <p className="text-sm font-semibold text-stone-800">
+                {getFlag(targetLanguage)} {scenarioLabel}
               </p>
-              <p className="mt-0.5 text-sm font-semibold text-stone-800">
-                {scenarioLabel}
-              </p>
+              {(() => {
+                const accuracy: number | null = computeAccuracy(messages);
+                if (accuracy === null) return null;
+                return (
+                  <p className="text-xs font-medium text-stone-500">
+                    {accuracy}% correct
+                  </p>
+                );
+              })()}
             </div>
-            <div className="flex-1 space-y-4 overflow-y-auto p-4">
+            <div className="flex-1 space-y-3 overflow-y-auto px-3 py-2">
               {loading && displayMessages.length === 0 ? (
                 <TypingIndicator />
               ) : displayMessages.length > 0 ? (
@@ -452,40 +489,63 @@ export default function HomePage() {
             </div>
 
             {error ? (
-              <p className="border-t border-stone-100 px-4 py-2 text-xs text-red-600">
+              <p className="border-t border-stone-100 px-3 py-1.5 text-xs text-red-600">
                 {error}
               </p>
             ) : null}
 
             <form
               onSubmit={handleSubmit}
-              className="flex shrink-0 items-end gap-2 border-t border-stone-100 p-4"
+              className="shrink-0 px-3 pb-0 pt-2"
             >
-              <textarea
-                ref={composerRef}
-                rows={1}
-                lang={targetLanguage === "no" ? "nb" : targetLanguage}
-                autoComplete="off"
-                autoCorrect="on"
-                spellCheck
-                value={input}
-                onChange={(event) => setInput(event.target.value)}
-                onKeyDown={handleComposerKeyDown}
-                placeholder={
-                  awaitingAcknowledgment
-                    ? "Acknowledge the correction to continue…"
-                    : "Type a message…"
-                }
-                disabled={loading || awaitingAcknowledgment}
-                className="flex-1 resize-none rounded-lg border border-stone-200 px-3 py-2 text-sm leading-5 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 disabled:bg-stone-50"
-              />
-              <button
-                type="submit"
-                disabled={loading || awaitingAcknowledgment || !input.trim()}
-                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-stone-300"
-              >
-                Send
-              </button>
+              <div className={`flex flex-col border border-stone-200 focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100 ${input.trim() ? "rounded-2xl" : "rounded-full"}`}>
+                <div className="flex items-end">
+                  <textarea
+                    ref={composerRef}
+                    rows={1}
+                    lang={targetLanguage === "no" ? "nb" : targetLanguage}
+                    autoComplete="off"
+                    autoCorrect="on"
+                    spellCheck
+                    value={input}
+                    onChange={(event) => setInput(event.target.value)}
+                    onKeyDown={handleComposerKeyDown}
+                    placeholder={
+                      awaitingAcknowledgment
+                        ? "Acknowledge the correction to continue…"
+                        : "Type a message…"
+                    }
+                    disabled={loading || awaitingAcknowledgment}
+                    className="flex-1 resize-none border-none bg-transparent px-4 py-2 text-sm leading-5 focus:outline-none focus:ring-0 disabled:bg-stone-50"
+                  />
+                  {!input.trim() ? (
+                    <button
+                      type="submit"
+                      disabled={loading || awaitingAcknowledgment || !input.trim()}
+                      className="m-1.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-stone-300 text-white transition-colors disabled:cursor-not-allowed"
+                      aria-label="Send"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
+                        <path fillRule="evenodd" d="M10 17a.75.75 0 0 1-.75-.75V5.612L5.29 9.77a.75.75 0 0 1-1.08-1.04l5.25-5.5a.75.75 0 0 1 1.08 0l5.25 5.5a.75.75 0 1 1-1.08 1.04l-3.96-4.158V16.25A.75.75 0 0 1 10 17Z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                  ) : null}
+                </div>
+                {input.trim() ? (
+                  <div className="flex justify-end px-1.5 pb-1.5">
+                    <button
+                      type="submit"
+                      disabled={loading || awaitingAcknowledgment}
+                      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-stone-300"
+                      aria-label="Send"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
+                        <path fillRule="evenodd" d="M10 17a.75.75 0 0 1-.75-.75V5.612L5.29 9.77a.75.75 0 0 1-1.08-1.04l5.25-5.5a.75.75 0 0 1 1.08 0l5.25 5.5a.75.75 0 1 1-1.08 1.04l-3.96-4.158V16.25A.75.75 0 0 1 10 17Z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                  </div>
+                ) : null}
+              </div>
             </form>
           </>
         )}
