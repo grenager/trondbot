@@ -29,7 +29,7 @@ export default function ChatMessage({
 
   return (
     <div className="flex justify-start">
-      <div className="relative max-w-[85%] rounded-2xl rounded-bl-md bg-stone-100 px-4 py-2.5 pr-8 text-sm leading-relaxed text-stone-800">
+      <div className="relative max-w-[85%] rounded-2xl rounded-bl-md bg-stone-200 px-4 py-2.5 pr-8 text-sm leading-relaxed text-stone-800">
         {message.tokens.map((token, index) => (
           <span key={`${token.word}-${index}`}>
             <HoverWord token={token} />
