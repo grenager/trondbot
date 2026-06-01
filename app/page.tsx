@@ -21,6 +21,7 @@ import {
   DEFAULT_SCENARIO,
   loadCredits,
   loadStoredState,
+  MAX_TOTAL_CREDITS,
   saveCredits,
   saveStoredState,
 } from "@/lib/storage";
@@ -188,10 +189,18 @@ export default function HomePage() {
     setShowNewChatConfirm(false);
   }
 
-  function handleCreditsPurchase(creditsToAdd: number): void {
-    const newCredits: number = credits + creditsToAdd;
+  function handleCreditsPurchase(creditsToAdd: number): number {
+    const creditsAdded: number = Math.min(
+      creditsToAdd,
+      MAX_TOTAL_CREDITS - credits,
+    );
+    if (creditsAdded <= 0) {
+      return 0;
+    }
+    const newCredits: number = credits + creditsAdded;
     setCredits(newCredits);
     saveCredits(newCredits);
+    return creditsAdded;
   }
 
   async function startScenario(
