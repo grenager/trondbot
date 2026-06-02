@@ -1,28 +1,34 @@
 import type { DisplayMessage, LanguageCode } from "@/lib/types";
-import HoverWord from "./HoverWord";
+import LazyWordText from "./LazyWordText";
 import SpeakButton from "./SpeakButton";
 import UserBubble from "./UserBubble";
 
 interface ChatMessageProps {
   message: DisplayMessage;
-  language: LanguageCode;
+  targetLanguage: LanguageCode;
+  nativeLanguage: LanguageCode;
   loading?: boolean;
   onAcknowledgeCorrection?: () => void;
+  onSpendTokenizeCredit?: () => boolean;
 }
 
 export default function ChatMessage({
   message,
-  language,
+  targetLanguage,
+  nativeLanguage,
   loading = false,
   onAcknowledgeCorrection,
+  onSpendTokenizeCredit,
 }: ChatMessageProps) {
   if (message.role === "user") {
     return (
       <UserBubble
         message={message}
-        language={language}
+        targetLanguage={targetLanguage}
+        nativeLanguage={nativeLanguage}
         loading={loading}
         onAcknowledgeCorrection={onAcknowledgeCorrection}
+        onSpendTokenizeCredit={onSpendTokenizeCredit}
       />
     );
   }
@@ -30,15 +36,15 @@ export default function ChatMessage({
   return (
     <div className="flex justify-start">
       <div className="relative max-w-[85%] rounded-2xl rounded-bl-md bg-stone-200 px-4 py-2.5 pr-8 text-sm leading-relaxed text-stone-800">
-        {message.tokens.map((token, index) => (
-          <span key={`${token.word}-${index}`}>
-            <HoverWord token={token} />
-            {index < message.tokens.length - 1 ? " " : ""}
-          </span>
-        ))}
+        <LazyWordText
+          text={message.content}
+          messageLanguage={targetLanguage}
+          glossLanguage={nativeLanguage}
+          onSpendTokenizeCredit={onSpendTokenizeCredit}
+        />
         <SpeakButton
           text={message.content}
-          language={language}
+          language={targetLanguage}
           variant="assistant"
         />
       </div>

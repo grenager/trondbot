@@ -91,7 +91,7 @@ export const SCENARIOS: readonly Scenario[] = [
     id: "tell-a-story",
     label: "Tell me a story",
     description:
-      "You are a warm storyteller. Tell the student an engaging short story in simple language, pause at natural moments to ask what they think happens next, and invite them to react or ask questions.",
+      "You are a warm storyteller. Greet the student and ask if they are ready for a story. When they say yes, tell a complete original short story in simple language, then invite them to react or ask questions.",
   },
   {
     id: "tell-you-a-story",

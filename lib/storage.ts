@@ -10,7 +10,6 @@ import type {
   Correction,
   DisplayMessage,
   LanguageCode,
-  Token,
 } from "./types";
 
 export const STORAGE_KEY = "trondbot-state";
@@ -41,11 +40,21 @@ export function isLanguageCode(value: string): value is LanguageCode {
   return LANGUAGE_CODES.has(value as LanguageCode);
 }
 
-function isToken(value: unknown): value is Token {
-  if (!isRecord(value)) {
-    return false;
+function stripLegacyAssistantTokens(
+  message: DisplayMessage,
+): DisplayMessage {
+  if (message.role !== "assistant") {
+    return message;
   }
-  return typeof value.word === "string" && typeof value.gloss === "string";
+
+  if (!isRecord(message) || !("tokens" in message)) {
+    return message;
+  }
+
+  const { tokens: _tokens, ...rest } = message as DisplayMessage & {
+    tokens?: unknown;
+  };
+  return rest as DisplayMessage;
 }
 
 function isCorrection(value: unknown): value is Correction {
@@ -62,11 +71,7 @@ function isAgentReply(value: unknown): value is AgentReply {
   if (!isRecord(value)) {
     return false;
   }
-  return (
-    typeof value.text === "string" &&
-    Array.isArray(value.tokens) &&
-    value.tokens.every(isToken)
-  );
+  return typeof value.text === "string";
 }
 
 function isDisplayMessage(value: unknown): value is DisplayMessage {
@@ -104,7 +109,7 @@ function isDisplayMessage(value: unknown): value is DisplayMessage {
   }
 
   if (value.role === "assistant") {
-    return Array.isArray(value.tokens) && value.tokens.every(isToken);
+    return true;
   }
 
   return false;
@@ -135,7 +140,9 @@ function parseStoredState(raw: unknown): StoredChatState | null {
       ? scenario
       : DEFAULT_SCENARIO;
 
-  const parsedMessages: DisplayMessage[] = messages.filter(isDisplayMessage);
+  const parsedMessages: DisplayMessage[] = messages
+    .filter(isDisplayMessage)
+    .map(stripLegacyAssistantTokens);
 
   return {
     nativeLanguage,
@@ -263,8 +270,8 @@ export function getOrCreateInviteCode(): string {
   }
 }
 
-export function getInviteUrl(): string {
-  const code: string = getOrCreateInviteCode();
+export function getInviteUrl(inviteCode?: string): string {
+  const code: string = inviteCode ?? getOrCreateInviteCode();
   if (typeof window === "undefined") {
     return `https://trondbot.com/?ref=${code}`;
   }

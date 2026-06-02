@@ -70,24 +70,51 @@ function voiceScore(
   candidates: readonly string[],
 ): number {
   const voiceLang: string = voice.lang.toLowerCase();
+  const voiceName: string = voice.name.toLowerCase();
 
+  let localeScore = 0;
   for (let index = 0; index < candidates.length; index += 1) {
     const candidate: string = candidates[index].toLowerCase();
     if (voiceLang === candidate) {
-      return 200 - index;
+      localeScore = 200 - index;
+      break;
     }
     if (voiceLang.startsWith(`${candidate}-`)) {
-      return 150 - index;
+      localeScore = 150 - index;
+      break;
     }
     if (candidate.includes("-") && voiceLang.startsWith(candidate.split("-")[0])) {
-      return 100 - index;
+      localeScore = 100 - index;
+      break;
     }
     if (!candidate.includes("-") && voiceLang.startsWith(candidate)) {
-      return 120 - index;
+      localeScore = 120 - index;
+      break;
     }
   }
 
-  return 0;
+  if (localeScore === 0) {
+    return 0;
+  }
+
+  let qualityBonus = 0;
+  if (voiceName.includes("premium")) {
+    qualityBonus = 50;
+  } else if (voiceName.includes("enhanced")) {
+    qualityBonus = 40;
+  } else if (voiceName.includes("natural")) {
+    qualityBonus = 35;
+  } else if (voiceName.startsWith("google")) {
+    qualityBonus = 30;
+  } else if (voiceName.includes("microsoft") && voiceName.includes("online")) {
+    qualityBonus = 25;
+  }
+
+  if (!voice.localService) {
+    qualityBonus += 10;
+  }
+
+  return localeScore + qualityBonus;
 }
 
 export function pickVoiceForLanguage(
@@ -139,6 +166,8 @@ export async function speakText(
   if (voice) {
     utterance.voice = voice;
   }
+  utterance.rate = 0.9;
+  utterance.pitch = 1.0;
 
   if (options?.onStart) {
     utterance.onstart = options.onStart;

@@ -74,6 +74,18 @@ export const de: Translations = {
   acknowledgeCorrectionPlaceholder:
     "Bestätige die Korrektur, um fortzufahren…",
   typeMessagePlaceholder: "Nachricht eingeben…",
+  lookupWordAria: "Wort nachschlagen",
+  lookupTitle: "Wortsuche",
+  lookupDescription:
+    "Schlage ein Wort in deiner Komfortsprache nach und füge die Übersetzung in deine Nachricht ein.",
+  lookupSourceLabel: (language: string) => `Wort auf ${language}`,
+  lookupSourcePlaceholder: "Wort eingeben…",
+  lookupAction: "Nachschlagen",
+  lookupTargetLabel: (language: string) => `Auf ${language}`,
+  lookupInsert: "Einfügen",
+  lookupFailed: "Suche fehlgeschlagen. Bitte erneut versuchen.",
+  noCreditsForWordLookup: "Keine Credits mehr für Wortsuche.",
+  lookupNoResult: "Keine Übersetzung gefunden.",
   appTitle: "Trondbot",
   appDescription: "Einfacher KI-Chat zum Sprachenlernen",
   scenarioLabels: {

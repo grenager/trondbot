@@ -70,6 +70,18 @@ export const ko: Translations = {
   newChatAria: "새 채팅",
   acknowledgeCorrectionPlaceholder: "교정을 수락하여 계속…",
   typeMessagePlaceholder: "메시지 입력…",
+  lookupWordAria: "단어 찾기",
+  lookupTitle: "단어 찾기",
+  lookupDescription:
+    "편한 언어로 단어를 찾아 번역을 메시지에 삽입하세요.",
+  lookupSourceLabel: (language: string) => `${language} 단어`,
+  lookupSourcePlaceholder: "단어 입력…",
+  lookupAction: "찾기",
+  lookupTargetLabel: (language: string) => `${language} 번역`,
+  lookupInsert: "삽입",
+  lookupFailed: "찾기에 실패했습니다. 다시 시도해 주세요.",
+  noCreditsForWordLookup: "단어 찾기에 사용할 크레딧이 없습니다.",
+  lookupNoResult: "번역을 찾을 수 없습니다.",
   appTitle: "Trondbot",
   appDescription: "간단한 언어 학습 AI 채팅",
   scenarioLabels: {

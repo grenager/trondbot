@@ -70,6 +70,18 @@ export const hi: Translations = {
   newChatAria: "नई चैट",
   acknowledgeCorrectionPlaceholder: "जारी रखने के लिए सुधार स्वीकार करें…",
   typeMessagePlaceholder: "संदेश लिखें…",
+  lookupWordAria: "शब्द खोजें",
+  lookupTitle: "शब्द खोज",
+  lookupDescription:
+    "अपनी आरामदायक भाषा में शब्द खोजें और अनुवाद अपने संदेश में डालें।",
+  lookupSourceLabel: (language: string) => `${language} में शब्द`,
+  lookupSourcePlaceholder: "शब्द लिखें…",
+  lookupAction: "खोजें",
+  lookupTargetLabel: (language: string) => `${language} में`,
+  lookupInsert: "डालें",
+  lookupFailed: "खोज विफल। कृपया पुनः प्रयास करें।",
+  noCreditsForWordLookup: "शब्द खोज के लिए कोई क्रेडिट शेष नहीं।",
+  lookupNoResult: "कोई अनुवाद नहीं मिला।",
   appTitle: "Trondbot",
   appDescription: "सरल भाषा सीखने वाली AI चैट",
   scenarioLabels: {

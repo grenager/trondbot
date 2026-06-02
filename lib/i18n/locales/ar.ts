@@ -70,6 +70,18 @@ export const ar: Translations = {
   newChatAria: "محادثة جديدة",
   acknowledgeCorrectionPlaceholder: "اقبل التصحيح للمتابعة…",
   typeMessagePlaceholder: "اكتب رسالة…",
+  lookupWordAria: "البحث عن كلمة",
+  lookupTitle: "البحث عن كلمة",
+  lookupDescription:
+    "ابحث عن كلمة بلغتك المريحة وأدرج الترجمة في رسالتك.",
+  lookupSourceLabel: (language: string) => `كلمة بال${language}`,
+  lookupSourcePlaceholder: "اكتب كلمة…",
+  lookupAction: "بحث",
+  lookupTargetLabel: (language: string) => `بال${language}`,
+  lookupInsert: "إدراج",
+  lookupFailed: "فشل البحث. يرجى المحاولة مرة أخرى.",
+  noCreditsForWordLookup: "لا يوجد رصيد متبٍ للبحث عن الكلمات.",
+  lookupNoResult: "لم يتم العثور على ترجمة.",
   appTitle: "Trondbot",
   appDescription: "دردشة ذكاء اصطناعي بسيطة لتعلم اللغات",
   scenarioLabels: {

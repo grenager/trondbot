@@ -73,6 +73,18 @@ export const pt: Translations = {
   acknowledgeCorrectionPlaceholder:
     "Aceite a correção para continuar…",
   typeMessagePlaceholder: "Digite uma mensagem…",
+  lookupWordAria: "Consultar uma palavra",
+  lookupTitle: "Consulta de palavras",
+  lookupDescription:
+    "Consulte uma palavra no seu idioma de conforto e insira a tradução na sua mensagem.",
+  lookupSourceLabel: (language: string) => `Palavra em ${language}`,
+  lookupSourcePlaceholder: "Digite uma palavra…",
+  lookupAction: "Consultar",
+  lookupTargetLabel: (language: string) => `Em ${language}`,
+  lookupInsert: "Inserir",
+  lookupFailed: "Consulta falhou. Tente novamente.",
+  noCreditsForWordLookup: "Sem créditos para consulta de palavras.",
+  lookupNoResult: "Nenhuma tradução encontrada.",
   appTitle: "Trondbot",
   appDescription: "Chat de IA simples para aprender idiomas",
   scenarioLabels: {
