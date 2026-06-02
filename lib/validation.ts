@@ -104,14 +104,22 @@ function coerceReplyInput(raw: unknown): unknown {
   return raw;
 }
 
+function stripXmlParameterWrapper(text: string): string {
+  const match: RegExpMatchArray | null = text.match(
+    /^<parameter\s+name="text">\s*([\s\S]*?)\s*<\/parameter>$/,
+  );
+  return match?.[1] ?? text;
+}
+
 function extractReplyText(value: unknown): string | null {
   if (typeof value === "string") {
-    const parsed: unknown | null = tryParseEmbeddedJson(value);
+    const stripped: string = stripXmlParameterWrapper(value.trim());
+    const parsed: unknown | null = tryParseEmbeddedJson(stripped);
     if (isRecord(parsed) && typeof parsed.text === "string") {
       return parsed.text.trim().length > 0 ? parsed.text : null;
     }
 
-    return value.trim().length > 0 ? value : null;
+    return stripped.trim().length > 0 ? stripped : null;
   }
 
   if (isRecord(value) && typeof value.text === "string") {
