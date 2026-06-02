@@ -80,6 +80,7 @@ export const hi: Translations = {
   lookupTargetLabel: (language: string) => `${language} में`,
   lookupInsert: "डालें",
   lookupFailed: "खोज विफल। कृपया पुनः प्रयास करें।",
+  noCreditsForWordLookup: "शब्द खोज के लिए कोई क्रेडिट शेष नहीं।",
   lookupNoResult: "कोई अनुवाद नहीं मिला।",
   appTitle: "Trondbot",
   appDescription: "सरल भाषा सीखने वाली AI चैट",

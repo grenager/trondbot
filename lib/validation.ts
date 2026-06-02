@@ -6,41 +6,10 @@ import type {
   ChatRequestBody,
   Correction,
   ScenarioOpeningResponse,
-  Token,
 } from "./types";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
-}
-
-function normalizeToken(value: unknown): Token | null {
-  if (!isRecord(value)) {
-    return null;
-  }
-
-  const word: unknown = value.word;
-  const gloss: unknown =
-    value.gloss ?? value.translation ?? value.meaning;
-
-  if (typeof word !== "string" || typeof gloss !== "string") {
-    return null;
-  }
-
-  if (word.trim().length === 0 || gloss.trim().length === 0) {
-    return null;
-  }
-
-  return { word, gloss };
-}
-
-function isCorrection(value: unknown): value is Correction {
-  if (!isRecord(value)) {
-    return false;
-  }
-  return (
-    typeof value.corrected === "string" &&
-    typeof value.explanation === "string"
-  );
 }
 
 export function parseJsonFromModelText(text: string): unknown {
@@ -72,7 +41,14 @@ function parseOptionalCorrection(
   value: unknown,
   userMessage?: string,
 ): Correction | undefined {
-  if (!isCorrection(value)) {
+  if (!isRecord(value)) {
+    return undefined;
+  }
+
+  if (
+    typeof value.corrected !== "string" ||
+    typeof value.explanation !== "string"
+  ) {
     return undefined;
   }
 
@@ -80,29 +56,109 @@ function parseOptionalCorrection(
     return undefined;
   }
 
-  return value;
+  return {
+    corrected: value.corrected,
+    explanation: value.explanation,
+  };
+}
+
+function tryParseEmbeddedJson(text: string): unknown | null {
+  const trimmed: string = text.trim();
+  if (!trimmed.startsWith("{") && !trimmed.startsWith("[")) {
+    return null;
+  }
+
+  try {
+    return parseJsonFromModelText(trimmed);
+  } catch {
+    // After a prior JSON.parse, control characters (newlines, tabs) become
+    // literal chars which are invalid inside JSON string values. Re-escape them.
+    const sanitized: string = trimmed.replace(/[\x00-\x1f]/g, (ch: string) => {
+      if (ch === "\n") return "\\n";
+      if (ch === "\r") return "\\r";
+      if (ch === "\t") return "\\t";
+      return `\\u${ch.charCodeAt(0).toString(16).padStart(4, "0")}`;
+    });
+    try {
+      return JSON.parse(sanitized);
+    } catch {
+      return null;
+    }
+  }
+}
+
+function coerceReplyInput(raw: unknown): unknown {
+  if (typeof raw === "string") {
+    const parsed: unknown | null = tryParseEmbeddedJson(raw);
+    if (parsed !== null) {
+      return parsed;
+    }
+
+    if (raw.trim().length > 0) {
+      return { text: raw };
+    }
+
+    return raw;
+  }
+
+  return raw;
+}
+
+function extractReplyText(value: unknown): string | null {
+  if (typeof value === "string") {
+    const parsed: unknown | null = tryParseEmbeddedJson(value);
+    if (isRecord(parsed) && typeof parsed.text === "string") {
+      return parsed.text.trim().length > 0 ? parsed.text : null;
+    }
+
+    return value.trim().length > 0 ? value : null;
+  }
+
+  if (isRecord(value) && typeof value.text === "string") {
+    return extractReplyText(value.text);
+  }
+
+  return null;
 }
 
 function parseAgentReply(raw: unknown): AgentReply | null {
+  const coerced: unknown = coerceReplyInput(raw);
+  const text: string | null = extractReplyText(coerced);
+  if (!text) {
+    return null;
+  }
+
+  return { text };
+}
+
+export function parseAgentResponseFailureReason(
+  raw: unknown,
+  userMessage?: string,
+): string {
   if (!isRecord(raw)) {
-    return null;
+    return "response is not an object";
   }
 
-  if (typeof raw.text !== "string" || !Array.isArray(raw.tokens)) {
-    return null;
+  if (raw.reply === undefined) {
+    return "missing reply (correction-only responses are invalid)";
   }
 
-  const tokens: Token[] = raw.tokens
-    .map(normalizeToken)
-    .filter((token): token is Token => token !== null);
-  if (tokens.length === 0) {
-    return null;
+  const reply: AgentReply | null = parseAgentReply(raw.reply);
+  if (!reply) {
+    return "reply is missing, invalid, or empty";
   }
 
-  return {
-    text: raw.text,
-    tokens,
-  };
+  if (raw.correction !== undefined) {
+    const correction: Correction | undefined = parseOptionalCorrection(
+      raw.correction,
+      userMessage,
+    );
+    if (!correction) {
+      return "correction present but invalid or trivial";
+    }
+  }
+
+  return "unknown validation failure";
 }
 
 export function parseAgentResponse(

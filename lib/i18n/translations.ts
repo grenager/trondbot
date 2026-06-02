@@ -77,6 +77,7 @@ export interface Translations {
   lookupTargetLabel: (language: string) => string;
   lookupInsert: string;
   lookupFailed: string;
+  noCreditsForWordLookup: string;
   lookupNoResult: string;
   appTitle: string;
   appDescription: string;
@@ -202,6 +203,7 @@ export const en: Translations = {
   lookupTargetLabel: (language: string) => `In ${language}`,
   lookupInsert: "Insert",
   lookupFailed: "Lookup failed. Please try again.",
+  noCreditsForWordLookup: "No credits left for word lookup.",
   lookupNoResult: "No translation found.",
   appTitle: "Trondbot",
   appDescription: "Simple language learning AI chat",

@@ -83,6 +83,7 @@ export const nl: Translations = {
   lookupTargetLabel: (language: string) => `In het ${language}`,
   lookupInsert: "Invoegen",
   lookupFailed: "Opzoeken mislukt. Probeer het opnieuw.",
+  noCreditsForWordLookup: "Geen credits meer voor woordopzoeking.",
   lookupNoResult: "Geen vertaling gevonden.",
   appTitle: "Trondbot",
   appDescription: "Eenvoudige AI-chat voor taal leren",

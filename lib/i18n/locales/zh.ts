@@ -77,6 +77,7 @@ export const zh: Translations = {
   lookupTargetLabel: (language: string) => `${language}译文`,
   lookupInsert: "插入",
   lookupFailed: "查询失败，请重试。",
+  noCreditsForWordLookup: "没有剩余积分进行单词查询。",
   lookupNoResult: "未找到翻译。",
   appTitle: "Trondbot",
   appDescription: "简单的语言学习 AI 聊天",

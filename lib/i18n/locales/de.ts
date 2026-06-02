@@ -84,6 +84,7 @@ export const de: Translations = {
   lookupTargetLabel: (language: string) => `Auf ${language}`,
   lookupInsert: "Einfügen",
   lookupFailed: "Suche fehlgeschlagen. Bitte erneut versuchen.",
+  noCreditsForWordLookup: "Keine Credits mehr für Wortsuche.",
   lookupNoResult: "Keine Übersetzung gefunden.",
   appTitle: "Trondbot",
   appDescription: "Einfacher KI-Chat zum Sprachenlernen",

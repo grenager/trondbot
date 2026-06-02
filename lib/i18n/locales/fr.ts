@@ -84,6 +84,7 @@ export const fr: Translations = {
   lookupTargetLabel: (language: string) => `En ${language}`,
   lookupInsert: "Insérer",
   lookupFailed: "La recherche a échoué. Veuillez réessayer.",
+  noCreditsForWordLookup: "Plus de crédits pour la recherche de mots.",
   lookupNoResult: "Aucune traduction trouvée.",
   appTitle: "Trondbot",
   appDescription: "Chat IA simple pour apprendre les langues",

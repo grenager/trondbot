@@ -5,9 +5,13 @@ import type { Token } from "@/lib/types";
 
 interface HoverWordProps {
   token: Token;
+  variant?: "default" | "onDark";
 }
 
-export default function HoverWord({ token }: HoverWordProps) {
+export default function HoverWord({
+  token,
+  variant = "default",
+}: HoverWordProps) {
   const [showGloss, setShowGloss] = useState<boolean>(false);
   const spanRef = useRef<HTMLSpanElement>(null);
 
@@ -40,10 +44,15 @@ export default function HoverWord({ token }: HoverWordProps) {
     setShowGloss((current) => !current);
   }
 
+  const underlineClass: string =
+    variant === "onDark"
+      ? "border-white/50 hover:border-white"
+      : "border-stone-300 hover:border-blue-400";
+
   return (
     <span
       ref={spanRef}
-      className="relative inline cursor-help border-b border-dotted border-stone-300 hover:border-blue-400"
+      className={`relative inline cursor-help border-b border-dotted ${underlineClass}`}
       onClick={handleClick}
     >
       {token.word}

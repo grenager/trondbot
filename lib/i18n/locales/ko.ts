@@ -80,6 +80,7 @@ export const ko: Translations = {
   lookupTargetLabel: (language: string) => `${language} 번역`,
   lookupInsert: "삽입",
   lookupFailed: "찾기에 실패했습니다. 다시 시도해 주세요.",
+  noCreditsForWordLookup: "단어 찾기에 사용할 크레딧이 없습니다.",
   lookupNoResult: "번역을 찾을 수 없습니다.",
   appTitle: "Trondbot",
   appDescription: "간단한 언어 학습 AI 채팅",

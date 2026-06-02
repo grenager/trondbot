@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, KeyboardEvent, useEffect, useRef, useState } from "react";
+import { FormEvent, KeyboardEvent, useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import ChatMessage from "@/components/ChatMessage";
@@ -29,6 +29,7 @@ import type { ScenarioId } from "@/lib/scenarios";
 import type { Language } from "@/lib/types";
 import {
   DEFAULT_SCENARIO,
+  INITIAL_FREE_CREDITS,
   loadCredits,
   loadStoredState,
   MAX_TOTAL_CREDITS,
@@ -36,6 +37,8 @@ import {
   saveStoredState,
 } from "@/lib/storage";
 import { trackNewChat, trackSendMessage } from "@/lib/analytics";
+import { debugLog } from "@/lib/debug";
+import { fetchChat, getFetchErrorMessage } from "@/lib/fetchChat";
 import type {
   AgentResponse,
   AssistantMessage,
@@ -78,7 +81,6 @@ function toApiMessages(displayMessages: DisplayMessage[]): ApiChatMessage[] {
     return {
       role: "assistant",
       content: message.content,
-      tokens: message.tokens,
     };
   });
 }
@@ -122,7 +124,8 @@ export default function TrondbotApp() {
   const [showAbout, setShowAbout] = useState<boolean>(false);
   const [showCreditsModal, setShowCreditsModal] = useState<boolean>(false);
   const [showLookupModal, setShowLookupModal] = useState<boolean>(false);
-  const [credits, setCredits] = useState<number>(100);
+  const [credits, setCredits] = useState<number>(INITIAL_FREE_CREDITS);
+  const creditsRef = useRef<number>(INITIAL_FREE_CREDITS);
   const [typingAfterAck, setTypingAfterAck] = useState<boolean>(false);
   const [composerMultiline, setComposerMultiline] = useState<boolean>(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -196,6 +199,10 @@ export default function TrondbotApp() {
   }
 
   useEffect(() => {
+    creditsRef.current = credits;
+  }, [credits]);
+
+  useEffect(() => {
     const stored = loadStoredState();
     const fromPath = parseLanguagePath(pathname);
 
@@ -264,6 +271,20 @@ export default function TrondbotApp() {
     }
   }, [loading, typingAfterAck, showSetupForm]);
 
+  useEffect(() => {
+    debugLog("ui", "loading state changed", { loading });
+  }, [loading]);
+
+  useEffect(() => {
+    debugLog("ui", "messages updated", {
+      count: messages.length,
+      lastRole: messages.at(-1)?.role,
+      awaitingAcknowledgment: messages.some(
+        (message) => message.role === "user" && message.awaitingAcknowledgment,
+      ),
+    });
+  }, [messages]);
+
   function handleComposerKeyDown(
     event: KeyboardEvent<HTMLTextAreaElement>,
   ): void {
@@ -328,6 +349,18 @@ export default function TrondbotApp() {
     return creditsAdded;
   }
 
+  const spendTokenizeCredit = useCallback((): boolean => {
+    if (creditsRef.current <= 0) {
+      return false;
+    }
+
+    const newCredits: number = creditsRef.current - 1;
+    creditsRef.current = newCredits;
+    setCredits(newCredits);
+    saveCredits(newCredits);
+    return true;
+  }, []);
+
   async function startScenario(
     scenarioId: ScenarioId,
     customDesc: string | undefined,
@@ -348,22 +381,36 @@ export default function TrondbotApp() {
     setShowSetupForm(false);
     setLoading(true);
     trackNewChat(nativeLang, targetLang, scenarioId);
+    debugLog("chat", "startScenario: request sent", {
+      scenarioId,
+      nativeLang,
+      targetLang,
+    });
 
     try {
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const response = await fetchChat({
           messages: [],
           nativeLanguage: nativeLang,
           targetLanguage: targetLang,
           scenario: scenarioId,
           customDescription: customDesc,
           startScenario: true,
-        }),
+        });
+
+      debugLog("chat", "startScenario: response received", {
+        ok: response.ok,
+        status: response.status,
       });
 
       const data: unknown = await response.json();
+
+      debugLog("chat", "startScenario: response parsed", {
+        hasReply:
+          typeof data === "object" &&
+          data !== null &&
+          "reply" in data &&
+          typeof data.reply === "object",
+      });
 
       if (!response.ok) {
         const errorMessage: string =
@@ -381,17 +428,21 @@ export default function TrondbotApp() {
       const assistantMessage: AssistantMessage = {
         role: "assistant",
         content: opening.reply.text,
-        tokens: opening.reply.tokens,
       };
 
       setMessages([assistantMessage]);
+      debugLog("chat", "startScenario: complete", {
+        replyLength: assistantMessage.content.length,
+      });
     } catch (startError: unknown) {
-      const message: string =
-        startError instanceof Error
-          ? startError.message
-          : getTranslations(nativeLang).failedToStartScenario;
+      const message: string = getFetchErrorMessage(
+        startError,
+        getTranslations(nativeLang).failedToStartScenario,
+      );
+      debugLog("chat", "startScenario: failed", { message, startError });
       setError(message);
     } finally {
+      debugLog("chat", "startScenario: finally, clearing loading");
       setLoading(false);
     }
   }
@@ -415,25 +466,52 @@ export default function TrondbotApp() {
     setLoading(true);
     setError(null);
     trackSendMessage(nativeLanguage, targetLanguage, scenario);
+    debugLog("chat", "handleSubmit: request sent", {
+      contentLength: trimmedInput.length,
+      messageCount: apiMessages.length,
+      nativeLanguage,
+      targetLanguage,
+      scenario,
+    });
 
     const newCredits: number = Math.max(0, credits - 1);
     setCredits(newCredits);
     saveCredits(newCredits);
 
     try {
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const response = await fetchChat({
           messages: toApiMessages(apiMessages),
           nativeLanguage,
           targetLanguage,
           scenario,
           customDescription,
-        }),
+        });
+
+      debugLog("chat", "handleSubmit: response received", {
+        ok: response.ok,
+        status: response.status,
       });
 
-      const data: unknown = await response.json();
+      let data: unknown;
+      try {
+        data = await response.json();
+      } catch (parseError: unknown) {
+        debugLog("chat", "handleSubmit: failed to parse JSON", parseError);
+        throw new Error(getTranslations(nativeLanguage).failedToSendMessage);
+      }
+
+      debugLog("chat", "handleSubmit: response parsed", {
+        hasCorrection:
+          typeof data === "object" &&
+          data !== null &&
+          "correction" in data &&
+          data.correction !== undefined,
+        hasReply:
+          typeof data === "object" &&
+          data !== null &&
+          "reply" in data &&
+          typeof data.reply === "object",
+      });
 
       if (!response.ok) {
         const errorMessage: string =
@@ -449,6 +527,9 @@ export default function TrondbotApp() {
       const agentResponse: AgentResponse = data as AgentResponse;
 
       if (agentResponse.correction) {
+        debugLog("chat", "handleSubmit: applying correction", {
+          correctedLength: agentResponse.correction.corrected.length,
+        });
         const userAwaitingAck: UserMessageWithCorrection = {
           ...userMessage,
           correction: agentResponse.correction,
@@ -460,6 +541,9 @@ export default function TrondbotApp() {
           userAwaitingAck,
         ]);
       } else {
+        debugLog("chat", "handleSubmit: message accepted", {
+          replyLength: agentResponse.reply.text.length,
+        });
         const userAccepted: UserMessageWithCorrection = {
           ...userMessage,
           accepted: true,
@@ -467,7 +551,6 @@ export default function TrondbotApp() {
         const assistantMessage: AssistantMessage = {
           role: "assistant",
           content: agentResponse.reply.text,
-          tokens: agentResponse.reply.tokens,
         };
         setMessages((previous) => [
           ...previous.slice(0, -1),
@@ -475,13 +558,16 @@ export default function TrondbotApp() {
           assistantMessage,
         ]);
       }
+      debugLog("chat", "handleSubmit: complete");
     } catch (submitError: unknown) {
-      const message: string =
-        submitError instanceof Error
-          ? submitError.message
-          : getTranslations(nativeLanguage).failedToSendMessage;
+      const message: string = getFetchErrorMessage(
+        submitError,
+        getTranslations(nativeLanguage).failedToSendMessage,
+      );
+      debugLog("chat", "handleSubmit: failed", { message, submitError });
       setError(message);
     } finally {
+      debugLog("chat", "handleSubmit: finally, clearing loading");
       setLoading(false);
     }
   }
@@ -572,7 +658,6 @@ export default function TrondbotApp() {
       const assistantMessage: AssistantMessage = {
         role: "assistant",
         content: pendingReply.text,
-        tokens: pendingReply.tokens,
       };
       setMessages((previous) => [...previous, assistantMessage]);
       setTypingAfterAck(false);
@@ -679,7 +764,8 @@ export default function TrondbotApp() {
                       <ChatMessage
                         key={`${message.role}-${index}-${message.content.slice(0, 20)}`}
                         message={message}
-                        language={targetLanguage}
+                        targetLanguage={targetLanguage}
+                        nativeLanguage={nativeLanguage}
                         loading={
                           loading &&
                           index === displayMessages.length - 1 &&
@@ -692,6 +778,7 @@ export default function TrondbotApp() {
                             ? acknowledgeCorrection
                             : undefined
                         }
+                        onSpendTokenizeCredit={spendTokenizeCredit}
                       />
                     ))}
                     {typingAfterAck ? <TypingIndicator /> : null}

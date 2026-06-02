@@ -80,6 +80,7 @@ export const ar: Translations = {
   lookupTargetLabel: (language: string) => `بال${language}`,
   lookupInsert: "إدراج",
   lookupFailed: "فشل البحث. يرجى المحاولة مرة أخرى.",
+  noCreditsForWordLookup: "لا يوجد رصيد متبٍ للبحث عن الكلمات.",
   lookupNoResult: "لم يتم العثور على ترجمة.",
   appTitle: "Trondbot",
   appDescription: "دردشة ذكاء اصطناعي بسيطة لتعلم اللغات",

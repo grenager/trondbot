@@ -80,6 +80,7 @@ export const ja: Translations = {
   lookupTargetLabel: (language: string) => `${language}訳`,
   lookupInsert: "挿入",
   lookupFailed: "検索に失敗しました。もう一度お試しください。",
+  noCreditsForWordLookup: "単語検索に使えるクレジットがありません。",
   lookupNoResult: "翻訳が見つかりませんでした。",
   appTitle: "Trondbot",
   appDescription: "シンプルな語学学習AIチャット",

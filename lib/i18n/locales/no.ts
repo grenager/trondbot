@@ -82,6 +82,7 @@ export const no: Translations = {
   lookupTargetLabel: (language: string) => `På ${language}`,
   lookupInsert: "Sett inn",
   lookupFailed: "Oppslaget mislyktes. Prøv igjen.",
+  noCreditsForWordLookup: "Ingen kreditter igjen for ordoppslag.",
   lookupNoResult: "Ingen oversettelse funnet.",
   appTitle: "Trondbot",
   appDescription: "Enkel AI-chat for språklæring",
