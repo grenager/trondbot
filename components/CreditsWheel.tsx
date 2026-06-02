@@ -1,6 +1,7 @@
 "use client";
 
 import { INITIAL_FREE_CREDITS } from "@/lib/storage";
+import { useTranslation } from "@/lib/i18n/TranslationContext";
 
 interface CreditsWheelProps {
   credits: number;
@@ -8,6 +9,7 @@ interface CreditsWheelProps {
 }
 
 export default function CreditsWheel({ credits, onClick }: CreditsWheelProps) {
+  const { t } = useTranslation();
   const ratio: number = Math.min(credits / INITIAL_FREE_CREDITS, 1);
   const radius = 9;
   const circumference: number = 2 * Math.PI * radius;
@@ -19,7 +21,7 @@ export default function CreditsWheel({ credits, onClick }: CreditsWheelProps) {
       type="button"
       onClick={onClick}
       className="flex items-center gap-1 text-stone-500 transition-colors hover:text-stone-700"
-      aria-label={`${credits} credits remaining`}
+      aria-label={t.creditsRemainingAria(credits)}
     >
       <svg width="20" height="20" className="-rotate-90">
         <circle
@@ -42,7 +44,7 @@ export default function CreditsWheel({ credits, onClick }: CreditsWheelProps) {
           strokeLinecap="round"
         />
       </svg>
-      <span className="text-xs font-medium">{credits} credits</span>
+      <span className="text-xs font-medium">{t.creditsLabel(credits)}</span>
     </button>
   );
 }

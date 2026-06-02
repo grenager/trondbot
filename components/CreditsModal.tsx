@@ -2,18 +2,19 @@
 
 import { useEffect, useState } from "react";
 import { trackCreditPurchase } from "@/lib/analytics";
+import { useTranslation } from "@/lib/i18n/TranslationContext";
 import { MAX_TOTAL_CREDITS } from "@/lib/storage";
 
 interface CreditPurchaseOption {
   credits: number;
   priceUsd: number;
-  label: string;
+  labelKey: "buy100Credits" | "buy250Credits" | "buy500Credits";
 }
 
 const PURCHASE_OPTIONS: readonly CreditPurchaseOption[] = [
-  { credits: 100, priceUsd: 2, label: "Buy 100 credits ($2)" },
-  { credits: 250, priceUsd: 5, label: "Buy 250 credits ($5)" },
-  { credits: 500, priceUsd: 10, label: "Buy 500 credits ($10)" },
+  { credits: 100, priceUsd: 2, labelKey: "buy100Credits" },
+  { credits: 250, priceUsd: 5, labelKey: "buy250Credits" },
+  { credits: 500, priceUsd: 10, labelKey: "buy500Credits" },
 ] as const;
 
 interface CreditsModalProps {
@@ -29,6 +30,7 @@ export default function CreditsModal({
   onClose,
   onPurchase,
 }: CreditsModalProps) {
+  const { t } = useTranslation();
   const [confirmationCredits, setConfirmationCredits] = useState<number | null>(
     null,
   );
@@ -59,7 +61,7 @@ export default function CreditsModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <button
         type="button"
-        aria-label="Close"
+        aria-label={t.close}
         className="absolute inset-0 bg-stone-900/40"
         onClick={handleClose}
       />
@@ -67,7 +69,7 @@ export default function CreditsModal({
         <button
           type="button"
           onClick={handleClose}
-          aria-label="Close"
+          aria-label={t.close}
           className="absolute right-4 top-4 rounded-md p-1 text-stone-400 transition-colors hover:bg-stone-100 hover:text-stone-600"
         >
           <svg
@@ -88,36 +90,29 @@ export default function CreditsModal({
         {confirmationCredits !== null ? (
           <>
             <h2 className="mb-2 pr-8 text-lg font-semibold text-stone-900">
-              Credits Added
+              {t.creditsAdded}
             </h2>
             <p className="text-sm leading-relaxed text-stone-600">
-              Surprise, credits are currently free of charge! We have added{" "}
-              <span className="font-semibold text-stone-900">
-                {confirmationCredits}
-              </span>{" "}
-              credits to your account. Happy chatting!
+              {t.creditsAddedMessage(confirmationCredits)}
             </p>
             <button
               type="button"
               onClick={handleClose}
               className="mt-5 w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
             >
-              OK
+              {t.ok}
             </button>
           </>
         ) : (
           <>
             <h2 className="mb-2 pr-8 text-lg font-semibold text-stone-900">
-              Message Credits
+              {t.messageCredits}
             </h2>
             <p className="text-sm leading-relaxed text-stone-600">
-              You have{" "}
-              <span className="font-semibold text-stone-900">{credits}</span>{" "}
-              messages remaining.
+              {t.youHaveMessagesRemaining(credits)}
             </p>
             <p className="mt-2 text-sm leading-relaxed text-stone-600">
-              If you are out of credits you will need to purchase more in order
-              to continue chatting with Trondbot.
+              {t.outOfCreditsMessage}
             </p>
             <div className="mt-5 space-y-2">
               {PURCHASE_OPTIONS.map((option, index) => (
@@ -132,7 +127,7 @@ export default function CreditsModal({
                       : "w-full rounded-lg bg-blue-50 px-4 py-2.5 text-sm font-medium text-blue-700 transition-colors hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-50"
                   }
                 >
-                  {option.label}
+                  {t[option.labelKey]}
                 </button>
               ))}
             </div>

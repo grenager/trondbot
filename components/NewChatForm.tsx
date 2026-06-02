@@ -1,15 +1,18 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import LanguageSelect from "@/components/LanguageSelect";
 import { SCENARIOS } from "@/lib/scenarios";
 import type { ScenarioId } from "@/lib/scenarios";
+import { useTranslation } from "@/lib/i18n/TranslationContext";
 import type { LanguageCode } from "@/lib/types";
 
 interface NewChatFormProps {
   initialNativeLanguage: LanguageCode;
   initialTargetLanguage: LanguageCode;
   initialScenario: ScenarioId;
+  onComfortLanguageChange: (nativeLanguage: LanguageCode) => void;
+  onTargetLanguageChange: (targetLanguage: LanguageCode) => void;
   onStart: (
     nativeLanguage: LanguageCode,
     targetLanguage: LanguageCode,
@@ -24,12 +27,33 @@ export default function NewChatForm({
   initialNativeLanguage,
   initialTargetLanguage,
   initialScenario,
+  onComfortLanguageChange,
+  onTargetLanguageChange,
   onStart,
 }: NewChatFormProps) {
+  const { t } = useTranslation();
   const [nativeLanguage, setNativeLanguage] =
     useState<LanguageCode>(initialNativeLanguage);
   const [targetLanguage, setTargetLanguage] =
     useState<LanguageCode>(initialTargetLanguage);
+
+  useEffect(() => {
+    setNativeLanguage(initialNativeLanguage);
+  }, [initialNativeLanguage]);
+
+  useEffect(() => {
+    setTargetLanguage(initialTargetLanguage);
+  }, [initialTargetLanguage]);
+
+  function handleComfortLanguageChange(code: LanguageCode): void {
+    setNativeLanguage(code);
+    onComfortLanguageChange(code);
+  }
+
+  function handleTargetLanguageChange(code: LanguageCode): void {
+    setTargetLanguage(code);
+    onTargetLanguageChange(code);
+  }
   const [scenario, setScenario] = useState<ScenarioId>(
     initialScenario === "custom" ? FIRST_SCENARIO_ID : initialScenario,
   );
@@ -53,31 +77,27 @@ export default function NewChatForm({
       className="flex w-full max-w-xs flex-col gap-4"
     >
       <h2 className="text-center text-lg font-semibold text-stone-900">
-        Start a New Chat
+        {t.startNewChat}
       </h2>
-      <p className="text-sm leading-relaxed text-stone-500">
-        The best way to learn a language is by just speaking it! Trondbot makes that
-        possible by letting you chat with AI, giving you word-level translations of everything the agent
-        says, as well as corrections on what you say.
-      </p>
+      <p className="text-sm leading-relaxed text-stone-500">{t.introText}</p>
       <LanguageSelect
         id="setup-native-language"
-        label="My comfort language is"
+        label={t.comfortLanguageLabel}
         value={nativeLanguage}
-        onChange={setNativeLanguage}
+        onChange={handleComfortLanguageChange}
       />
       <LanguageSelect
         id="setup-target-language"
-        label="I want to chat in"
+        label={t.targetLanguageLabel}
         value={targetLanguage}
-        onChange={setTargetLanguage}
+        onChange={handleTargetLanguageChange}
       />
       <div className="flex flex-col gap-1">
         <label
           htmlFor="setup-scenario"
           className="text-xs font-medium text-stone-500"
         >
-          Chat topic
+          {t.chatTopic}
         </label>
         <select
           id="setup-scenario"
@@ -87,7 +107,7 @@ export default function NewChatForm({
         >
           {SCENARIOS.map((s) => (
             <option key={s.id} value={s.id}>
-              {s.label}
+              {t.scenarioLabels[s.id]}
             </option>
           ))}
         </select>
@@ -98,14 +118,14 @@ export default function NewChatForm({
             htmlFor="setup-custom"
             className="text-xs font-medium text-stone-500"
           >
-            Describe the conversation
+            {t.describeConversation}
           </label>
           <textarea
             id="setup-custom"
             value={customDescription}
             onChange={(event) => setCustomDescription(event.target.value)}
             rows={3}
-            placeholder="e.g. I'm at the doctor's office describing my symptoms…"
+            placeholder={t.conversationPlaceholder}
             className="resize-none rounded-lg border border-stone-200 px-3 py-2 text-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
           />
         </div>
@@ -115,10 +135,10 @@ export default function NewChatForm({
         disabled={!isValid}
         className="rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-stone-300"
       >
-        Start Chatting Now
+        {t.startChattingNow}
       </button>
       <p className="text-center text-xs leading-relaxed text-stone-400">
-        First 100 messages are free. Afterwards you can buy 100 credits for $2.
+        {t.freeCreditsNote}
       </p>
     </form>
   );
