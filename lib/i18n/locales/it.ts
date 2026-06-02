@@ -74,6 +74,17 @@ export const it: Translations = {
   acknowledgeCorrectionPlaceholder:
     "Accetta la correzione per continuare…",
   typeMessagePlaceholder: "Scrivi un messaggio…",
+  lookupWordAria: "Cerca una parola",
+  lookupTitle: "Ricerca parole",
+  lookupDescription:
+    "Cerca una parola nella tua lingua di comfort e inserisci la traduzione nel messaggio.",
+  lookupSourceLabel: (language: string) => `Parola in ${language}`,
+  lookupSourcePlaceholder: "Scrivi una parola…",
+  lookupAction: "Cerca",
+  lookupTargetLabel: (language: string) => `In ${language}`,
+  lookupInsert: "Inserisci",
+  lookupFailed: "Ricerca non riuscita. Riprova.",
+  lookupNoResult: "Nessuna traduzione trovata.",
   appTitle: "Trondbot",
   appDescription: "Chat IA semplice per imparare le lingue",
   scenarioLabels: {

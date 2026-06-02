@@ -8,6 +8,7 @@ import ConfirmDialog from "@/components/ConfirmDialog";
 import AboutModal from "@/components/AboutModal";
 import CreditsModal from "@/components/CreditsModal";
 import CreditsWheel from "@/components/CreditsWheel";
+import LookupModal from "@/components/LookupModal";
 import NewChatForm from "@/components/NewChatForm";
 import TypingIndicator from "@/components/TypingIndicator";
 import LocaleHtmlLang from "@/components/LocaleHtmlLang";
@@ -120,10 +121,13 @@ export default function TrondbotApp() {
   const [showNewChatConfirm, setShowNewChatConfirm] = useState<boolean>(false);
   const [showAbout, setShowAbout] = useState<boolean>(false);
   const [showCreditsModal, setShowCreditsModal] = useState<boolean>(false);
+  const [showLookupModal, setShowLookupModal] = useState<boolean>(false);
   const [credits, setCredits] = useState<number>(100);
   const [typingAfterAck, setTypingAfterAck] = useState<boolean>(false);
+  const [composerMultiline, setComposerMultiline] = useState<boolean>(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const composerRef = useRef<HTMLTextAreaElement>(null);
+  const lastComposerInputLengthRef = useRef<number>(0);
 
   function updateLanguages(
     native: LanguageCode,
@@ -159,6 +163,32 @@ export default function TrondbotApp() {
       Number.parseFloat(styles.paddingTop) +
       Number.parseFloat(styles.paddingBottom);
     const maxHeight: number = lineHeight * MAX_COMPOSER_LINES + padding;
+    const singleLineHeight: number = lineHeight + padding;
+    const inputLength: number = textarea.value.length;
+    const wrapped: boolean = textarea.scrollHeight > singleLineHeight + 1;
+
+    if (inputLength === 0) {
+      lastComposerInputLengthRef.current = 0;
+      setComposerMultiline(false);
+    } else {
+      setComposerMultiline((previous) => {
+        if (wrapped) {
+          lastComposerInputLengthRef.current = inputLength;
+          return true;
+        }
+
+        if (!previous) {
+          return false;
+        }
+
+        if (inputLength < lastComposerInputLengthRef.current) {
+          lastComposerInputLengthRef.current = inputLength;
+          return false;
+        }
+
+        return true;
+      });
+    }
 
     textarea.style.height = `${Math.min(textarea.scrollHeight, maxHeight)}px`;
     textarea.style.overflowY =
@@ -219,6 +249,12 @@ export default function TrondbotApp() {
   }, [input]);
 
   useEffect(() => {
+    requestAnimationFrame(() => {
+      resizeComposer();
+    });
+  }, [composerMultiline]);
+
+  useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading, typingAfterAck]);
 
@@ -235,6 +271,27 @@ export default function TrondbotApp() {
       event.preventDefault();
       event.currentTarget.form?.requestSubmit();
     }
+  }
+
+  function insertIntoComposer(text: string): void {
+    const trimmed: string = text.trim();
+    if (!trimmed) {
+      return;
+    }
+
+    setInput((previous) => {
+      if (!previous.trim()) {
+        return trimmed;
+      }
+
+      const needsSpace: boolean =
+        !previous.endsWith(" ") && !previous.endsWith("\n");
+      return `${previous}${needsSpace ? " " : ""}${trimmed}`;
+    });
+
+    requestAnimationFrame(() => {
+      composerRef.current?.focus();
+    });
   }
 
   function handleNewChatClick(): void {
@@ -311,9 +368,9 @@ export default function TrondbotApp() {
       if (!response.ok) {
         const errorMessage: string =
           typeof data === "object" &&
-          data !== null &&
-          "error" in data &&
-          typeof data.error === "string"
+            data !== null &&
+            "error" in data &&
+            typeof data.error === "string"
             ? data.error
             : getTranslations(nativeLang).somethingWentWrong;
         throw new Error(errorMessage);
@@ -381,9 +438,9 @@ export default function TrondbotApp() {
       if (!response.ok) {
         const errorMessage: string =
           typeof data === "object" &&
-          data !== null &&
-          "error" in data &&
-          typeof data.error === "string"
+            data !== null &&
+            "error" in data &&
+            typeof data.error === "string"
             ? data.error
             : getTranslations(nativeLanguage).somethingWentWrong;
         throw new Error(errorMessage);
@@ -438,6 +495,45 @@ export default function TrondbotApp() {
   const awaitingAcknowledgment: boolean = messages.some(
     (message) => message.role === "user" && message.awaitingAcknowledgment,
   );
+  const composerDisabled: boolean =
+    loading || awaitingAcknowledgment || typingAfterAck;
+  const hasComposerInput: boolean = input.trim().length > 0;
+
+  const lookupButton = (
+    <button
+      type="button"
+      onClick={() => setShowLookupModal(true)}
+      disabled={composerDisabled}
+      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-stone-200 p-1.5 text-stone-600 transition-colors hover:bg-stone-300 hover:text-stone-800 disabled:cursor-not-allowed disabled:bg-stone-100 disabled:text-stone-300"
+      aria-label={t.lookupWordAria}
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 20 20"
+        fill="currentColor"
+        className="h-3.5 w-3.5"
+        aria-hidden="true"
+      >
+        <path d="M9 4.804A7.968 7.968 0 0 0 5.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 0 1 5.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0 1 14.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0 0 14.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 1 1-2 0V4.804Z" />
+      </svg>
+    </button>
+  );
+
+  const sendButton = (
+    <button
+      type="submit"
+      disabled={composerDisabled || !hasComposerInput}
+      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-white transition-colors disabled:cursor-not-allowed ${hasComposerInput
+          ? "bg-blue-600 hover:bg-blue-700 disabled:bg-stone-300"
+          : "bg-stone-300"
+        }`}
+      aria-label={t.send}
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
+        <path fillRule="evenodd" d="M10 17a.75.75 0 0 1-.75-.75V5.612L5.29 9.77a.75.75 0 0 1-1.08-1.04l5.25-5.5a.75.75 0 0 1 1.08 0l5.25 5.5a.75.75 0 1 1-1.08 1.04l-3.96-4.158V16.25A.75.75 0 0 1 10 17Z" clipRule="evenodd" />
+      </svg>
+    </button>
+  );
 
   function acknowledgeCorrection(): void {
     const ackIndex: number = messages.findIndex(
@@ -487,177 +583,180 @@ export default function TrondbotApp() {
     <TranslationProvider locale={nativeLanguage}>
       <LocaleHtmlLang />
       <main className="mx-auto flex h-dvh max-w-2xl flex-col overflow-hidden py-3">
-      <ConfirmDialog
-        open={showNewChatConfirm}
-        title={t.confirmNewChatTitle}
-        message={t.confirmNewChatMessage}
-        confirmLabel={t.confirmNewChatConfirm}
-        cancelLabel={t.confirmNewChatCancel}
-        onConfirm={confirmNewChat}
-        onCancel={cancelNewChat}
-      />
-      <AboutModal open={showAbout} onClose={() => setShowAbout(false)} />
-      <CreditsModal
-        open={showCreditsModal}
-        credits={credits}
-        onClose={() => setShowCreditsModal(false)}
-        onPurchase={handleCreditsPurchase}
-      />
-      <header className="mb-2 shrink-0 px-3">
-        <div className="flex items-center justify-between">
-          <button
-            type="button"
-            onClick={() => setShowAbout(true)}
-            className="flex items-center"
-            aria-label={t.aboutTrondbotAria}
-          >
-            <Image
-              src="/trondbot-icon.png"
-              alt=""
-              width={32}
-              height={32}
-              className="h-8 w-8 shrink-0 rounded-full object-cover"
-              priority
-            />
-          </button>
-          <CreditsWheel credits={credits} onClick={() => setShowCreditsModal(true)} />
-          <button
-            type="button"
-            disabled={loading || awaitingAcknowledgment || typingAfterAck}
-            onClick={handleNewChatClick}
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-            aria-label={t.newChatAria}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
-              <path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" />
-            </svg>
-          </button>
-        </div>
-      </header>
-
-      <section className="flex min-h-0 flex-1 flex-col overflow-hidden">
-        {showSetupForm ? (
-          <div className="flex flex-1 flex-col items-center overflow-y-auto p-6">
-            <NewChatForm
-              initialNativeLanguage={nativeLanguage}
-              initialTargetLanguage={targetLanguage}
-              initialScenario={scenario}
-              onComfortLanguageChange={handleComfortLanguageChange}
-              onTargetLanguageChange={handleTargetLanguageChange}
-              onStart={(native, target, scenarioId, customDesc) =>
-                startScenario(scenarioId, customDesc, native, target)
-              }
-            />
-          </div>
-        ) : (
-          <>
-            <div className="shrink-0 border-b border-stone-100 px-3 py-2 text-center">
-              <p className="text-sm font-semibold text-stone-800">
-                {getFlag(targetLanguage)} {scenarioLabel}
-              </p>
-              {(() => {
-                const accuracy: number | null = computeAccuracy(messages);
-                if (accuracy === null) return null;
-                return (
-                  <p className="text-xs font-medium text-stone-500">
-                    {t.accuracyCorrect(accuracy)}
-                  </p>
-                );
-              })()}
+        <ConfirmDialog
+          open={showNewChatConfirm}
+          title={t.confirmNewChatTitle}
+          message={t.confirmNewChatMessage}
+          confirmLabel={t.confirmNewChatConfirm}
+          cancelLabel={t.confirmNewChatCancel}
+          onConfirm={confirmNewChat}
+          onCancel={cancelNewChat}
+        />
+        <AboutModal open={showAbout} onClose={() => setShowAbout(false)} />
+        <CreditsModal
+          open={showCreditsModal}
+          credits={credits}
+          onClose={() => setShowCreditsModal(false)}
+          onPurchase={handleCreditsPurchase}
+        />
+        <LookupModal
+          open={showLookupModal}
+          nativeLanguage={nativeLanguage}
+          targetLanguage={targetLanguage}
+          onClose={() => setShowLookupModal(false)}
+          onInsert={insertIntoComposer}
+        />
+        <header className="mb-2 shrink-0 px-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setShowAbout(true)}
+                className="flex items-center"
+                aria-label={t.aboutTrondbotAria}
+              >
+                <Image
+                  src="/trondbot-icon.png"
+                  alt=""
+                  width={32}
+                  height={32}
+                  className="h-8 w-8 shrink-0 rounded-full object-cover"
+                  priority
+                />
+              </button>
             </div>
-            <div className="flex-1 space-y-3 overflow-y-auto px-3 py-2">
-              {loading && displayMessages.length === 0 ? (
-                <TypingIndicator />
-              ) : displayMessages.length > 0 ? (
-                <>
-                  {displayMessages.map((message, index) => (
-                    <ChatMessage
-                      key={`${message.role}-${index}-${message.content.slice(0, 20)}`}
-                      message={message}
-                      language={targetLanguage}
-                      loading={
-                        loading &&
-                        index === displayMessages.length - 1 &&
-                        message.role === "user" &&
-                        !message.accepted &&
-                        !message.awaitingAcknowledgment
-                      }
-                      onAcknowledgeCorrection={
-                        message.role === "user" && message.awaitingAcknowledgment
-                          ? acknowledgeCorrection
-                          : undefined
-                      }
-                    />
-                  ))}
-                  {typingAfterAck ? <TypingIndicator /> : null}
-                </>
-              ) : null}
-              <div ref={messagesEndRef} />
-            </div>
-
-            {error ? (
-              <p className="border-t border-stone-100 px-3 py-1.5 text-xs text-red-600">
-                {error}
-              </p>
-            ) : null}
-
-            <form
-              onSubmit={handleSubmit}
-              className="shrink-0 px-3 pb-0 pt-2"
+            <CreditsWheel credits={credits} onClick={() => setShowCreditsModal(true)} />
+            <button
+              type="button"
+              disabled={loading || awaitingAcknowledgment || typingAfterAck}
+              onClick={handleNewChatClick}
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+              aria-label={t.newChatAria}
             >
-              <div className={`flex flex-col border border-stone-200 focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100 ${input.trim() ? "rounded-2xl" : "rounded-full"}`}>
-                <div className="flex items-end">
-                  <textarea
-                    ref={composerRef}
-                    rows={1}
-                    lang={targetLanguage === "no" ? "nb" : targetLanguage}
-                    autoComplete="off"
-                    autoCorrect="on"
-                    spellCheck
-                    value={input}
-                    onChange={(event) => setInput(event.target.value)}
-                    onKeyDown={handleComposerKeyDown}
-                    placeholder={
-                      awaitingAcknowledgment
-                        ? t.acknowledgeCorrectionPlaceholder
-                        : t.typeMessagePlaceholder
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
+                <path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" />
+              </svg>
+            </button>
+          </div>
+        </header>
+
+        <section className="flex min-h-0 flex-1 flex-col overflow-hidden">
+          {showSetupForm ? (
+            <div className="flex flex-1 flex-col items-center overflow-y-auto p-6">
+              <NewChatForm
+                initialNativeLanguage={nativeLanguage}
+                initialTargetLanguage={targetLanguage}
+                initialScenario={scenario}
+                onComfortLanguageChange={handleComfortLanguageChange}
+                onTargetLanguageChange={handleTargetLanguageChange}
+                onStart={(native, target, scenarioId, customDesc) =>
+                  startScenario(scenarioId, customDesc, native, target)
+                }
+              />
+            </div>
+          ) : (
+            <>
+              <div className="shrink-0 border-b border-stone-100 px-3 py-2 text-center">
+                <p className="text-sm font-semibold text-stone-800">
+                  {getFlag(targetLanguage)} {scenarioLabel}
+                </p>
+                {(() => {
+                  const accuracy: number | null = computeAccuracy(messages);
+                  if (accuracy === null) return null;
+                  return (
+                    <p className="text-xs font-medium text-stone-500">
+                      {t.accuracyCorrect(accuracy)}
+                    </p>
+                  );
+                })()}
+              </div>
+              <div className="flex-1 space-y-3 overflow-y-auto px-3 py-2">
+                {loading && displayMessages.length === 0 ? (
+                  <TypingIndicator />
+                ) : displayMessages.length > 0 ? (
+                  <>
+                    {displayMessages.map((message, index) => (
+                      <ChatMessage
+                        key={`${message.role}-${index}-${message.content.slice(0, 20)}`}
+                        message={message}
+                        language={targetLanguage}
+                        loading={
+                          loading &&
+                          index === displayMessages.length - 1 &&
+                          message.role === "user" &&
+                          !message.accepted &&
+                          !message.awaitingAcknowledgment
+                        }
+                        onAcknowledgeCorrection={
+                          message.role === "user" && message.awaitingAcknowledgment
+                            ? acknowledgeCorrection
+                            : undefined
+                        }
+                      />
+                    ))}
+                    {typingAfterAck ? <TypingIndicator /> : null}
+                  </>
+                ) : null}
+                <div ref={messagesEndRef} />
+              </div>
+
+              {error ? (
+                <p className="border-t border-stone-100 px-3 py-1.5 text-xs text-red-600">
+                  {error}
+                </p>
+              ) : null}
+
+              <form
+                onSubmit={handleSubmit}
+                className="shrink-0 px-3 pb-0 pt-2"
+              >
+                <div className={`flex flex-col border border-stone-200 focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100 ${hasComposerInput ? "rounded-2xl" : "rounded-full"}`}>
+                  <div
+                    className={
+                      composerMultiline
+                        ? "px-4 pt-2"
+                        : "flex items-end"
                     }
-                    disabled={loading || awaitingAcknowledgment || typingAfterAck}
-                    className="flex-1 resize-none border-none bg-transparent px-4 py-2 text-sm leading-5 focus:outline-none focus:ring-0 disabled:bg-stone-50"
-                  />
-                  {!input.trim() ? (
-                    <button
-                      type="submit"
-                      disabled={loading || awaitingAcknowledgment || typingAfterAck || !input.trim()}
-                      className="m-1.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-stone-300 text-white transition-colors disabled:cursor-not-allowed"
-                      aria-label={t.send}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
-                        <path fillRule="evenodd" d="M10 17a.75.75 0 0 1-.75-.75V5.612L5.29 9.77a.75.75 0 0 1-1.08-1.04l5.25-5.5a.75.75 0 0 1 1.08 0l5.25 5.5a.75.75 0 1 1-1.08 1.04l-3.96-4.158V16.25A.75.75 0 0 1 10 17Z" clipRule="evenodd" />
-                      </svg>
-                    </button>
+                  >
+                    {!composerMultiline ? (
+                      <div className="m-1.5 shrink-0">{lookupButton}</div>
+                    ) : null}
+                    <textarea
+                      ref={composerRef}
+                      rows={1}
+                      lang={targetLanguage === "no" ? "nb" : targetLanguage}
+                      autoComplete="off"
+                      autoCorrect="on"
+                      spellCheck
+                      value={input}
+                      onChange={(event) => setInput(event.target.value)}
+                      onKeyDown={handleComposerKeyDown}
+                      placeholder={
+                        awaitingAcknowledgment
+                          ? t.acknowledgeCorrectionPlaceholder
+                          : t.typeMessagePlaceholder
+                      }
+                      disabled={composerDisabled}
+                      className={`resize-none border-none bg-transparent py-2 text-sm leading-5 focus:outline-none focus:ring-0 disabled:bg-stone-50 ${
+                        composerMultiline ? "w-full px-0" : "flex-1 px-4"
+                      }`}
+                    />
+                    {!composerMultiline ? (
+                      <div className="m-1.5 shrink-0">{sendButton}</div>
+                    ) : null}
+                  </div>
+                  {composerMultiline ? (
+                    <div className="flex items-center justify-between px-1.5 pb-1.5">
+                      {lookupButton}
+                      {sendButton}
+                    </div>
                   ) : null}
                 </div>
-                {input.trim() ? (
-                  <div className="flex justify-end px-1.5 pb-1.5">
-                    <button
-                      type="submit"
-                      disabled={loading || awaitingAcknowledgment || typingAfterAck}
-                      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-stone-300"
-                      aria-label={t.send}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
-                        <path fillRule="evenodd" d="M10 17a.75.75 0 0 1-.75-.75V5.612L5.29 9.77a.75.75 0 0 1-1.08-1.04l5.25-5.5a.75.75 0 0 1 1.08 0l5.25 5.5a.75.75 0 1 1-1.08 1.04l-3.96-4.158V16.25A.75.75 0 0 1 10 17Z" clipRule="evenodd" />
-                      </svg>
-                    </button>
-                  </div>
-                ) : null}
-              </div>
-            </form>
-          </>
-        )}
-      </section>
-    </main>
+              </form>
+            </>
+          )}
+        </section>
+      </main>
     </TranslationProvider>
   );
 }

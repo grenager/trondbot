@@ -73,6 +73,17 @@ export const nl: Translations = {
   acknowledgeCorrectionPlaceholder:
     "Accepteer de correctie om door te gaan…",
   typeMessagePlaceholder: "Typ een bericht…",
+  lookupWordAria: "Woord opzoeken",
+  lookupTitle: "Woord opzoeken",
+  lookupDescription:
+    "Zoek een woord op in je comforttaal en voeg de vertaling toe aan je bericht.",
+  lookupSourceLabel: (language: string) => `Woord in het ${language}`,
+  lookupSourcePlaceholder: "Typ een woord…",
+  lookupAction: "Opzoeken",
+  lookupTargetLabel: (language: string) => `In het ${language}`,
+  lookupInsert: "Invoegen",
+  lookupFailed: "Opzoeken mislukt. Probeer het opnieuw.",
+  lookupNoResult: "Geen vertaling gevonden.",
   appTitle: "Trondbot",
   appDescription: "Eenvoudige AI-chat voor taal leren",
   scenarioLabels: {

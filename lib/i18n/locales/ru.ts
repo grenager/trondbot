@@ -71,6 +71,17 @@ export const ru: Translations = {
   newChatAria: "Новый чат",
   acknowledgeCorrectionPlaceholder: "Примите исправление, чтобы продолжить…",
   typeMessagePlaceholder: "Введите сообщение…",
+  lookupWordAria: "Найти слово",
+  lookupTitle: "Поиск слова",
+  lookupDescription:
+    "Найдите слово на вашем родном языке и вставьте перевод в сообщение.",
+  lookupSourceLabel: (language: string) => `Слово на ${language}`,
+  lookupSourcePlaceholder: "Введите слово…",
+  lookupAction: "Найти",
+  lookupTargetLabel: (language: string) => `На ${language}`,
+  lookupInsert: "Вставить",
+  lookupFailed: "Поиск не удался. Попробуйте снова.",
+  lookupNoResult: "Перевод не найден.",
   appTitle: "Trondbot",
   appDescription: "Простой AI-чат для изучения языков",
   scenarioLabels: {

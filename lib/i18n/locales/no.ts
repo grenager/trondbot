@@ -72,6 +72,17 @@ export const no: Translations = {
   acknowledgeCorrectionPlaceholder:
     "Godta rettelsen for å fortsette…",
   typeMessagePlaceholder: "Skriv en melding…",
+  lookupWordAria: "Slå opp et ord",
+  lookupTitle: "Ordoppslag",
+  lookupDescription:
+    "Slå opp et ord på komfortspråket ditt og sett inn oversettelsen i meldingen.",
+  lookupSourceLabel: (language: string) => `Ord på ${language}`,
+  lookupSourcePlaceholder: "Skriv et ord…",
+  lookupAction: "Slå opp",
+  lookupTargetLabel: (language: string) => `På ${language}`,
+  lookupInsert: "Sett inn",
+  lookupFailed: "Oppslaget mislyktes. Prøv igjen.",
+  lookupNoResult: "Ingen oversettelse funnet.",
   appTitle: "Trondbot",
   appDescription: "Enkel AI-chat for språklæring",
   scenarioLabels: {

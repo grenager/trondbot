@@ -68,6 +68,16 @@ export interface Translations {
   newChatAria: string;
   acknowledgeCorrectionPlaceholder: string;
   typeMessagePlaceholder: string;
+  lookupWordAria: string;
+  lookupTitle: string;
+  lookupDescription: string;
+  lookupSourceLabel: (language: string) => string;
+  lookupSourcePlaceholder: string;
+  lookupAction: string;
+  lookupTargetLabel: (language: string) => string;
+  lookupInsert: string;
+  lookupFailed: string;
+  lookupNoResult: string;
   appTitle: string;
   appDescription: string;
   scenarioLabels: ScenarioLabels;
@@ -182,6 +192,17 @@ export const en: Translations = {
   acknowledgeCorrectionPlaceholder:
     "Acknowledge the correction to continue…",
   typeMessagePlaceholder: "Type a message…",
+  lookupWordAria: "Look up a word",
+  lookupTitle: "Word lookup",
+  lookupDescription:
+    "Look up a word in your comfort language and insert the translation into your message.",
+  lookupSourceLabel: (language: string) => `Word in ${language}`,
+  lookupSourcePlaceholder: "Type a word…",
+  lookupAction: "Look up",
+  lookupTargetLabel: (language: string) => `In ${language}`,
+  lookupInsert: "Insert",
+  lookupFailed: "Lookup failed. Please try again.",
+  lookupNoResult: "No translation found.",
   appTitle: "Trondbot",
   appDescription: "Simple language learning AI chat",
   scenarioLabels: EN_SCENARIO_LABELS,
