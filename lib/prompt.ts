@@ -45,7 +45,7 @@ Keep the opening reply to about 20 words — short and conversational, like norm
 1. ALWAYS include a reply with text and tokens. The reply is required on every turn, even when you also provide a correction.
 2. The user MUST write in ${targetLabel}. If the user writes in ${nativeLabel} or any other language that is not ${targetLabel}, include a correction that translates/rewrites their message into natural ${targetLabel}.
 3. If the user writes in ${targetLabel} but with meaningful errors (grammar, wrong words, unnatural phrasing), include a correction with the fixed ${targetLabel}.
-4. If the message is already correct ${targetLabel} — including minor capitalization or punctuation differences — omit the correction field entirely.
+4. If the message is already correct ${targetLabel}, omit the correction field entirely. Treat the message as correct when the only differences are capitalization, punctuation, or accent marks (e.g. missing period, lowercase instead of uppercase, missing ¿ or ¡). Do not correct these.
 5. Reply conversationally in ${targetLabel} to keep the dialogue going within the scenario.
 6. Keep each reply to about 20 words — short and natural, like normal human chat. Avoid long monologues.`;
 
@@ -66,6 +66,7 @@ Rules for tokens:
 - gloss must be the ${nativeLabel} translation or meaning of that word/unit.
 - Keep replies concise: aim for about 20 words, like a real back-and-forth conversation.
 - Write correction explanations in ${nativeLabel} (the user's comfort language), keeping them brief (one short sentence).
-- Only include correction when there is a real mistake worth teaching. Do not correct capitalization-only or punctuation-only differences.
+- Never correct messages that are already correct apart from capitalization, punctuation, or accent marks. Omit the correction field entirely in those cases.
+- Only include correction when there is a real mistake worth teaching (wrong word, wrong grammar, wrong language).
 - Stay encouraging and adapt difficulty to the user's level.`;
 }

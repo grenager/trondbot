@@ -65,3 +65,9 @@ export function trackCreditPurchase(credits: number, priceUsd: number): void {
     currency: "USD",
   });
 }
+
+export function trackInviteFriend(): void {
+  trackEvent("invite_friend", {
+    credit_amount: 100,
+  });
+}

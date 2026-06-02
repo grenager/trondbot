@@ -30,13 +30,20 @@ export interface Translations {
   customScenario: string;
   customScenarioDescription: string;
   buy100Credits: string;
-  buy250Credits: string;
-  buy500Credits: string;
   creditsAdded: string;
   creditsAddedMessage: (count: number) => string;
-  messageCredits: string;
+  getMoreCredits: string;
   youHaveMessagesRemaining: (count: number) => string;
-  outOfCreditsMessage: string;
+  buyCreditsDescription: string;
+  inviteFriend: string;
+  inviteFriendDescription: string;
+  getInviteLink: string;
+  buyNow: string;
+  copyLink: string;
+  linkCopied: string;
+  free: string;
+  orDivider: string;
+  yourInviteLink: string;
   creditsRemainingAria: (count: number) => string;
   creditsLabel: (count: number) => string;
   aboutTrondbot: string;
@@ -120,7 +127,7 @@ export const en: Translations = {
     "e.g. I'm at the doctor's office describing my symptoms…",
   startChattingNow: "Start Chatting Now",
   freeCreditsNote:
-    "First 100 messages are free. Afterwards you can buy 100 credits for $2.",
+    "First 100 messages are free. Get more by inviting a friend or buying credits.",
   checking: "Checking…",
   perfect: "Perfect!",
   corrected: "Corrected",
@@ -129,17 +136,23 @@ export const en: Translations = {
   plusChat: "+ Chat",
   customScenario: "Custom scenario",
   customScenarioDescription: "Describe the conversation you want to have.",
-  buy100Credits: "Buy 100 credits ($2)",
-  buy250Credits: "Buy 250 credits ($5)",
-  buy500Credits: "Buy 500 credits ($10)",
-  creditsAdded: "Credits Added",
+  buy100Credits: "100 credits for $2",
+  creditsAdded: "Credits Added!",
   creditsAddedMessage: (count: number) =>
-    `Surprise, credits are currently free of charge! We have added ${count} credits to your account. Happy chatting!`,
-  messageCredits: "Message Credits",
+    `${count} credits have been added to your account. Happy chatting!`,
+  getMoreCredits: "Get More Credits",
   youHaveMessagesRemaining: (count: number) =>
     `You have ${count} messages remaining.`,
-  outOfCreditsMessage:
-    "If you are out of credits you will need to purchase more in order to continue chatting with Trondbot.",
+  buyCreditsDescription: "Support Trondbot's development",
+  inviteFriend: "Invite a Friend",
+  inviteFriendDescription: "Share your link and get 100 free credits",
+  getInviteLink: "Get Invite Link",
+  buyNow: "Buy Now",
+  copyLink: "Copy Link",
+  linkCopied: "Copied!",
+  free: "Free",
+  orDivider: "or",
+  yourInviteLink: "Your invite link",
   creditsRemainingAria: (count: number) => `${count} credits remaining`,
   creditsLabel: (count: number) => `${count} credits`,
   aboutTrondbot: "About Trondbot",

@@ -57,7 +57,11 @@ function normalizeForComparison(text: string): string {
     .trim()
     .replace(/^["'""'']+|["'""'']+$/g, "")
     .toLowerCase()
-    .replace(/\s+/g, " ");
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "")
+    .replace(/[^\p{L}\p{N}\s]/gu, "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function isTrivialCorrection(original: string, corrected: string): boolean {

@@ -15,6 +15,7 @@ import type {
 
 export const STORAGE_KEY = "trondbot-state";
 export const CREDITS_KEY = "trondbot-credits";
+export const INVITE_CODE_KEY = "trondbot-invite-code";
 export const MAX_STORED_MESSAGES = 50;
 export const INITIAL_FREE_CREDITS = 100;
 export const MAX_TOTAL_CREDITS = 100;
@@ -234,4 +235,38 @@ export function saveCredits(credits: number): void {
   } catch {
     // Ignore quota or privacy-mode errors.
   }
+}
+
+function generateInviteCode(): string {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let code = "";
+  for (let i = 0; i < 8; i++) {
+    code += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return code;
+}
+
+export function getOrCreateInviteCode(): string {
+  if (typeof window === "undefined") {
+    return generateInviteCode();
+  }
+  try {
+    const existing: string | null = window.localStorage.getItem(INVITE_CODE_KEY);
+    if (existing) {
+      return existing;
+    }
+    const code: string = generateInviteCode();
+    window.localStorage.setItem(INVITE_CODE_KEY, code);
+    return code;
+  } catch {
+    return generateInviteCode();
+  }
+}
+
+export function getInviteUrl(): string {
+  const code: string = getOrCreateInviteCode();
+  if (typeof window === "undefined") {
+    return `https://trondbot.com/?ref=${code}`;
+  }
+  return `${window.location.origin}?ref=${code}`;
 }
