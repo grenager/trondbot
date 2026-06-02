@@ -26,7 +26,7 @@ import {
 
 const MODEL: string = "claude-sonnet-4-20250514";
 const MAX_TOKENS: number = 1024;
-const STORY_MAX_TOKENS: number = 4096;
+const STORY_MAX_TOKENS: number = 1500;
 const RETRY_SYSTEM_SUFFIX: string =
   "\n\nIMPORTANT: Your previous response was invalid. You MUST always include a reply object with text on every turn — even when you also include a correction. Never omit reply.";
 

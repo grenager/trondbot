@@ -105,10 +105,17 @@ function coerceReplyInput(raw: unknown): unknown {
 }
 
 function stripXmlParameterWrapper(text: string): string {
-  const match: RegExpMatchArray | null = text.match(
+  const withClosing: RegExpMatchArray | null = text.match(
     /^<parameter\s+name="text">\s*([\s\S]*?)\s*<\/parameter>$/,
   );
-  return match?.[1] ?? text;
+  if (withClosing?.[1]) {
+    return withClosing[1];
+  }
+
+  const withoutClosing: RegExpMatchArray | null = text.match(
+    /^<parameter\s+name="text">\s*([\s\S]+)$/,
+  );
+  return withoutClosing?.[1] ?? text;
 }
 
 function extractReplyText(value: unknown): string | null {

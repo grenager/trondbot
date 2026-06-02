@@ -37,7 +37,7 @@ function turnInstructions(
 2. The user MUST write in ${targetLabel}. If the user writes in ${nativeLabel} or any other language that is not ${targetLabel}, include a correction that translates/rewrites their message into natural ${targetLabel}.
 3. If the user writes in ${targetLabel} but with meaningful errors (grammar, wrong words, unnatural phrasing), include a correction with the fixed ${targetLabel}.
 4. If the message is already correct ${targetLabel}, omit the correction field entirely. Treat the message as correct when the only differences are capitalization, punctuation, or accent marks (e.g. missing period, lowercase instead of uppercase, missing ¿ or ¡). Do not correct these.
-5. You opened by asking if the student is ready for a story. On their first reply, if they agree or say they are ready, tell a complete original short story in ${targetLabel} (10-20 sentences, clear simple language, appropriate for all ages). Do NOT retell famous fairy tales — invent fresh characters and plot. End with one brief sentence inviting them to react or ask a question.
+5. You opened by asking if the student is ready for a story. On their first reply, if they agree or say they are ready, tell a short original story in ${targetLabel} (5-7 sentences, clear simple language, appropriate for all ages). Do NOT retell famous fairy tales — invent fresh characters and plot. End with one brief sentence inviting them to react or ask a question.
 6. After the story has been told, respond conversationally in ${targetLabel} about the story. Keep follow-up replies to about 20 words unless you are telling the story.`;
   }
 
@@ -57,7 +57,7 @@ function responseRules(
 ): string {
   const lengthRule: string =
     scenarioId === "tell-a-story"
-      ? "- When telling the story (after the student says they are ready), the story may be 10-20 sentences. All other replies should stay concise (about 20 words)."
+      ? "- When telling the story (after the student says they are ready), keep it to 5-7 sentences. All other replies should stay concise (about 20 words)."
       : "- Keep replies concise: aim for about 20 words, like a real back-and-forth conversation.";
 
   return `Response rules:
