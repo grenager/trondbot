@@ -121,6 +121,7 @@ export default function TrondbotApp() {
   const [showAbout, setShowAbout] = useState<boolean>(false);
   const [showCreditsModal, setShowCreditsModal] = useState<boolean>(false);
   const [credits, setCredits] = useState<number>(100);
+  const [typingAfterAck, setTypingAfterAck] = useState<boolean>(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const composerRef = useRef<HTMLTextAreaElement>(null);
 
@@ -219,13 +220,13 @@ export default function TrondbotApp() {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, loading]);
+  }, [messages, loading, typingAfterAck]);
 
   useEffect(() => {
-    if (!loading && !showSetupForm) {
+    if (!loading && !typingAfterAck && !showSetupForm) {
       composerRef.current?.focus();
     }
-  }, [loading, showSetupForm]);
+  }, [loading, typingAfterAck, showSetupForm]);
 
   function handleComposerKeyDown(
     event: KeyboardEvent<HTMLTextAreaElement>,
@@ -439,42 +440,47 @@ export default function TrondbotApp() {
   );
 
   function acknowledgeCorrection(): void {
-    setMessages((previous) => {
-      const messageIndex: number = previous.findIndex(
-        (message) => message.role === "user" && message.awaitingAcknowledgment,
-      );
-      const message: DisplayMessage | undefined = previous[messageIndex];
-      if (
-        messageIndex === -1 ||
-        !message ||
-        message.role !== "user" ||
-        !message.awaitingAcknowledgment ||
-        !message.correction ||
-        !message.pendingReply
-      ) {
-        return previous;
-      }
+    const ackIndex: number = messages.findIndex(
+      (m) => m.role === "user" && m.awaitingAcknowledgment,
+    );
+    const ackMessage: DisplayMessage | undefined = messages[ackIndex];
+    if (
+      ackIndex === -1 ||
+      !ackMessage ||
+      ackMessage.role !== "user" ||
+      !ackMessage.awaitingAcknowledgment ||
+      !ackMessage.correction ||
+      !ackMessage.pendingReply
+    ) {
+      return;
+    }
 
-      const updatedUser: UserMessageWithCorrection = {
-        role: "user",
-        content: message.correction.corrected,
-        originalContent: message.content,
-        correction: message.correction,
-      };
+    const pendingReply = ackMessage.pendingReply;
 
+    const updatedUser: UserMessageWithCorrection = {
+      role: "user",
+      content: ackMessage.correction.corrected,
+      originalContent: ackMessage.content,
+      correction: ackMessage.correction,
+    };
+
+    setMessages((previous) => [
+      ...previous.slice(0, ackIndex),
+      updatedUser,
+      ...previous.slice(ackIndex + 1),
+    ]);
+    setTypingAfterAck(true);
+
+    const delayMs: number = 1000 + Math.random() * 1000;
+    setTimeout(() => {
       const assistantMessage: AssistantMessage = {
         role: "assistant",
-        content: message.pendingReply.text,
-        tokens: message.pendingReply.tokens,
+        content: pendingReply.text,
+        tokens: pendingReply.tokens,
       };
-
-      return [
-        ...previous.slice(0, messageIndex),
-        updatedUser,
-        assistantMessage,
-        ...previous.slice(messageIndex + 1),
-      ];
-    });
+      setMessages((previous) => [...previous, assistantMessage]);
+      setTypingAfterAck(false);
+    }, delayMs);
   }
 
   return (
@@ -517,7 +523,7 @@ export default function TrondbotApp() {
           <CreditsWheel credits={credits} onClick={() => setShowCreditsModal(true)} />
           <button
             type="button"
-            disabled={loading || awaitingAcknowledgment}
+            disabled={loading || awaitingAcknowledgment || typingAfterAck}
             onClick={handleNewChatClick}
             className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
             aria-label={t.newChatAria}
@@ -563,7 +569,8 @@ export default function TrondbotApp() {
               {loading && displayMessages.length === 0 ? (
                 <TypingIndicator />
               ) : displayMessages.length > 0 ? (
-                displayMessages.map((message, index) => (
+                <>
+                  {displayMessages.map((message, index) => (
                     <ChatMessage
                       key={`${message.role}-${index}-${message.content.slice(0, 20)}`}
                       message={message}
@@ -581,7 +588,9 @@ export default function TrondbotApp() {
                           : undefined
                       }
                     />
-                  ))
+                  ))}
+                  {typingAfterAck ? <TypingIndicator /> : null}
+                </>
               ) : null}
               <div ref={messagesEndRef} />
             </div>
@@ -613,13 +622,13 @@ export default function TrondbotApp() {
                         ? t.acknowledgeCorrectionPlaceholder
                         : t.typeMessagePlaceholder
                     }
-                    disabled={loading || awaitingAcknowledgment}
+                    disabled={loading || awaitingAcknowledgment || typingAfterAck}
                     className="flex-1 resize-none border-none bg-transparent px-4 py-2 text-sm leading-5 focus:outline-none focus:ring-0 disabled:bg-stone-50"
                   />
                   {!input.trim() ? (
                     <button
                       type="submit"
-                      disabled={loading || awaitingAcknowledgment || !input.trim()}
+                      disabled={loading || awaitingAcknowledgment || typingAfterAck || !input.trim()}
                       className="m-1.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-stone-300 text-white transition-colors disabled:cursor-not-allowed"
                       aria-label={t.send}
                     >
@@ -633,7 +642,7 @@ export default function TrondbotApp() {
                   <div className="flex justify-end px-1.5 pb-1.5">
                     <button
                       type="submit"
-                      disabled={loading || awaitingAcknowledgment}
+                      disabled={loading || awaitingAcknowledgment || typingAfterAck}
                       className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-stone-300"
                       aria-label={t.send}
                     >
