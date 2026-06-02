@@ -70,6 +70,18 @@ export const ja: Translations = {
   newChatAria: "新しいチャット",
   acknowledgeCorrectionPlaceholder: "訂正を受け入れて続行…",
   typeMessagePlaceholder: "メッセージを入力…",
+  lookupWordAria: "単語を調べる",
+  lookupTitle: "単語検索",
+  lookupDescription:
+    "快適な言語で単語を調べ、翻訳をメッセージに挿入します。",
+  lookupSourceLabel: (language: string) => `${language}の単語`,
+  lookupSourcePlaceholder: "単語を入力…",
+  lookupAction: "調べる",
+  lookupTargetLabel: (language: string) => `${language}訳`,
+  lookupInsert: "挿入",
+  lookupFailed: "検索に失敗しました。もう一度お試しください。",
+  noCreditsForWordLookup: "単語検索に使えるクレジットがありません。",
+  lookupNoResult: "翻訳が見つかりませんでした。",
   appTitle: "Trondbot",
   appDescription: "シンプルな語学学習AIチャット",
   scenarioLabels: {

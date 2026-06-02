@@ -35,7 +35,6 @@ export interface Correction {
 
 export interface AgentReply {
   text: string;
-  tokens: Token[];
 }
 
 export interface AgentResponse {
@@ -51,7 +50,6 @@ export interface UserMessage {
 export interface AssistantMessage {
   role: "assistant";
   content: string;
-  tokens: Token[];
 }
 
 export type ChatMessage = UserMessage | AssistantMessage;

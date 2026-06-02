@@ -4,7 +4,7 @@ export const SCENARIO_OPENING_TOOL_NAME = "scenario_opening";
 export const chatTurnTool = {
   name: CHAT_TURN_TOOL_NAME,
   description:
-    "Always return a conversational reply with word-level translations. Include a correction only when the user's message needs fixing.",
+    "Return a conversational reply. When correcting the user, include a correction with the fixed text and a brief explanation.",
   input_schema: {
     type: "object" as const,
     properties: {
@@ -12,19 +12,8 @@ export const chatTurnTool = {
         type: "object" as const,
         properties: {
           text: { type: "string" as const },
-          tokens: {
-            type: "array" as const,
-            items: {
-              type: "object" as const,
-              properties: {
-                word: { type: "string" as const },
-                gloss: { type: "string" as const },
-              },
-              required: ["word", "gloss"],
-            },
-          },
         },
-        required: ["text", "tokens"],
+        required: ["text"],
       },
       correction: {
         type: "object" as const,
@@ -41,8 +30,7 @@ export const chatTurnTool = {
 
 export const scenarioOpeningTool = {
   name: SCENARIO_OPENING_TOOL_NAME,
-  description:
-    "Return your opening line for the scenario with word-level translations.",
+  description: "Return your opening line for the scenario.",
   input_schema: {
     type: "object" as const,
     properties: {
@@ -50,19 +38,8 @@ export const scenarioOpeningTool = {
         type: "object" as const,
         properties: {
           text: { type: "string" as const },
-          tokens: {
-            type: "array" as const,
-            items: {
-              type: "object" as const,
-              properties: {
-                word: { type: "string" as const },
-                gloss: { type: "string" as const },
-              },
-              required: ["word", "gloss"],
-            },
-          },
         },
-        required: ["text", "tokens"],
+        required: ["text"],
       },
     },
     required: ["reply"],
