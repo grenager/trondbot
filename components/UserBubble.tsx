@@ -1,15 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { LanguageCode, UserMessageWithCorrection } from "@/lib/types";
 import { useTranslation } from "@/lib/i18n/TranslationContext";
+import { debugLog } from "@/lib/debug";
+import LazyWordText from "./LazyWordText";
 import SpeakButton from "./SpeakButton";
 
 interface UserBubbleProps {
   message: UserMessageWithCorrection;
-  language: LanguageCode;
+  targetLanguage: LanguageCode;
+  nativeLanguage: LanguageCode;
   loading?: boolean;
   onAcknowledgeCorrection?: () => void;
+  onSpendTokenizeCredit?: () => boolean;
 }
 
 const STATUS_LABEL_CLASS: string =
@@ -17,9 +21,11 @@ const STATUS_LABEL_CLASS: string =
 
 export default function UserBubble({
   message,
-  language,
+  targetLanguage,
+  nativeLanguage,
   loading = false,
   onAcknowledgeCorrection,
+  onSpendTokenizeCredit,
 }: UserBubbleProps) {
   const { t } = useTranslation();
   const [showExplanation, setShowExplanation] = useState<boolean>(false);
@@ -29,14 +35,33 @@ export default function UserBubble({
   const wasAccepted: boolean = !!message.accepted;
   const wasCorrected: boolean = !!message.originalContent;
 
+  useEffect(() => {
+    if (!loading) {
+      return;
+    }
+
+    debugLog("ui", "UserBubble checking visible", {
+      contentPreview: message.content.slice(0, 40),
+      awaitingAcknowledgment: message.awaitingAcknowledgment === true,
+      accepted: message.accepted === true,
+      hasCorrection: message.correction !== undefined,
+    });
+  }, [loading, message]);
+
   return (
     <div className="flex flex-col items-end">
       <div className="flex w-full max-w-[85%] flex-col items-end">
         <div className="relative w-fit max-w-full rounded-2xl rounded-br-md bg-blue-600 px-4 py-2.5 pr-8 text-sm text-white">
-          {message.content}
+          <LazyWordText
+            text={message.content}
+            messageLanguage={targetLanguage}
+            glossLanguage={nativeLanguage}
+            variant="onDark"
+            onSpendTokenizeCredit={onSpendTokenizeCredit}
+          />
           <SpeakButton
             text={message.content}
-            language={language}
+            language={targetLanguage}
             variant="user"
           />
         </div>
@@ -103,10 +128,15 @@ export default function UserBubble({
               ) : null}
             </div>
             <div className="relative mt-1.5 w-fit max-w-full rounded-2xl rounded-br-md border-2 border-blue-300 bg-blue-50 px-4 py-2.5 pr-8 text-sm text-blue-900">
-              {message.correction.corrected}
+              <LazyWordText
+                text={message.correction.corrected}
+                messageLanguage={targetLanguage}
+                glossLanguage={nativeLanguage}
+                onSpendTokenizeCredit={onSpendTokenizeCredit}
+              />
               <SpeakButton
                 text={message.correction.corrected}
-                language={language}
+                language={targetLanguage}
                 variant="correction"
               />
             </div>
