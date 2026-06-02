@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import LanguageSelect from "@/components/LanguageSelect";
 import { SCENARIOS } from "@/lib/scenarios";
 import type { ScenarioId } from "@/lib/scenarios";
@@ -12,6 +12,7 @@ interface NewChatFormProps {
   initialTargetLanguage: LanguageCode;
   initialScenario: ScenarioId;
   onComfortLanguageChange: (nativeLanguage: LanguageCode) => void;
+  onTargetLanguageChange: (targetLanguage: LanguageCode) => void;
   onStart: (
     nativeLanguage: LanguageCode,
     targetLanguage: LanguageCode,
@@ -27,18 +28,32 @@ export default function NewChatForm({
   initialTargetLanguage,
   initialScenario,
   onComfortLanguageChange,
+  onTargetLanguageChange,
   onStart,
 }: NewChatFormProps) {
   const { t } = useTranslation();
   const [nativeLanguage, setNativeLanguage] =
     useState<LanguageCode>(initialNativeLanguage);
+  const [targetLanguage, setTargetLanguage] =
+    useState<LanguageCode>(initialTargetLanguage);
+
+  useEffect(() => {
+    setNativeLanguage(initialNativeLanguage);
+  }, [initialNativeLanguage]);
+
+  useEffect(() => {
+    setTargetLanguage(initialTargetLanguage);
+  }, [initialTargetLanguage]);
 
   function handleComfortLanguageChange(code: LanguageCode): void {
     setNativeLanguage(code);
     onComfortLanguageChange(code);
   }
-  const [targetLanguage, setTargetLanguage] =
-    useState<LanguageCode>(initialTargetLanguage);
+
+  function handleTargetLanguageChange(code: LanguageCode): void {
+    setTargetLanguage(code);
+    onTargetLanguageChange(code);
+  }
   const [scenario, setScenario] = useState<ScenarioId>(
     initialScenario === "custom" ? FIRST_SCENARIO_ID : initialScenario,
   );
@@ -75,7 +90,7 @@ export default function NewChatForm({
         id="setup-target-language"
         label={t.targetLanguageLabel}
         value={targetLanguage}
-        onChange={setTargetLanguage}
+        onChange={handleTargetLanguageChange}
       />
       <div className="flex flex-col gap-1">
         <label
