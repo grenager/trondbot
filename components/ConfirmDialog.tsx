@@ -1,3 +1,7 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/TranslationContext";
+
 interface ConfirmDialogProps {
   open: boolean;
   title: string;
@@ -17,6 +21,8 @@ export default function ConfirmDialog({
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
+  const { t } = useTranslation();
+
   if (!open) {
     return null;
   }
@@ -25,7 +31,7 @@ export default function ConfirmDialog({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <button
         type="button"
-        aria-label="Close dialog"
+        aria-label={t.closeDialog}
         className="absolute inset-0 bg-stone-900/40"
         onClick={onCancel}
       />

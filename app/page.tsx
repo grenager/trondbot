@@ -9,13 +9,15 @@ import CreditsModal from "@/components/CreditsModal";
 import CreditsWheel from "@/components/CreditsWheel";
 import NewChatForm from "@/components/NewChatForm";
 import TypingIndicator from "@/components/TypingIndicator";
+import LocaleHtmlLang from "@/components/LocaleHtmlLang";
 import {
   DEFAULT_NATIVE_LANGUAGE,
   DEFAULT_TARGET_LANGUAGE,
   LANGUAGES,
 } from "@/lib/languages";
+import { getScenarioLabel, getTranslations } from "@/lib/i18n";
+import { TranslationProvider } from "@/lib/i18n/TranslationContext";
 import type { ScenarioId } from "@/lib/scenarios";
-import { getScenario } from "@/lib/scenarios";
 import type { Language } from "@/lib/types";
 import {
   DEFAULT_SCENARIO,
@@ -244,7 +246,7 @@ export default function HomePage() {
           "error" in data &&
           typeof data.error === "string"
             ? data.error
-            : "Something went wrong";
+            : getTranslations(nativeLang).somethingWentWrong;
         throw new Error(errorMessage);
       }
 
@@ -261,7 +263,7 @@ export default function HomePage() {
       const message: string =
         startError instanceof Error
           ? startError.message
-          : "Failed to start scenario";
+          : getTranslations(nativeLang).failedToStartScenario;
       setError(message);
     } finally {
       setLoading(false);
@@ -314,7 +316,7 @@ export default function HomePage() {
           "error" in data &&
           typeof data.error === "string"
             ? data.error
-            : "Something went wrong";
+            : getTranslations(nativeLanguage).somethingWentWrong;
         throw new Error(errorMessage);
       }
 
@@ -351,17 +353,18 @@ export default function HomePage() {
       const message: string =
         submitError instanceof Error
           ? submitError.message
-          : "Failed to send message";
+          : getTranslations(nativeLanguage).failedToSendMessage;
       setError(message);
     } finally {
       setLoading(false);
     }
   }
 
+  const t = getTranslations(nativeLanguage);
   const scenarioLabel: string =
     scenario === "custom" && customDescription
-      ? `Custom: ${customDescription}`
-      : getScenario(scenario).label;
+      ? t.customPrefix(customDescription)
+      : getScenarioLabel(scenario, nativeLanguage);
   const displayMessages: DisplayMessage[] = getDisplayMessages(messages);
   const awaitingAcknowledgment: boolean = messages.some(
     (message) => message.role === "user" && message.awaitingAcknowledgment,
@@ -407,13 +410,15 @@ export default function HomePage() {
   }
 
   return (
-    <main className="mx-auto flex h-dvh max-w-2xl flex-col overflow-hidden py-3">
+    <TranslationProvider locale={nativeLanguage}>
+      <LocaleHtmlLang />
+      <main className="mx-auto flex h-dvh max-w-2xl flex-col overflow-hidden py-3">
       <ConfirmDialog
         open={showNewChatConfirm}
-        title="Start a new chat?"
-        message="Starting a new chat will clear your current conversation."
-        confirmLabel="Start new chat"
-        cancelLabel="Keep current chat"
+        title={t.confirmNewChatTitle}
+        message={t.confirmNewChatMessage}
+        confirmLabel={t.confirmNewChatConfirm}
+        cancelLabel={t.confirmNewChatCancel}
         onConfirm={confirmNewChat}
         onCancel={cancelNewChat}
       />
@@ -430,7 +435,7 @@ export default function HomePage() {
             type="button"
             onClick={() => setShowAbout(true)}
             className="flex items-center"
-            aria-label="About Trondbot"
+            aria-label={t.aboutTrondbotAria}
           >
             <Image
               src="/trondbot-icon.png"
@@ -447,7 +452,7 @@ export default function HomePage() {
             disabled={loading || awaitingAcknowledgment}
             onClick={handleNewChatClick}
             className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-            aria-label="New chat"
+            aria-label={t.newChatAria}
           >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
               <path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" />
@@ -463,6 +468,7 @@ export default function HomePage() {
               initialNativeLanguage={nativeLanguage}
               initialTargetLanguage={targetLanguage}
               initialScenario={scenario}
+              onComfortLanguageChange={setNativeLanguage}
               onStart={(native, target, scenarioId, customDesc) =>
                 startScenario(scenarioId, customDesc, native, target)
               }
@@ -479,7 +485,7 @@ export default function HomePage() {
                 if (accuracy === null) return null;
                 return (
                   <p className="text-xs font-medium text-stone-500">
-                    {accuracy}% correct
+                    {t.accuracyCorrect(accuracy)}
                   </p>
                 );
               })()}
@@ -535,8 +541,8 @@ export default function HomePage() {
                     onKeyDown={handleComposerKeyDown}
                     placeholder={
                       awaitingAcknowledgment
-                        ? "Acknowledge the correction to continue…"
-                        : "Type a message…"
+                        ? t.acknowledgeCorrectionPlaceholder
+                        : t.typeMessagePlaceholder
                     }
                     disabled={loading || awaitingAcknowledgment}
                     className="flex-1 resize-none border-none bg-transparent px-4 py-2 text-sm leading-5 focus:outline-none focus:ring-0 disabled:bg-stone-50"
@@ -546,7 +552,7 @@ export default function HomePage() {
                       type="submit"
                       disabled={loading || awaitingAcknowledgment || !input.trim()}
                       className="m-1.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-stone-300 text-white transition-colors disabled:cursor-not-allowed"
-                      aria-label="Send"
+                      aria-label={t.send}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
                         <path fillRule="evenodd" d="M10 17a.75.75 0 0 1-.75-.75V5.612L5.29 9.77a.75.75 0 0 1-1.08-1.04l5.25-5.5a.75.75 0 0 1 1.08 0l5.25 5.5a.75.75 0 1 1-1.08 1.04l-3.96-4.158V16.25A.75.75 0 0 1 10 17Z" clipRule="evenodd" />
@@ -560,7 +566,7 @@ export default function HomePage() {
                       type="submit"
                       disabled={loading || awaitingAcknowledgment}
                       className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-stone-300"
-                      aria-label="Send"
+                      aria-label={t.send}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
                         <path fillRule="evenodd" d="M10 17a.75.75 0 0 1-.75-.75V5.612L5.29 9.77a.75.75 0 0 1-1.08-1.04l5.25-5.5a.75.75 0 0 1 1.08 0l5.25 5.5a.75.75 0 1 1-1.08 1.04l-3.96-4.158V16.25A.75.75 0 0 1 10 17Z" clipRule="evenodd" />
@@ -574,5 +580,6 @@ export default function HomePage() {
         )}
       </section>
     </main>
+    </TranslationProvider>
   );
 }

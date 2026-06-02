@@ -1,5 +1,8 @@
+"use client";
+
 import type { LanguageCode } from "@/lib/types";
 import { LANGUAGES } from "@/lib/languages";
+import { useTranslation } from "@/lib/i18n/TranslationContext";
 
 interface LanguageSelectProps {
   id: string;
@@ -16,6 +19,8 @@ export default function LanguageSelect({
   disabled = false,
   onChange,
 }: LanguageSelectProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="flex flex-col gap-1">
       <label htmlFor={id} className="text-xs font-medium text-stone-500">
@@ -30,7 +35,7 @@ export default function LanguageSelect({
       >
         {LANGUAGES.map((language) => (
           <option key={language.code} value={language.code}>
-            {language.flag} {language.label}
+            {language.flag} {t.languageLabels[language.code]}
           </option>
         ))}
       </select>

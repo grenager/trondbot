@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { SCENARIOS } from "@/lib/scenarios";
 import type { ScenarioId } from "@/lib/scenarios";
+import { useTranslation } from "@/lib/i18n/TranslationContext";
 
 interface ScenarioMenuProps {
   disabled: boolean;
@@ -10,6 +11,7 @@ interface ScenarioMenuProps {
 }
 
 export default function ScenarioMenu({ disabled, onSelect }: ScenarioMenuProps) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState<boolean>(false);
   const [showCustomModal, setShowCustomModal] = useState<boolean>(false);
   const [customInput, setCustomInput] = useState<string>("");
@@ -76,7 +78,7 @@ export default function ScenarioMenu({ disabled, onSelect }: ScenarioMenuProps) 
           onClick={() => setOpen((current) => !current)}
           className="rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm font-medium text-stone-700 shadow-sm transition-colors hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          + Chat
+          {t.plusChat}
         </button>
         {open ? (
           <div className="absolute right-0 z-20 mt-2 w-56 overflow-hidden rounded-lg border border-stone-200 bg-white py-1 shadow-lg">
@@ -87,7 +89,7 @@ export default function ScenarioMenu({ disabled, onSelect }: ScenarioMenuProps) 
                 onClick={() => handleSelect(scenario.id)}
                 className="block w-full px-3 py-2 text-left text-sm text-stone-700 hover:bg-stone-50"
               >
-                {scenario.label}
+                {t.scenarioLabels[scenario.id]}
               </button>
             ))}
           </div>
@@ -98,7 +100,7 @@ export default function ScenarioMenu({ disabled, onSelect }: ScenarioMenuProps) 
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <button
             type="button"
-            aria-label="Close"
+            aria-label={t.close}
             className="absolute inset-0 bg-stone-900/40"
             onClick={handleCustomCancel}
           />
@@ -107,17 +109,17 @@ export default function ScenarioMenu({ disabled, onSelect }: ScenarioMenuProps) 
             className="relative w-full max-w-sm rounded-xl bg-white p-5 shadow-xl"
           >
             <h2 className="text-base font-semibold text-stone-900">
-              Custom scenario
+              {t.customScenario}
             </h2>
             <p className="mt-1 text-xs text-stone-500">
-              Describe the conversation you want to have.
+              {t.customScenarioDescription}
             </p>
             <textarea
               ref={customInputRef}
               value={customInput}
               onChange={(event) => setCustomInput(event.target.value)}
               rows={3}
-              placeholder="e.g. I'm at the doctor's office describing my symptoms…"
+              placeholder={t.conversationPlaceholder}
               className="mt-3 w-full resize-none rounded-lg border border-stone-200 px-3 py-2 text-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
             />
             <div className="mt-4 flex justify-end gap-2">
@@ -126,14 +128,14 @@ export default function ScenarioMenu({ disabled, onSelect }: ScenarioMenuProps) 
                 onClick={handleCustomCancel}
                 className="rounded-lg border border-stone-200 px-3 py-2 text-sm font-medium text-stone-700 hover:bg-stone-50"
               >
-                Cancel
+                {t.cancel}
               </button>
               <button
                 type="submit"
                 disabled={!customInput.trim()}
                 className="rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:bg-stone-300"
               >
-                Start
+                {t.start}
               </button>
             </div>
           </form>

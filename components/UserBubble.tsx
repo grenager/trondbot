@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { LanguageCode, UserMessageWithCorrection } from "@/lib/types";
+import { useTranslation } from "@/lib/i18n/TranslationContext";
 import SpeakButton from "./SpeakButton";
 
 interface UserBubbleProps {
@@ -20,6 +21,7 @@ export default function UserBubble({
   loading = false,
   onAcknowledgeCorrection,
 }: UserBubbleProps) {
+  const { t } = useTranslation();
   const [showExplanation, setShowExplanation] = useState<boolean>(false);
 
   const isAwaitingAck: boolean =
@@ -49,13 +51,13 @@ export default function UserBubble({
               className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-blue-200 border-t-blue-600"
               aria-hidden="true"
             />
-            <span>Checking…</span>
+            <span>{t.checking}</span>
           </div>
         ) : null}
 
         {wasAccepted ? (
           <p className={`${STATUS_LABEL_CLASS} font-medium text-green-600`}>
-            Perfect!
+            {t.perfect}
           </p>
         ) : null}
 
@@ -66,12 +68,12 @@ export default function UserBubble({
               onClick={() => setShowExplanation((current) => !current)}
               className="text-stone-400 underline decoration-dotted underline-offset-2 hover:text-stone-600"
             >
-              Corrected
+              {t.corrected}
             </button>
             {showExplanation && message.correction ? (
               <div className="absolute right-0 top-full z-10 mt-2 w-72 rounded-lg bg-stone-800 px-3 py-2.5 text-xs leading-relaxed text-white shadow-lg">
                 <p className="mb-1.5 text-stone-300">
-                  <span className="font-medium text-stone-100">Original:</span>{" "}
+                  <span className="font-medium text-stone-100">{t.original}</span>{" "}
                   {message.originalContent}
                 </p>
                 <p>{message.correction.explanation}</p>
@@ -88,12 +90,12 @@ export default function UserBubble({
                 onClick={() => setShowExplanation((current) => !current)}
                 className="text-stone-400 underline decoration-dotted underline-offset-2 hover:text-stone-600"
               >
-                Corrected
+                {t.corrected}
               </button>
               {showExplanation ? (
                 <div className="absolute right-0 top-full z-10 mt-2 w-72 rounded-lg bg-stone-800 px-3 py-2.5 text-xs leading-relaxed text-white shadow-lg">
                   <p className="mb-1.5 text-stone-300">
-                    <span className="font-medium text-stone-100">Original:</span>{" "}
+                    <span className="font-medium text-stone-100">{t.original}</span>{" "}
                     {message.content}
                   </p>
                   <p>{message.correction.explanation}</p>
@@ -113,7 +115,7 @@ export default function UserBubble({
               onClick={onAcknowledgeCorrection}
               className={`${STATUS_LABEL_CLASS} rounded-lg px-3 py-1.5 font-medium text-blue-600 transition-colors hover:bg-blue-50`}
             >
-              Accept Changes
+              {t.acceptChanges}
             </button>
           </>
         ) : null}

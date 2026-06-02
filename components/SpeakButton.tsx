@@ -7,6 +7,7 @@ import {
   stopSpeaking,
   warmupSpeechVoices,
 } from "@/lib/tts";
+import { useTranslation } from "@/lib/i18n/TranslationContext";
 import type { LanguageCode } from "@/lib/types";
 
 interface SpeakButtonProps {
@@ -20,6 +21,7 @@ export default function SpeakButton({
   language,
   variant,
 }: SpeakButtonProps) {
+  const { t } = useTranslation();
   const [speaking, setSpeaking] = useState<boolean>(false);
   const supported: boolean = isSpeechSupported();
 
@@ -61,7 +63,7 @@ export default function SpeakButton({
     <button
       type="button"
       onClick={handleClick}
-      aria-label={speaking ? "Stop audio" : "Play message"}
+      aria-label={speaking ? t.stopAudio : t.playMessage}
       className={`absolute bottom-1 right-1.5 rounded p-0.5 transition-colors ${colorClass} ${
         speaking ? "opacity-100" : "opacity-70"
       }`}
