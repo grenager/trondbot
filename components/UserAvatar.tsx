@@ -36,7 +36,7 @@ export default function UserAvatar({
 }: UserAvatarProps) {
   const [imageFailed, setImageFailed] = useState<boolean>(false);
   const sizeClasses: string =
-    size === "sm" ? "h-8 w-8 text-xs" : "h-9 w-9 text-sm";
+    size === "sm" ? "h-6 w-6 text-[10px]" : "h-7 w-7 text-[11px]";
 
   useEffect(() => {
     setImageFailed(false);
@@ -52,7 +52,7 @@ export default function UserAvatar({
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 20 20"
           fill="currentColor"
-          className="h-4 w-4"
+          className="h-3 w-3"
         >
           <path
             fillRule="evenodd"
@@ -70,7 +70,7 @@ export default function UserAvatar({
       <img
         src={avatarUrl}
         alt=""
-        className={`${sizeClasses} shrink-0 rounded-full object-cover`}
+        className={`${sizeClasses} block shrink-0 rounded-full object-cover`}
         onError={() => setImageFailed(true)}
       />
     );

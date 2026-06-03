@@ -1,14 +1,17 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
+import { usePathname } from "next/navigation";
 import AuthModal from "@/components/AuthModal";
 import SideDrawer from "@/components/SideDrawer";
 import UserAvatar from "@/components/UserAvatar";
 import { AuthProvider, useAuth } from "@/components/AuthProvider";
 import LocaleHtmlLang from "@/components/LocaleHtmlLang";
+import { buildLanguagePath } from "@/lib/languagePath";
 import { useComfortLanguage } from "@/lib/useComfortLanguage";
 import { TranslationProvider, useTranslation } from "@/lib/i18n/TranslationContext";
 import type { Translations } from "@/lib/i18n/translations";
+import { loadStoredState } from "@/lib/storage";
 
 type PageTitleKey =
   | "settingsTitle"
@@ -30,7 +33,13 @@ function SecondaryPageShellContent({
   children,
 }: SecondaryPageShellProps) {
   const { t } = useTranslation();
+  const pathname: string = usePathname();
   const title: string = getPageTitle(t, titleKey);
+  const storedState = loadStoredState();
+  const chatPath: string = buildLanguagePath(
+    storedState.nativeLanguage,
+    storedState.targetLanguage,
+  );
   const {
     user,
     profile,
@@ -58,6 +67,8 @@ function SecondaryPageShellContent({
       <SideDrawer
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
+        chatPath={chatPath}
+        currentPath={pathname}
         email={profile?.email ?? user?.email ?? null}
         displayName={displayName}
         avatarUrl={avatarUrl}
@@ -66,13 +77,13 @@ function SecondaryPageShellContent({
         onSignIn={() => setShowAuthModal(true)}
         onSignOut={() => void signOut()}
       />
-      <main className="mx-auto flex h-dvh max-w-2xl flex-col overflow-hidden py-3">
-        <header className="mb-2 shrink-0 px-3">
-          <div className="flex items-center justify-between gap-3">
+      <main className="mx-auto flex h-dvh max-w-2xl flex-col overflow-hidden pb-3 pt-4">
+        <header className="mb-4 shrink-0 px-4">
+          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
             <button
               type="button"
               onClick={() => setDrawerOpen(true)}
-              className="rounded-full p-0.5 transition-colors hover:bg-stone-100"
+              className="flex items-center justify-self-start rounded-full transition-colors hover:bg-stone-100"
               aria-label={t.openMenu}
             >
               <UserAvatar
@@ -82,13 +93,13 @@ function SecondaryPageShellContent({
                 signedIn={!!user}
               />
             </button>
-            <h1 className="flex-1 truncate text-center text-sm font-semibold text-stone-900">
+            <h1 className="truncate text-sm font-semibold text-stone-900">
               {title}
             </h1>
-            <div className="h-9 w-9 shrink-0" aria-hidden="true" />
+            <div aria-hidden="true" />
           </div>
         </header>
-        <section className="min-h-0 flex-1 overflow-y-auto px-4 pb-6">
+        <section className="min-h-0 flex-1 overflow-y-auto px-4 pb-6 pt-1">
           {children}
         </section>
       </main>

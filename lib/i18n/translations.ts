@@ -95,6 +95,7 @@ export interface Translations {
   openMenu: string;
   closeMenu: string;
   guestUser: string;
+  navChat: string;
   navHistoryStreaks: string;
   navBuyCredits: string;
   navSettings: string;
@@ -261,6 +262,7 @@ export const en: Translations = {
   openMenu: "Open menu",
   closeMenu: "Close menu",
   guestUser: "Guest",
+  navChat: "Chat",
   navHistoryStreaks: "History & Streaks",
   navBuyCredits: "Buy Credits",
   navSettings: "Settings",

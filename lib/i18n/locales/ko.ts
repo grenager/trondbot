@@ -98,6 +98,7 @@ export const ko: Translations = {
   openMenu: "Open menu",
   closeMenu: "Close menu",
   guestUser: "Guest",
+  navChat: "Chat",
   navHistoryStreaks: "History & Streaks",
   navBuyCredits: "Buy Credits",
   navSettings: "Settings",

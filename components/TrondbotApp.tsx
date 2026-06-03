@@ -727,6 +727,8 @@ function TrondbotAppContent() {
         <SideDrawer
           open={showDrawer}
           onClose={() => setShowDrawer(false)}
+          chatPath={pathname}
+          currentPath={pathname}
           email={profile?.email ?? user?.email ?? null}
           displayName={displayName}
           avatarUrl={avatarUrl}
@@ -761,7 +763,7 @@ function TrondbotAppContent() {
             <button
               type="button"
               onClick={() => setShowDrawer(true)}
-              className="rounded-full p-0.5 transition-colors hover:bg-stone-100"
+              className="flex items-center rounded-full p-0.5 transition-colors hover:bg-stone-100"
               aria-label={t.openMenu}
             >
               <UserAvatar

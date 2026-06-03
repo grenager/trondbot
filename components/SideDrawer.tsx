@@ -8,6 +8,8 @@ import { useTranslation } from "@/lib/i18n/TranslationContext";
 interface SideDrawerProps {
   open: boolean;
   onClose: () => void;
+  chatPath: string;
+  currentPath: string;
   email: string | null;
   displayName: string | null;
   avatarUrl: string | null;
@@ -20,6 +22,8 @@ interface SideDrawerProps {
 export default function SideDrawer({
   open,
   onClose,
+  chatPath,
+  currentPath,
   email,
   displayName,
   avatarUrl,
@@ -56,6 +60,13 @@ export default function SideDrawer({
     : t.guestUser;
   const accountSubtitle: string | null =
     signedIn && displayName && email ? email : null;
+  const isChatActive: boolean = currentPath === chatPath;
+
+  function navLinkClassName(active: boolean): string {
+    return active
+      ? "block rounded-lg bg-blue-50 px-3 py-2.5 text-sm font-medium text-blue-700"
+      : "block rounded-lg px-3 py-2.5 text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100";
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex">
@@ -94,9 +105,20 @@ export default function SideDrawer({
           <ul className="space-y-1">
             <li>
               <Link
+                href={chatPath}
+                onClick={onClose}
+                className={navLinkClassName(isChatActive)}
+                aria-current={isChatActive ? "page" : undefined}
+              >
+                {t.navChat}
+              </Link>
+            </li>
+            <li>
+              <Link
                 href="/history"
                 onClick={onClose}
-                className="block rounded-lg px-3 py-2.5 text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100"
+                className={navLinkClassName(currentPath === "/history")}
+                aria-current={currentPath === "/history" ? "page" : undefined}
               >
                 {t.navHistoryStreaks}
               </Link>
@@ -105,7 +127,8 @@ export default function SideDrawer({
               <Link
                 href="/credits"
                 onClick={onClose}
-                className="block rounded-lg px-3 py-2.5 text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100"
+                className={navLinkClassName(currentPath === "/credits")}
+                aria-current={currentPath === "/credits" ? "page" : undefined}
               >
                 {t.navBuyCredits}
               </Link>
@@ -114,7 +137,8 @@ export default function SideDrawer({
               <Link
                 href="/settings"
                 onClick={onClose}
-                className="block rounded-lg px-3 py-2.5 text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100"
+                className={navLinkClassName(currentPath === "/settings")}
+                aria-current={currentPath === "/settings" ? "page" : undefined}
               >
                 {t.navSettings}
               </Link>
@@ -123,7 +147,8 @@ export default function SideDrawer({
               <Link
                 href="/about"
                 onClick={onClose}
-                className="block rounded-lg px-3 py-2.5 text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100"
+                className={navLinkClassName(currentPath === "/about")}
+                aria-current={currentPath === "/about" ? "page" : undefined}
               >
                 {t.navAbout}
               </Link>
