@@ -92,6 +92,34 @@ export interface Translations {
   account: string;
   signedInAs: (email: string) => string;
   loadingAccount: string;
+  openMenu: string;
+  closeMenu: string;
+  guestUser: string;
+  navChat: string;
+  navHistoryStreaks: string;
+  navBuyCredits: string;
+  navSettings: string;
+  navAbout: string;
+  backToChat: string;
+  settingsTitle: string;
+  historyTitle: string;
+  reminderEnabled: string;
+  reminderEnabledDescription: string;
+  reminderTime: string;
+  displayName: string;
+  displayNamePlaceholder: string;
+  languageDefaults: string;
+  languageDefaultsDescription: string;
+  currentStreak: string;
+  dayStreak: (count: number) => string;
+  longestStreak: string;
+  totalMessages: string;
+  recentActivity: string;
+  noActivityYet: string;
+  currentSession: string;
+  messagesSent: (count: number) => string;
+  saveSettings: string;
+  settingsSaved: string;
   appTitle: string;
   appDescription: string;
   scenarioLabels: ScenarioLabels;
@@ -231,6 +259,36 @@ export const en: Translations = {
   account: "Account",
   signedInAs: (email: string) => `Signed in as ${email}`,
   loadingAccount: "Loading…",
+  openMenu: "Open menu",
+  closeMenu: "Close menu",
+  guestUser: "Guest",
+  navChat: "Chat",
+  navHistoryStreaks: "History & Streaks",
+  navBuyCredits: "Refill Credits (Free!)",
+  navSettings: "Settings",
+  navAbout: "About",
+  backToChat: "Back to chat",
+  settingsTitle: "Settings",
+  historyTitle: "History & Streaks",
+  reminderEnabled: "Daily practice reminder",
+  reminderEnabledDescription: "Get a reminder to practice each day",
+  reminderTime: "Reminder time",
+  displayName: "Display name",
+  displayNamePlaceholder: "Your name",
+  languageDefaults: "Language defaults",
+  languageDefaultsDescription:
+    "Change your comfort and target languages when starting a new chat.",
+  currentStreak: "Current streak",
+  dayStreak: (count: number) =>
+    count === 1 ? "1 day" : `${count} days`,
+  longestStreak: "Longest streak",
+  totalMessages: "Total messages",
+  recentActivity: "Recent activity",
+  noActivityYet: "No activity yet. Start chatting to build your streak!",
+  currentSession: "Current session",
+  messagesSent: (count: number) => `${count} messages sent`,
+  saveSettings: "Save settings",
+  settingsSaved: "Settings saved",
   appTitle: "Trondbot",
   appDescription: "Simple language learning AI chat",
   scenarioLabels: EN_SCENARIO_LABELS,
