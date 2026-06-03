@@ -80,15 +80,15 @@ export interface Translations {
   noCreditsForWordLookup: string;
   lookupNoResult: string;
   signIn: string;
-  signUp: string;
   signOut: string;
   email: string;
-  password: string;
-  createAccount: string;
-  alreadyHaveAccount: string;
-  dontHaveAccount: string;
+  signInWithGoogle: string;
+  sendSignInCode: string;
+  enterSignInCode: string;
+  codeSentMessage: (email: string) => string;
+  verifyCode: string;
+  useDifferentEmail: string;
   authError: string;
-  checkEmailConfirm: string;
   account: string;
   signedInAs: (email: string) => string;
   loadingAccount: string;
@@ -219,15 +219,15 @@ export const en: Translations = {
   noCreditsForWordLookup: "No credits left for word lookup.",
   lookupNoResult: "No translation found.",
   signIn: "Sign in",
-  signUp: "Sign up",
   signOut: "Sign out",
   email: "Email",
-  password: "Password",
-  createAccount: "Create account",
-  alreadyHaveAccount: "Already have an account? Sign in",
-  dontHaveAccount: "Don't have an account? Create one",
+  signInWithGoogle: "Continue with Google",
+  sendSignInCode: "Send sign-in code",
+  enterSignInCode: "6-digit code",
+  codeSentMessage: (email: string) => `We sent a sign-in code to ${email}.`,
+  verifyCode: "Verify code",
+  useDifferentEmail: "Use a different email",
   authError: "Authentication failed. Please try again.",
-  checkEmailConfirm: "Check your email to confirm your account.",
   account: "Account",
   signedInAs: (email: string) => `Signed in as ${email}`,
   loadingAccount: "Loading…",

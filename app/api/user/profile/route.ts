@@ -1,6 +1,51 @@
 import { NextResponse } from "next/server";
+import type { User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
-import { clampCredits, parseProfile } from "@/lib/supabase/profile";
+import {
+  clampCredits,
+  generateInviteCode,
+  parseProfile,
+} from "@/lib/supabase/profile";
+import type { Profile } from "@/lib/supabase/types";
+import { INITIAL_FREE_CREDITS } from "@/lib/storage";
+
+type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
+
+async function getOrCreateProfile(
+  supabase: SupabaseServerClient,
+  user: User,
+): Promise<Profile | null> {
+  const { data: existing, error: selectError } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (selectError) {
+    return null;
+  }
+
+  if (existing) {
+    return parseProfile(existing);
+  }
+
+  const { data: inserted, error: insertError } = await supabase
+    .from("profiles")
+    .insert({
+      id: user.id,
+      email: user.email ?? null,
+      credits: INITIAL_FREE_CREDITS,
+      invite_code: generateInviteCode(),
+    })
+    .select("*")
+    .single();
+
+  if (insertError || !inserted) {
+    return null;
+  }
+
+  return parseProfile(inserted);
+}
 
 export async function GET() {
   try {
@@ -14,24 +59,11 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", user.id)
-      .single();
-
-    if (error || !data) {
+    const profile: Profile | null = await getOrCreateProfile(supabase, user);
+    if (!profile) {
       return NextResponse.json(
         { error: "Profile not found" },
         { status: 404 },
-      );
-    }
-
-    const profile = parseProfile(data);
-    if (!profile) {
-      return NextResponse.json(
-        { error: "Invalid profile data" },
-        { status: 500 },
       );
     }
 
@@ -67,6 +99,17 @@ export async function PATCH(request: Request) {
     }
 
     const credits: number = clampCredits(creditsValue);
+
+    const existingProfile: Profile | null = await getOrCreateProfile(
+      supabase,
+      user,
+    );
+    if (!existingProfile) {
+      return NextResponse.json(
+        { error: "Profile not found" },
+        { status: 404 },
+      );
+    }
 
     const { data, error } = await supabase
       .from("profiles")

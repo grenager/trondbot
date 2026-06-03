@@ -1,5 +1,5 @@
 import type { Profile } from "@/lib/supabase/types";
-import { MAX_TOTAL_CREDITS } from "@/lib/storage";
+import { INITIAL_FREE_CREDITS, MAX_TOTAL_CREDITS } from "@/lib/storage";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
@@ -7,6 +7,16 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 export function clampCredits(credits: number): number {
   return Math.min(MAX_TOTAL_CREDITS, Math.max(0, credits));
+}
+
+export function generateInviteCode(): string {
+  const chars =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let code = "";
+  for (let i = 0; i < 8; i++) {
+    code += chars[Math.floor(Math.random() * chars.length)] ?? "a";
+  }
+  return code;
 }
 
 export function parseProfile(value: unknown): Profile | null {

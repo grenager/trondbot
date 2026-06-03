@@ -29,6 +29,12 @@ Set `ANTHROPIC_API_KEY` for chat. For accounts and credits, create a [Supabase](
 
 Then run the SQL migration in `supabase/migrations/001_profiles.sql` in the Supabase SQL editor (creates the `profiles` table and signup trigger).
 
+In Supabase **Authentication**:
+
+- **URL Configuration** — add `http://localhost:3000/auth/callback` (and your production URL)
+- **Providers → Google** — enable and add OAuth credentials from Google Cloud Console
+- **Providers → Email** — enable email sign-in; use the email OTP / magic link flow (no passwords)
+
 3. Run the dev server:
 
 ```bash

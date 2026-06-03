@@ -20,14 +20,19 @@ interface AuthContextValue {
   authReady: boolean;
   profileLoading: boolean;
   supabaseEnabled: boolean;
-  signIn: (email: string, password: string) => Promise<string | null>;
-  signUp: (email: string, password: string) => Promise<string | null>;
+  signInWithGoogle: () => Promise<string | null>;
+  sendEmailCode: (email: string) => Promise<string | null>;
+  verifyEmailCode: (email: string, code: string) => Promise<string | null>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<Profile | null>;
   updateProfileCredits: (credits: number) => Promise<Profile | null>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
+
+function getAuthCallbackUrl(): string {
+  return `${window.location.origin}/auth/callback`;
+}
 
 async function fetchProfile(): Promise<Profile | null> {
   const response = await fetch("/api/user/profile");
@@ -164,16 +169,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [refreshProfile, supabaseEnabled]);
 
-  const signIn = useCallback(
-    async (email: string, password: string): Promise<string | null> => {
+  const signInWithGoogle = useCallback(async (): Promise<string | null> => {
+    if (!supabaseEnabled) {
+      return "Supabase is not configured";
+    }
+
+    const supabase = createClient();
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: getAuthCallbackUrl(),
+      },
+    });
+
+    return error?.message ?? null;
+  }, [supabaseEnabled]);
+
+  const sendEmailCode = useCallback(
+    async (email: string): Promise<string | null> => {
       if (!supabaseEnabled) {
         return "Supabase is not configured";
       }
 
       const supabase = createClient();
-      const { error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithOtp({
         email,
-        password,
+        options: {
+          shouldCreateUser: true,
+        },
       });
 
       return error?.message ?? null;
@@ -181,19 +204,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [supabaseEnabled],
   );
 
-  const signUp = useCallback(
-    async (email: string, password: string): Promise<string | null> => {
+  const verifyEmailCode = useCallback(
+    async (email: string, code: string): Promise<string | null> => {
       if (!supabaseEnabled) {
         return "Supabase is not configured";
       }
 
       const supabase = createClient();
-      const { error } = await supabase.auth.signUp({
+      const { error } = await supabase.auth.verifyOtp({
         email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-        },
+        token: code.trim(),
+        type: "email",
       });
 
       return error?.message ?? null;
@@ -218,8 +239,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       authReady,
       profileLoading,
       supabaseEnabled,
-      signIn,
-      signUp,
+      signInWithGoogle,
+      sendEmailCode,
+      verifyEmailCode,
       signOut,
       refreshProfile,
       updateProfileCredits,
@@ -230,8 +252,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       authReady,
       profileLoading,
       supabaseEnabled,
-      signIn,
-      signUp,
+      signInWithGoogle,
+      sendEmailCode,
+      verifyEmailCode,
       signOut,
       refreshProfile,
       updateProfileCredits,

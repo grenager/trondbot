@@ -142,8 +142,9 @@ function TrondbotAppContent() {
     profile,
     authReady,
     supabaseEnabled,
-    signIn,
-    signUp,
+    signInWithGoogle,
+    sendEmailCode,
+    verifyEmailCode,
     signOut,
     updateProfileCredits,
   } = useAuth();
@@ -730,8 +731,9 @@ function TrondbotAppContent() {
         <AuthModal
           open={showAuthModal}
           onClose={() => setShowAuthModal(false)}
-          onSignIn={signIn}
-          onSignUp={signUp}
+          onSignInWithGoogle={signInWithGoogle}
+          onSendEmailCode={sendEmailCode}
+          onVerifyEmailCode={verifyEmailCode}
         />
         <LookupModal
           open={showLookupModal}
