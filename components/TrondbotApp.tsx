@@ -1,14 +1,14 @@
 "use client";
 
 import { FormEvent, KeyboardEvent, useCallback, useEffect, useRef, useState } from "react";
-import Image from "next/image";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import ChatMessage from "@/components/ChatMessage";
 import ConfirmDialog from "@/components/ConfirmDialog";
-import AboutModal from "@/components/AboutModal";
 import CreditsModal from "@/components/CreditsModal";
 import CreditsWheel from "@/components/CreditsWheel";
 import AuthModal from "@/components/AuthModal";
+import SideDrawer from "@/components/SideDrawer";
+import UserAvatar from "@/components/UserAvatar";
 import { AuthProvider, useAuth } from "@/components/AuthProvider";
 import LookupModal from "@/components/LookupModal";
 import NewChatForm from "@/components/NewChatForm";
@@ -39,6 +39,7 @@ import {
   saveStoredState,
 } from "@/lib/storage";
 import { trackNewChat, trackSendMessage } from "@/lib/analytics";
+import { recordMessageSent } from "@/lib/activity";
 import { debugLog } from "@/lib/debug";
 import { fetchChat, getFetchErrorMessage } from "@/lib/fetchChat";
 import type {
@@ -131,7 +132,7 @@ function TrondbotAppContent() {
   const [hydrated, setHydrated] = useState<boolean>(false);
   const [showSetupForm, setShowSetupForm] = useState<boolean>(false);
   const [showNewChatConfirm, setShowNewChatConfirm] = useState<boolean>(false);
-  const [showAbout, setShowAbout] = useState<boolean>(false);
+  const [showDrawer, setShowDrawer] = useState<boolean>(false);
   const [showCreditsModal, setShowCreditsModal] = useState<boolean>(false);
   const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
   const [showLookupModal, setShowLookupModal] = useState<boolean>(false);
@@ -140,6 +141,8 @@ function TrondbotAppContent() {
   const {
     user,
     profile,
+    displayName,
+    avatarUrl,
     authReady,
     supabaseEnabled,
     signInWithGoogle,
@@ -510,6 +513,7 @@ function TrondbotAppContent() {
     setLoading(true);
     setError(null);
     trackSendMessage(nativeLanguage, targetLanguage, scenario);
+    recordMessageSent();
     debugLog("chat", "handleSubmit: request sent", {
       contentLength: trimmedInput.length,
       messageCount: apiMessages.length,
@@ -720,7 +724,17 @@ function TrondbotAppContent() {
           onConfirm={confirmNewChat}
           onCancel={cancelNewChat}
         />
-        <AboutModal open={showAbout} onClose={() => setShowAbout(false)} />
+        <SideDrawer
+          open={showDrawer}
+          onClose={() => setShowDrawer(false)}
+          email={profile?.email ?? user?.email ?? null}
+          displayName={displayName}
+          avatarUrl={avatarUrl}
+          signedIn={!!user}
+          supabaseEnabled={supabaseEnabled}
+          onSignIn={() => setShowAuthModal(true)}
+          onSignOut={() => void signOut()}
+        />
         <CreditsModal
           open={showCreditsModal}
           credits={credits}
@@ -743,44 +757,20 @@ function TrondbotAppContent() {
           onInsert={insertIntoComposer}
         />
         <header className="mb-2 shrink-0 px-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setShowAbout(true)}
-                className="flex items-center"
-                aria-label={t.aboutTrondbotAria}
-              >
-                <Image
-                  src="/trondbot-icon.png"
-                  alt=""
-                  width={32}
-                  height={32}
-                  className="h-8 w-8 shrink-0 rounded-full object-cover"
-                  priority
-                />
-              </button>
-              {supabaseEnabled ? (
-                user ? (
-                  <button
-                    type="button"
-                    onClick={() => void signOut()}
-                    className="rounded-full px-2.5 py-1 text-xs font-medium text-stone-600 transition-colors hover:bg-stone-100 hover:text-stone-900"
-                    title={profile?.email ? t.signedInAs(profile.email) : t.account}
-                  >
-                    {t.signOut}
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => setShowAuthModal(true)}
-                    className="rounded-full px-2.5 py-1 text-xs font-medium text-blue-700 transition-colors hover:bg-blue-50"
-                  >
-                    {t.signIn}
-                  </button>
-                )
-              ) : null}
-            </div>
+          <div className="flex items-center justify-between gap-3">
+            <button
+              type="button"
+              onClick={() => setShowDrawer(true)}
+              className="rounded-full p-0.5 transition-colors hover:bg-stone-100"
+              aria-label={t.openMenu}
+            >
+              <UserAvatar
+                email={profile?.email ?? user?.email ?? null}
+                displayName={displayName}
+                avatarUrl={avatarUrl}
+                signedIn={!!user}
+              />
+            </button>
             <CreditsWheel credits={credits} onClick={() => setShowCreditsModal(true)} />
             <button
               type="button"

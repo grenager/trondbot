@@ -11,12 +11,14 @@ import {
 } from "react";
 import type { User } from "@supabase/supabase-js";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
-import { parseProfile } from "@/lib/supabase/profile";
+import { parseProfile, resolveDisplayName, getAvatarUrlFromUser } from "@/lib/supabase/profile";
 import type { Profile } from "@/lib/supabase/types";
 
 interface AuthContextValue {
   user: User | null;
   profile: Profile | null;
+  displayName: string | null;
+  avatarUrl: string | null;
   authReady: boolean;
   profileLoading: boolean;
   supabaseEnabled: boolean;
@@ -26,6 +28,7 @@ interface AuthContextValue {
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<Profile | null>;
   updateProfileCredits: (credits: number) => Promise<Profile | null>;
+  updateProfileDisplayName: (displayName: string | null) => Promise<Profile | null>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -86,6 +89,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ credits }),
+      });
+
+      if (!response.ok) {
+        return null;
+      }
+
+      const data: unknown = await response.json();
+      if (
+        typeof data !== "object" ||
+        data === null ||
+        !("profile" in data) ||
+        typeof data.profile !== "object" ||
+        data.profile === null
+      ) {
+        return null;
+      }
+
+      const nextProfile: Profile | null = parseProfile(
+        (data as { profile: unknown }).profile,
+      );
+      setProfile(nextProfile);
+      return nextProfile;
+    },
+    [supabaseEnabled, user],
+  );
+
+  const updateProfileDisplayName = useCallback(
+    async (displayName: string | null): Promise<Profile | null> => {
+      if (!supabaseEnabled || !user) {
+        return null;
+      }
+
+      const response = await fetch("/api/user/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ display_name: displayName }),
       });
 
       if (!response.ok) {
@@ -236,6 +275,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     () => ({
       user,
       profile,
+      displayName: resolveDisplayName(profile, user),
+      avatarUrl: getAvatarUrlFromUser(user),
       authReady,
       profileLoading,
       supabaseEnabled,
@@ -245,6 +286,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signOut,
       refreshProfile,
       updateProfileCredits,
+      updateProfileDisplayName,
     }),
     [
       user,
@@ -258,6 +300,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signOut,
       refreshProfile,
       updateProfileCredits,
+      updateProfileDisplayName,
     ],
   );
 

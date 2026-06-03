@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import {
   clampCredits,
   generateInviteCode,
+  getDisplayNameFromUser,
   parseProfile,
 } from "@/lib/supabase/profile";
 import type { Profile } from "@/lib/supabase/types";
@@ -15,6 +16,9 @@ async function getOrCreateProfile(
   supabase: SupabaseServerClient,
   user: User,
 ): Promise<Profile | null> {
+  const authDisplayName: string | null = getDisplayNameFromUser(user);
+  const authEmail: string | null = user.email ?? null;
+
   const { data: existing, error: selectError } = await supabase
     .from("profiles")
     .select("*")
@@ -26,14 +30,48 @@ async function getOrCreateProfile(
   }
 
   if (existing) {
-    return parseProfile(existing);
+    const profile: Profile | null = parseProfile(existing);
+    if (!profile) {
+      return null;
+    }
+
+    const updates: {
+      display_name?: string;
+      email?: string;
+    } = {};
+
+    if (!profile.display_name && authDisplayName) {
+      updates.display_name = authDisplayName;
+    }
+
+    if (!profile.email && authEmail) {
+      updates.email = authEmail;
+    }
+
+    if (Object.keys(updates).length === 0) {
+      return profile;
+    }
+
+    const { data: updated, error: updateError } = await supabase
+      .from("profiles")
+      .update(updates)
+      .eq("id", user.id)
+      .select("*")
+      .single();
+
+    if (updateError || !updated) {
+      return profile;
+    }
+
+    return parseProfile(updated);
   }
 
   const { data: inserted, error: insertError } = await supabase
     .from("profiles")
     .insert({
       id: user.id,
-      email: user.email ?? null,
+      email: authEmail,
+      display_name: authDisplayName,
       credits: INITIAL_FREE_CREDITS,
       invite_code: generateInviteCode(),
     })
@@ -93,13 +131,6 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
     }
 
-    const creditsValue: unknown = (body as { credits?: unknown }).credits;
-    if (typeof creditsValue !== "number" || !Number.isFinite(creditsValue)) {
-      return NextResponse.json({ error: "Invalid credits value" }, { status: 400 });
-    }
-
-    const credits: number = clampCredits(creditsValue);
-
     const existingProfile: Profile | null = await getOrCreateProfile(
       supabase,
       user,
@@ -111,9 +142,45 @@ export async function PATCH(request: Request) {
       );
     }
 
+    const updates: {
+      credits?: number;
+      display_name?: string | null;
+    } = {};
+
+    const creditsValue: unknown = (body as { credits?: unknown }).credits;
+    if (creditsValue !== undefined) {
+      if (typeof creditsValue !== "number" || !Number.isFinite(creditsValue)) {
+        return NextResponse.json({ error: "Invalid credits value" }, { status: 400 });
+      }
+      updates.credits = clampCredits(creditsValue);
+    }
+
+    const displayNameValue: unknown = (body as { display_name?: unknown })
+      .display_name;
+    if (displayNameValue !== undefined) {
+      if (
+        displayNameValue !== null &&
+        (typeof displayNameValue !== "string" ||
+          displayNameValue.trim().length === 0)
+      ) {
+        return NextResponse.json(
+          { error: "Invalid display name value" },
+          { status: 400 },
+        );
+      }
+      updates.display_name =
+        typeof displayNameValue === "string"
+          ? displayNameValue.trim()
+          : null;
+    }
+
+    if (Object.keys(updates).length === 0) {
+      return NextResponse.json({ error: "No valid fields to update" }, { status: 400 });
+    }
+
     const { data, error } = await supabase
       .from("profiles")
-      .update({ credits })
+      .update(updates)
       .eq("id", user.id)
       .select("*")
       .single();
