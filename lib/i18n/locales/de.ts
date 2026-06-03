@@ -104,7 +104,7 @@ export const de: Translations = {
   guestUser: "Guest",
   navChat: "Chat",
   navHistoryStreaks: "History & Streaks",
-  navBuyCredits: "Buy Credits",
+  navBuyCredits: "Refill Credits (Free!)",
   navSettings: "Settings",
   navAbout: "About",
   backToChat: "Back to chat",
