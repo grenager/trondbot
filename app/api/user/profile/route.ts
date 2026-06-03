@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import type { User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import {
-  clampCredits,
   generateInviteCode,
   getDisplayNameFromUser,
   parseProfile,
@@ -143,17 +142,8 @@ export async function PATCH(request: Request) {
     }
 
     const updates: {
-      credits?: number;
       display_name?: string | null;
     } = {};
-
-    const creditsValue: unknown = (body as { credits?: unknown }).credits;
-    if (creditsValue !== undefined) {
-      if (typeof creditsValue !== "number" || !Number.isFinite(creditsValue)) {
-        return NextResponse.json({ error: "Invalid credits value" }, { status: 400 });
-      }
-      updates.credits = clampCredits(creditsValue);
-    }
 
     const displayNameValue: unknown = (body as { display_name?: unknown })
       .display_name;

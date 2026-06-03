@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import type { LanguageCode, UserMessageWithCorrection } from "@/lib/types";
+import type { UsageSnapshot } from "@/lib/usage/client";
 import { useTranslation } from "@/lib/i18n/TranslationContext";
 import { debugLog } from "@/lib/debug";
 import LazyWordText from "./LazyWordText";
@@ -13,7 +14,8 @@ interface UserBubbleProps {
   nativeLanguage: LanguageCode;
   loading?: boolean;
   onAcknowledgeCorrection?: () => void;
-  onSpendTokenizeCredit?: () => boolean;
+  canSpendCredit?: () => boolean;
+  onUsageUpdate?: (usage: UsageSnapshot) => void;
 }
 
 const STATUS_LABEL_CLASS: string =
@@ -25,7 +27,8 @@ export default function UserBubble({
   nativeLanguage,
   loading = false,
   onAcknowledgeCorrection,
-  onSpendTokenizeCredit,
+  canSpendCredit,
+  onUsageUpdate,
 }: UserBubbleProps) {
   const { t } = useTranslation();
   const [showExplanation, setShowExplanation] = useState<boolean>(false);
@@ -57,7 +60,8 @@ export default function UserBubble({
             messageLanguage={targetLanguage}
             glossLanguage={nativeLanguage}
             variant="onDark"
-            onSpendTokenizeCredit={onSpendTokenizeCredit}
+            canSpendCredit={canSpendCredit}
+            onUsageUpdate={onUsageUpdate}
           />
           <SpeakButton
             text={message.content}
@@ -132,7 +136,8 @@ export default function UserBubble({
                 text={message.correction.corrected}
                 messageLanguage={targetLanguage}
                 glossLanguage={nativeLanguage}
-                onSpendTokenizeCredit={onSpendTokenizeCredit}
+                canSpendCredit={canSpendCredit}
+            onUsageUpdate={onUsageUpdate}
               />
               <SpeakButton
                 text={message.correction.corrected}

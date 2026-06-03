@@ -1,16 +1,22 @@
 "use client";
 
-import { INITIAL_FREE_CREDITS } from "@/lib/storage";
 import { useTranslation } from "@/lib/i18n/TranslationContext";
 
 interface CreditsWheelProps {
   credits: number;
+  maxCredits: number;
+  disabled?: boolean;
   onClick: () => void;
 }
 
-export default function CreditsWheel({ credits, onClick }: CreditsWheelProps) {
+export default function CreditsWheel({
+  credits,
+  maxCredits,
+  disabled = false,
+  onClick,
+}: CreditsWheelProps) {
   const { t } = useTranslation();
-  const ratio: number = Math.min(credits / INITIAL_FREE_CREDITS, 1);
+  const ratio: number = maxCredits > 0 ? Math.min(credits / maxCredits, 1) : 0;
   const radius = 9;
   const circumference: number = 2 * Math.PI * radius;
   const strokeDashoffset: number = circumference * (1 - ratio);
@@ -19,8 +25,9 @@ export default function CreditsWheel({ credits, onClick }: CreditsWheelProps) {
   return (
     <button
       type="button"
+      disabled={disabled}
       onClick={onClick}
-      className="flex items-center gap-1 text-stone-500 transition-colors hover:text-stone-700"
+      className="flex items-center gap-1 text-stone-500 transition-colors hover:text-stone-700 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:text-stone-500"
       aria-label={t.creditsRemainingAria(credits)}
     >
       <svg width="20" height="20" className="-rotate-90">

@@ -5,6 +5,7 @@ import { useParams, usePathname, useRouter } from "next/navigation";
 import ChatMessage from "@/components/ChatMessage";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import CreditsModal from "@/components/CreditsModal";
+import PaywallPrompt from "@/components/PaywallPrompt";
 import CreditsWheel from "@/components/CreditsWheel";
 import AuthModal from "@/components/AuthModal";
 import SideDrawer from "@/components/SideDrawer";
@@ -30,14 +31,18 @@ import {
 import type { ScenarioId } from "@/lib/scenarios";
 import type { Language } from "@/lib/types";
 import {
+  ANONYMOUS_FREE_MESSAGES,
   DEFAULT_SCENARIO,
-  INITIAL_FREE_CREDITS,
-  loadCredits,
+  GUEST_SCENARIO_ID,
   loadStoredState,
   MAX_TOTAL_CREDITS,
-  saveCredits,
   saveStoredState,
 } from "@/lib/storage";
+import {
+  fetchUsageSnapshot,
+  parseUsageSnapshot,
+  type UsageSnapshot,
+} from "@/lib/usage/client";
 import { trackNewChat, trackSendMessage } from "@/lib/analytics";
 import { recordMessageSent } from "@/lib/activity";
 import { debugLog } from "@/lib/debug";
@@ -54,6 +59,46 @@ import type {
 
 const MAX_COMPOSER_LINES = 3;
 const ACCURACY_WINDOW = 20;
+
+const DEFAULT_USAGE: UsageSnapshot = {
+  signedIn: false,
+  remaining: ANONYMOUS_FREE_MESSAGES,
+  maxCredits: ANONYMOUS_FREE_MESSAGES,
+  requiresSignIn: false,
+};
+
+function applyUsageFromResponse(
+  data: unknown,
+  setUsage: (usage: UsageSnapshot) => void,
+): void {
+  if (typeof data !== "object" || data === null || !("usage" in data)) {
+    return;
+  }
+
+  const parsed: UsageSnapshot | null = parseUsageSnapshot(
+    (data as { usage: unknown }).usage,
+  );
+  if (parsed) {
+    setUsage(parsed);
+  }
+}
+
+function isQuotaErrorResponse(response: Response, data: unknown): boolean {
+  if (response.status !== 402 && response.status !== 403) {
+    return false;
+  }
+
+  if (typeof data !== "object" || data === null || !("code" in data)) {
+    return response.status === 402;
+  }
+
+  const code: unknown = (data as { code: unknown }).code;
+  return (
+    code === "SIGN_IN_REQUIRED" ||
+    code === "NO_CREDITS" ||
+    code === "GUEST_SCENARIO_ONLY"
+  );
+}
 
 function getFlag(code: LanguageCode): string {
   const lang: Language | undefined = LANGUAGES.find((l) => l.code === code);
@@ -136,8 +181,7 @@ function TrondbotAppContent() {
   const [showCreditsModal, setShowCreditsModal] = useState<boolean>(false);
   const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
   const [showLookupModal, setShowLookupModal] = useState<boolean>(false);
-  const [credits, setCredits] = useState<number>(INITIAL_FREE_CREDITS);
-  const creditsRef = useRef<number>(INITIAL_FREE_CREDITS);
+  const [usage, setUsage] = useState<UsageSnapshot>(DEFAULT_USAGE);
   const {
     user,
     profile,
@@ -148,8 +192,6 @@ function TrondbotAppContent() {
     signInWithGoogle,
     sendEmailCode,
     verifyEmailCode,
-    signOut,
-    updateProfileCredits,
   } = useAuth();
   const [typingAfterAck, setTypingAfterAck] = useState<boolean>(false);
   const [composerMultiline, setComposerMultiline] = useState<boolean>(false);
@@ -157,6 +199,19 @@ function TrondbotAppContent() {
   const composerRef = useRef<HTMLTextAreaElement>(null);
   const lastComposerInputLengthRef = useRef<number>(0);
 
+  const credits: number = usage.remaining;
+  const signedIn: boolean = !!user;
+  const hideCreditsNav: boolean = usage.requiresSignIn && !signedIn;
+  const outOfCredits: boolean = usage.requiresSignIn || usage.remaining <= 0;
+
+
+  function refreshUsage(): void {
+    void fetchUsageSnapshot().then((snapshot: UsageSnapshot | null) => {
+      if (snapshot) {
+        setUsage(snapshot);
+      }
+    });
+  }
   function updateLanguages(
     native: LanguageCode,
     target: LanguageCode,
@@ -224,10 +279,6 @@ function TrondbotAppContent() {
   }
 
   useEffect(() => {
-    creditsRef.current = credits;
-  }, [credits]);
-
-  useEffect(() => {
     const stored = loadStoredState();
     const fromPath = parseLanguagePath(pathname);
 
@@ -241,36 +292,33 @@ function TrondbotAppContent() {
 
     setScenario(stored.scenario);
     setMessages(stored.messages);
-    setCredits(loadCredits());
     setHydrated(true);
     setShowSetupForm(stored.messages.length === 0);
     // Hydrate once from the initial URL and stored chat state.
     // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional mount-only
   }, []);
 
-  function persistCredits(newCredits: number): void {
-    setCredits(newCredits);
-    if (user) {
-      void updateProfileCredits(newCredits);
-      return;
-    }
-    saveCredits(newCredits);
-  }
-
   useEffect(() => {
     if (!hydrated || !authReady) {
       return;
     }
+    refreshUsage();
+  }, [hydrated, authReady, user, profile?.credits]);
 
-    if (user && profile) {
-      setCredits(profile.credits);
+  useEffect(() => {
+    if (!authReady || !user) {
       return;
     }
+    setShowAuthModal(false);
+  }, [authReady, user]);
 
-    if (!user) {
-      setCredits(loadCredits());
+  useEffect(() => {
+    if (!authReady || user || scenario === GUEST_SCENARIO_ID) {
+      return;
     }
-  }, [hydrated, authReady, user, profile]);
+    setScenario(GUEST_SCENARIO_ID);
+    setCustomDescription(undefined);
+  }, [authReady, user, scenario]);
 
   useEffect(() => {
     if (!hydrated) {
@@ -365,6 +413,10 @@ function TrondbotAppContent() {
   }
 
   function handleNewChatClick(): void {
+    if (outOfCredits) {
+      return;
+    }
+
     if (messages.length === 0) {
       setShowSetupForm(true);
       return;
@@ -392,21 +444,20 @@ function TrondbotAppContent() {
     if (creditsAdded <= 0) {
       return 0;
     }
-    const newCredits: number = credits + creditsAdded;
-    persistCredits(newCredits);
+    setUsage((previous) => ({
+      ...previous,
+      remaining: previous.remaining + creditsAdded,
+    }));
     return creditsAdded;
   }
 
-  const spendTokenizeCredit = useCallback((): boolean => {
-    if (creditsRef.current <= 0) {
-      return false;
-    }
+  const applyUsageSnapshot = useCallback((snapshot: UsageSnapshot): void => {
+    setUsage(snapshot);
+  }, []);
 
-    const newCredits: number = creditsRef.current - 1;
-    creditsRef.current = newCredits;
-    persistCredits(newCredits);
-    return true;
-  }, [user, updateProfileCredits]);
+  const canSpendCredit = useCallback((): boolean => {
+    return !usage.requiresSignIn && usage.remaining > 0;
+  }, [usage.requiresSignIn, usage.remaining]);
 
   async function startScenario(
     scenarioId: ScenarioId,
@@ -414,22 +465,26 @@ function TrondbotAppContent() {
     nativeLang: LanguageCode,
     targetLang: LanguageCode,
   ): Promise<void> {
+    const effectiveScenario: ScenarioId = signedIn ? scenarioId : GUEST_SCENARIO_ID;
+    const effectiveCustomDesc: string | undefined =
+      effectiveScenario === "custom" ? customDesc : undefined;
+
     setNativeLanguage(nativeLang);
     setTargetLanguage(targetLang);
     const nextPath: string = buildLanguagePath(nativeLang, targetLang);
     if (pathname !== nextPath) {
       router.replace(nextPath, { scroll: false });
     }
-    setScenario(scenarioId);
-    setCustomDescription(customDesc);
+    setScenario(effectiveScenario);
+    setCustomDescription(effectiveCustomDesc);
     setMessages([]);
     setInput("");
     setError(null);
     setShowSetupForm(false);
     setLoading(true);
-    trackNewChat(nativeLang, targetLang, scenarioId);
+    trackNewChat(nativeLang, targetLang, effectiveScenario);
     debugLog("chat", "startScenario: request sent", {
-      scenarioId,
+      scenarioId: effectiveScenario,
       nativeLang,
       targetLang,
     });
@@ -439,8 +494,8 @@ function TrondbotAppContent() {
           messages: [],
           nativeLanguage: nativeLang,
           targetLanguage: targetLang,
-          scenario: scenarioId,
-          customDescription: customDesc,
+          scenario: effectiveScenario,
+          customDescription: effectiveCustomDesc,
           startScenario: true,
         });
 
@@ -460,6 +515,13 @@ function TrondbotAppContent() {
       });
 
       if (!response.ok) {
+        if (isQuotaErrorResponse(response, data)) {
+          setMessages([]);
+          setShowSetupForm(true);
+          applyUsageFromResponse(data, setUsage);
+          return;
+        }
+
         const errorMessage: string =
           typeof data === "object" &&
             data !== null &&
@@ -469,6 +531,8 @@ function TrondbotAppContent() {
             : getTranslations(nativeLang).somethingWentWrong;
         throw new Error(errorMessage);
       }
+
+      applyUsageFromResponse(data, setUsage);
 
       const opening: ScenarioOpeningResponse = data as ScenarioOpeningResponse;
 
@@ -502,6 +566,10 @@ function TrondbotAppContent() {
       return;
     }
 
+    if (usage.requiresSignIn || usage.remaining <= 0) {
+      return;
+    }
+
     const userMessage: UserMessageWithCorrection = {
       role: "user",
       content: trimmedInput,
@@ -521,9 +589,6 @@ function TrondbotAppContent() {
       targetLanguage,
       scenario,
     });
-
-    const newCredits: number = Math.max(0, credits - 1);
-    persistCredits(newCredits);
 
     try {
       const response = await fetchChat({
@@ -561,6 +626,27 @@ function TrondbotAppContent() {
       });
 
       if (!response.ok) {
+        if (isQuotaErrorResponse(response, data)) {
+          setMessages((previous) => previous.slice(0, -1));
+          applyUsageFromResponse(data, setUsage);
+          if (
+            typeof data !== "object" ||
+            data === null ||
+            !("code" in data) ||
+            (data as { code: unknown }).code !== "SIGN_IN_REQUIRED"
+          ) {
+            setError(
+              typeof data === "object" &&
+                data !== null &&
+                "error" in data &&
+                typeof data.error === "string"
+                ? data.error
+                : getTranslations(nativeLanguage).failedToSendMessage,
+            );
+          }
+          return;
+        }
+
         const errorMessage: string =
           typeof data === "object" &&
             data !== null &&
@@ -570,6 +656,8 @@ function TrondbotAppContent() {
             : getTranslations(nativeLanguage).somethingWentWrong;
         throw new Error(errorMessage);
       }
+
+      applyUsageFromResponse(data, setUsage);
 
       const agentResponse: AgentResponse = data as AgentResponse;
 
@@ -629,7 +717,11 @@ function TrondbotAppContent() {
     (message) => message.role === "user" && message.awaitingAcknowledgment,
   );
   const composerDisabled: boolean =
-    loading || awaitingAcknowledgment || typingAfterAck;
+    loading ||
+    awaitingAcknowledgment ||
+    typingAfterAck ||
+    usage.requiresSignIn ||
+    usage.remaining <= 0;
   const hasComposerInput: boolean = input.trim().length > 0;
 
   const lookupButton = (
@@ -732,10 +824,16 @@ function TrondbotAppContent() {
           email={profile?.email ?? user?.email ?? null}
           displayName={displayName}
           avatarUrl={avatarUrl}
-          signedIn={!!user}
+          signedIn={signedIn}
+          hideCreditsNav={hideCreditsNav}
           supabaseEnabled={supabaseEnabled}
-          onSignIn={() => setShowAuthModal(true)}
-          onSignOut={() => void signOut()}
+          onSignIn={() => {
+            if (hideCreditsNav) {
+              void signInWithGoogle();
+              return;
+            }
+            setShowAuthModal(true);
+          }}
         />
         <CreditsModal
           open={showCreditsModal}
@@ -757,6 +855,8 @@ function TrondbotAppContent() {
           targetLanguage={targetLanguage}
           onClose={() => setShowLookupModal(false)}
           onInsert={insertIntoComposer}
+          canSpendCredit={canSpendCredit}
+          onUsageUpdate={applyUsageSnapshot}
         />
         <header className="mb-2 shrink-0 px-3">
           <div className="flex items-center justify-between gap-3">
@@ -773,10 +873,25 @@ function TrondbotAppContent() {
                 signedIn={!!user}
               />
             </button>
-            <CreditsWheel credits={credits} onClick={() => setShowCreditsModal(true)} />
+            <CreditsWheel
+              credits={credits}
+              maxCredits={usage.maxCredits}
+              disabled={hideCreditsNav}
+              onClick={() => {
+                if (hideCreditsNav) {
+                  return;
+                }
+                setShowCreditsModal(true);
+              }}
+            />
             <button
               type="button"
-              disabled={loading || awaitingAcknowledgment || typingAfterAck}
+              disabled={
+                loading ||
+                awaitingAcknowledgment ||
+                typingAfterAck ||
+                outOfCredits
+              }
               onClick={handleNewChatClick}
               className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
               aria-label={t.newChatAria}
@@ -795,6 +910,7 @@ function TrondbotAppContent() {
                 initialNativeLanguage={nativeLanguage}
                 initialTargetLanguage={targetLanguage}
                 initialScenario={scenario}
+                guestOnly={!signedIn}
                 onComfortLanguageChange={handleComfortLanguageChange}
                 onTargetLanguageChange={handleTargetLanguageChange}
                 onStart={(native, target, scenarioId, customDesc) =>
@@ -841,7 +957,8 @@ function TrondbotAppContent() {
                             ? acknowledgeCorrection
                             : undefined
                         }
-                        onSpendTokenizeCredit={spendTokenizeCredit}
+                        canSpendCredit={canSpendCredit}
+                        onUsageUpdate={applyUsageSnapshot}
                       />
                     ))}
                     {typingAfterAck ? <TypingIndicator /> : null}
@@ -849,6 +966,12 @@ function TrondbotAppContent() {
                 ) : null}
                 <div ref={messagesEndRef} />
               </div>
+
+              {usage.requiresSignIn ? (
+                <div className="border-t border-stone-100 bg-blue-50 px-3 py-3">
+                  <PaywallPrompt onSignInWithGoogle={signInWithGoogle} />
+                </div>
+              ) : null}
 
               {error ? (
                 <p className="border-t border-stone-100 px-3 py-1.5 text-xs text-red-600">

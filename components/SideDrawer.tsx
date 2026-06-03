@@ -14,9 +14,9 @@ interface SideDrawerProps {
   displayName: string | null;
   avatarUrl: string | null;
   signedIn: boolean;
+  hideCreditsNav: boolean;
   supabaseEnabled: boolean;
   onSignIn: () => void;
-  onSignOut: () => void;
 }
 
 export default function SideDrawer({
@@ -28,9 +28,9 @@ export default function SideDrawer({
   displayName,
   avatarUrl,
   signedIn,
+  hideCreditsNav,
   supabaseEnabled,
   onSignIn,
-  onSignOut,
 }: SideDrawerProps) {
   const { t } = useTranslation();
 
@@ -123,16 +123,18 @@ export default function SideDrawer({
                 {t.navHistoryStreaks}
               </Link>
             </li>
-            <li>
-              <Link
-                href="/credits"
-                onClick={onClose}
-                className={navLinkClassName(currentPath === "/credits")}
-                aria-current={currentPath === "/credits" ? "page" : undefined}
-              >
-                {t.navBuyCredits}
-              </Link>
-            </li>
+            {!hideCreditsNav ? (
+              <li>
+                <Link
+                  href="/credits"
+                  onClick={onClose}
+                  className={navLinkClassName(currentPath === "/credits")}
+                  aria-current={currentPath === "/credits" ? "page" : undefined}
+                >
+                  {t.navBuyCredits}
+                </Link>
+              </li>
+            ) : null}
             <li>
               <Link
                 href="/settings"
@@ -157,30 +159,17 @@ export default function SideDrawer({
         </nav>
 
         <div className="border-t border-stone-100 px-2 py-3">
-          {supabaseEnabled ? (
-            signedIn ? (
-              <button
-                type="button"
-                onClick={() => {
-                  onClose();
-                  void onSignOut();
-                }}
-                className="block w-full rounded-lg px-3 py-2.5 text-left text-sm font-medium text-stone-600 transition-colors hover:bg-stone-100"
-              >
-                {t.signOut}
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => {
-                  onClose();
-                  onSignIn();
-                }}
-                className="block w-full rounded-lg px-3 py-2.5 text-left text-sm font-medium text-blue-700 transition-colors hover:bg-blue-50"
-              >
-                {t.signIn}
-              </button>
-            )
+          {supabaseEnabled && !signedIn ? (
+            <button
+              type="button"
+              onClick={() => {
+                onClose();
+                onSignIn();
+              }}
+              className="block w-full rounded-lg px-3 py-2.5 text-left text-sm font-medium text-blue-700 transition-colors hover:bg-blue-50"
+            >
+              {t.signIn}
+            </button>
           ) : null}
         </div>
       </aside>

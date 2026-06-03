@@ -31,3 +31,11 @@ export function getSupabaseAnonKey(): string | undefined {
 export function isSupabaseConfigured(): boolean {
   return getSupabaseUrl() !== undefined && getSupabaseAnonKey() !== undefined;
 }
+
+export function getUsageHmacSecret(): string {
+  return (
+    trimEnv(process.env.USAGE_HMAC_SECRET) ??
+    trimEnv(process.env.SUPABASE_SERVICE_ROLE_KEY) ??
+    "trondbot-dev-usage-secret"
+  );
+}

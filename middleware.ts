@@ -1,8 +1,10 @@
 import { type NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
+import { ensureDeviceUsageCookie } from "@/lib/usage/deviceCookie";
 
 export async function middleware(request: NextRequest) {
-  return updateSession(request);
+  const response = await updateSession(request);
+  return ensureDeviceUsageCookie(request, response);
 }
 
 export const config = {

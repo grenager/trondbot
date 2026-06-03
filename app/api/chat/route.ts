@@ -16,6 +16,12 @@ import type {
   ScenarioOpeningResponse,
 } from "@/lib/types";
 import {
+  assertGuestScenarioAllowed,
+  attachUsageToResponse,
+  getUsageSnapshot,
+  spendMessageCredit,
+} from "@/lib/usage/quota";
+import {
   isChatRequestBody,
   parseAgentResponse,
   parseAgentResponseFailureReason,
@@ -141,6 +147,7 @@ export async function POST(request: Request): Promise<NextResponse> {
 
   const chatBody: ChatRequestBody = body;
   const requestId: string = crypto.randomUUID().slice(0, 8);
+  const usageSnapshot = await getUsageSnapshot();
   const anthropic = new Anthropic({ apiKey });
 
   logChatInfo("request received", {
@@ -153,6 +160,14 @@ export async function POST(request: Request): Promise<NextResponse> {
   });
 
   if (chatBody.startScenario) {
+    const scenarioError = assertGuestScenarioAllowed(
+      chatBody.scenario,
+      usageSnapshot.signedIn,
+    );
+    if (scenarioError) {
+      return scenarioError;
+    }
+
     try {
       const startedAt: number = Date.now();
       const systemPrompt: string = buildSystemPrompt(
@@ -212,7 +227,7 @@ export async function POST(request: Request): Promise<NextResponse> {
         );
       }
 
-      return NextResponse.json(opening);
+      return await attachUsageToResponse(opening, usageSnapshot);
     } catch (error: unknown) {
       const message: string =
         error instanceof Error ? error.message : "Unknown error";
@@ -232,6 +247,22 @@ export async function POST(request: Request): Promise<NextResponse> {
     return NextResponse.json(
       { error: "Last message must be from the user" },
       { status: 400 },
+    );
+  }
+
+  const scenarioError = assertGuestScenarioAllowed(
+    chatBody.scenario,
+    usageSnapshot.signedIn,
+  );
+  if (scenarioError) {
+    return scenarioError;
+  }
+
+  const spendResult = await spendMessageCredit();
+  if (!spendResult.ok) {
+    return (
+      spendResult.response ??
+      NextResponse.json({ error: "Could not spend message credit." }, { status: 500 })
     );
   }
 
@@ -308,7 +339,11 @@ export async function POST(request: Request): Promise<NextResponse> {
       );
     }
 
-    return NextResponse.json(agentResponse);
+    return await attachUsageToResponse(
+      agentResponse,
+      spendResult.usage,
+      spendResult.deviceUsage,
+    );
   } catch (error: unknown) {
     const message: string =
       error instanceof Error ? error.message : "Unknown error";

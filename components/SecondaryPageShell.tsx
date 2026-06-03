@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import AuthModal from "@/components/AuthModal";
 import SideDrawer from "@/components/SideDrawer";
@@ -12,6 +12,10 @@ import { useComfortLanguage } from "@/lib/useComfortLanguage";
 import { TranslationProvider, useTranslation } from "@/lib/i18n/TranslationContext";
 import type { Translations } from "@/lib/i18n/translations";
 import { loadStoredState } from "@/lib/storage";
+import {
+  fetchUsageSnapshot,
+  type UsageSnapshot,
+} from "@/lib/usage/client";
 
 type PageTitleKey =
   | "settingsTitle"
@@ -49,10 +53,17 @@ function SecondaryPageShellContent({
     signInWithGoogle,
     sendEmailCode,
     verifyEmailCode,
-    signOut,
   } = useAuth();
   const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
   const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
+  const [usage, setUsage] = useState<UsageSnapshot | null>(null);
+
+  useEffect(() => {
+    void fetchUsageSnapshot().then(setUsage);
+  }, [user]);
+
+  const hideCreditsNav: boolean =
+    (usage?.requiresSignIn ?? false) && !user;
 
   return (
     <>
@@ -73,9 +84,15 @@ function SecondaryPageShellContent({
         displayName={displayName}
         avatarUrl={avatarUrl}
         signedIn={!!user}
+        hideCreditsNav={hideCreditsNav}
         supabaseEnabled={supabaseEnabled}
-        onSignIn={() => setShowAuthModal(true)}
-        onSignOut={() => void signOut()}
+        onSignIn={() => {
+          if (hideCreditsNav) {
+            void signInWithGoogle();
+            return;
+          }
+          setShowAuthModal(true);
+        }}
       />
       <main className="mx-auto flex h-dvh max-w-2xl flex-col overflow-hidden pb-3 pt-4">
         <header className="mb-4 shrink-0 px-4">

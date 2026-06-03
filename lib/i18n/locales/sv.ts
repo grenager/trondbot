@@ -19,6 +19,14 @@ export const sv: Translations = {
   startChattingNow: "Börja chatta nu",
   freeCreditsNote:
     "De första 100 meddelandena är gratis. Få fler genom att bjuda in en vän eller köpa krediter.",
+  trialLimitUsedCredits: "You have used your 10 free credits.",
+  trialLimitSignInForMore: "Sign in to get 100 more free credits.",
+  signInToContinue: "Sign in to continue",
+  signInForMoreMessages:
+    "Sign in with Google to keep chatting. It is still free — no credit card, no payment, just 100 more messages and all conversation topics.",
+  signInPaywallFreeBadge: "100% free · No credit card required",
+  guestScenarioNote:
+    "Sign in to unlock more conversation topics. For now, try getting to know your chat partner.",
   checking: "Kontrollerar…",
   perfect: "Perfekt!",
   corrected: "Korrigerat",

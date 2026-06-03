@@ -5,6 +5,10 @@ import { getLanguageLabel } from "@/lib/languages";
 import { isLanguageCode } from "@/lib/languagePath";
 import { parseJsonFromModelText } from "@/lib/validation";
 import type { LanguageCode } from "@/lib/types";
+import {
+  attachUsageToResponse,
+  spendMessageCredit,
+} from "@/lib/usage/quota";
 
 const MODEL: string = "claude-sonnet-4-20250514";
 const MAX_TOKENS: number = 256;
@@ -64,6 +68,14 @@ export async function POST(request: Request): Promise<NextResponse> {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
+  const spendResult = await spendMessageCredit();
+  if (!spendResult.ok) {
+    return (
+      spendResult.response ??
+      NextResponse.json({ error: "Could not spend message credit." }, { status: 500 })
+    );
+  }
+
   const sourceLabel: string = getLanguageLabel(body.nativeLanguage);
   const targetLabel: string = getLanguageLabel(body.targetLanguage);
   const word: string = body.word.trim();
@@ -106,7 +118,11 @@ export async function POST(request: Request): Promise<NextResponse> {
       );
     }
 
-    return NextResponse.json({ translation });
+    return await attachUsageToResponse(
+      { translation },
+      spendResult.usage,
+      spendResult.deviceUsage,
+    );
   } catch (error: unknown) {
     const message: string =
       error instanceof Error ? error.message : "Unknown error";
