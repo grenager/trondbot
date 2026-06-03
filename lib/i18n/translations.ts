@@ -21,6 +21,12 @@ export interface Translations {
   conversationPlaceholder: string;
   startChattingNow: string;
   freeCreditsNote: string;
+  trialLimitUsedCredits: string;
+  trialLimitSignInForMore: string;
+  signInToContinue: string;
+  signInForMoreMessages: string;
+  signInPaywallFreeBadge: string;
+  guestScenarioNote: string;
   checking: string;
   perfect: string;
   corrected: string;
@@ -179,7 +185,15 @@ export const en: Translations = {
     "e.g. I'm at the doctor's office describing my symptoms…",
   startChattingNow: "Start Chatting Now",
   freeCreditsNote:
-    "First 100 messages are free. Get more by inviting a friend or buying credits.",
+    "Try 10 messages free. Sign in with Google for 100 more.",
+  trialLimitUsedCredits: "You have used your 10 free credits.",
+  trialLimitSignInForMore: "Sign in to get 100 more free credits.",
+  signInToContinue: "Sign in to continue",
+  signInForMoreMessages:
+    "Sign in with Google to keep chatting. It is still free — no credit card, no payment, just 100 more messages and all conversation topics.",
+  signInPaywallFreeBadge: "100% free · No credit card required",
+  guestScenarioNote:
+    "Sign in to unlock more conversation topics. For now, try getting to know your chat partner.",
   checking: "Checking…",
   perfect: "Perfect!",
   corrected: "Corrected",

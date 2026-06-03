@@ -70,6 +70,7 @@ export default function UserAvatar({
       <img
         src={avatarUrl}
         alt=""
+        referrerPolicy="no-referrer"
         className={`${sizeClasses} block shrink-0 rounded-full object-cover`}
         onError={() => setImageFailed(true)}
       />

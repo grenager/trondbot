@@ -8,6 +8,7 @@ type AuthStep = "options" | "verify-code";
 interface AuthModalProps {
   open: boolean;
   onClose: () => void;
+  paywall?: boolean;
   onSignInWithGoogle: () => Promise<string | null>;
   onSendEmailCode: (email: string) => Promise<string | null>;
   onVerifyEmailCode: (email: string, code: string) => Promise<string | null>;
@@ -16,6 +17,7 @@ interface AuthModalProps {
 export default function AuthModal({
   open,
   onClose,
+  paywall = false,
   onSignInWithGoogle,
   onSendEmailCode,
   onVerifyEmailCode,
@@ -39,6 +41,13 @@ export default function AuthModal({
 
   if (!open) {
     return null;
+  }
+
+  function handleDismiss(): void {
+    if (paywall) {
+      return;
+    }
+    onClose();
   }
 
   async function handleGoogleSignIn(): Promise<void> {
@@ -108,36 +117,48 @@ export default function AuthModal({
         type="button"
         aria-label={t.close}
         className="absolute inset-0 bg-stone-900/40"
-        onClick={onClose}
+        onClick={handleDismiss}
       />
       <div className="relative w-full max-w-sm rounded-xl bg-white p-6 shadow-xl">
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label={t.close}
-          className="absolute right-4 top-4 rounded-md p-1 text-stone-400 transition-colors hover:bg-stone-100 hover:text-stone-600"
-        >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 20 20"
-            fill="none"
-            aria-hidden="true"
+        {!paywall ? (
+          <button
+            type="button"
+            onClick={handleDismiss}
+            aria-label={t.close}
+            className="absolute right-4 top-4 rounded-md p-1 text-stone-400 transition-colors hover:bg-stone-100 hover:text-stone-600"
           >
-            <path
-              d="M5 5l10 10M15 5L5 15"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
-          </svg>
-        </button>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path
+                d="M5 5l10 10M15 5L5 15"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
+            </svg>
+          </button>
+        ) : null}
 
-        <h2 className="mb-4 pr-8 text-lg font-semibold text-stone-900">
-          {t.signIn}
+        <h2 className="mb-2 pr-8 text-lg font-semibold text-stone-900">
+          {paywall ? t.signInToContinue : t.signIn}
         </h2>
+        {paywall ? (
+          <div className="mb-4 space-y-1">
+            <p className="text-sm leading-relaxed text-stone-600">
+              {t.trialLimitUsedCredits}
+            </p>
+            <p className="text-sm leading-relaxed text-stone-600">
+              {t.trialLimitSignInForMore}
+            </p>
+          </div>
+        ) : null}
 
-        {step === "verify-code" ? (
+        {step === "verify-code" && !paywall ? (
           <form onSubmit={handleVerifyCode} className="space-y-4">
             <p className="text-sm leading-relaxed text-stone-600">
               {t.codeSentMessage(email.trim())}
@@ -218,39 +239,56 @@ export default function AuthModal({
               {t.signInWithGoogle}
             </button>
 
-            <div className="my-4 flex items-center gap-3">
-              <div className="h-px flex-1 bg-stone-200" />
-              <span className="text-xs font-medium text-stone-400">
-                {t.orDivider}
-              </span>
-              <div className="h-px flex-1 bg-stone-200" />
-            </div>
+            {paywall ? (
+              <>
+                {error ? (
+                  <p className="mt-3 text-center text-xs text-red-600">{error}</p>
+                ) : null}
+                <div className="mt-3 flex justify-center">
+                  <p className="inline-flex rounded-full bg-green-50 px-2.5 py-1 text-xs font-medium text-green-800">
+                    {t.signInPaywallFreeBadge}
+                  </p>
+                </div>
+              </>
+            ) : null}
 
-            <form onSubmit={handleSendCode} className="space-y-4">
-              <label className="block">
-                <span className="mb-1 block text-xs font-medium text-stone-600">
-                  {t.email}
-                </span>
-                <input
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={email}
-                  onChange={(event) => setEmail(event.target.value)}
-                  className="w-full rounded-lg border border-stone-200 px-3 py-2 text-sm text-stone-900 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
-                />
-              </label>
+            {!paywall ? (
+              <>
+                <div className="my-4 flex items-center gap-3">
+                  <div className="h-px flex-1 bg-stone-200" />
+                  <span className="text-xs font-medium text-stone-400">
+                    {t.orDivider}
+                  </span>
+                  <div className="h-px flex-1 bg-stone-200" />
+                </div>
 
-              {error ? <p className="text-xs text-red-600">{error}</p> : null}
+                <form onSubmit={handleSendCode} className="space-y-4">
+                  <label className="block">
+                    <span className="mb-1 block text-xs font-medium text-stone-600">
+                      {t.email}
+                    </span>
+                    <input
+                      type="email"
+                      autoComplete="email"
+                      required
+                      value={email}
+                      onChange={(event) => setEmail(event.target.value)}
+                      className="w-full rounded-lg border border-stone-200 px-3 py-2 text-sm text-stone-900 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                    />
+                  </label>
 
-              <button
-                type="submit"
-                disabled={submitting}
-                className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {submitting ? t.loadingAccount : t.sendSignInCode}
-              </button>
-            </form>
+                  {error ? <p className="text-xs text-red-600">{error}</p> : null}
+
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {submitting ? t.loadingAccount : t.sendSignInCode}
+                  </button>
+                </form>
+              </>
+            ) : null}
           </>
         )}
       </div>

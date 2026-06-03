@@ -5,6 +5,10 @@ import { getLanguageLabel } from "@/lib/languages";
 import { isLanguageCode } from "@/lib/languagePath";
 import { parseJsonFromModelText } from "@/lib/validation";
 import type { LanguageCode, Token } from "@/lib/types";
+import {
+  attachUsageToResponse,
+  spendMessageCredit,
+} from "@/lib/usage/quota";
 
 const MODEL: string = "claude-sonnet-4-20250514";
 
@@ -83,6 +87,14 @@ export async function POST(request: Request): Promise<NextResponse> {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
+  const spendResult = await spendMessageCredit();
+  if (!spendResult.ok) {
+    return (
+      spendResult.response ??
+      NextResponse.json({ error: "Could not spend message credit." }, { status: 500 })
+    );
+  }
+
   const messageLabel: string = getLanguageLabel(body.messageLanguage);
   const glossLabel: string = getLanguageLabel(body.glossLanguage);
   const text: string = body.text.trim();
@@ -102,7 +114,7 @@ export async function POST(request: Request): Promise<NextResponse> {
           content:
             `Tokenize this ${messageLabel} text for a learner whose comfort language is ${glossLabel}.\n` +
             `Text: "${text}"\n` +
-            "Return JSON only: {\"tokens\":[{\"word\":\"...\",\"gloss\":\"...\"}, ...]}\n" +
+            'Return JSON only: {"tokens":[{"word":"...","gloss":"..."}, ...]}\n' +
             "- word: each word or meaningful unit from the text, in order (keep punctuation attached when natural)\n" +
             `- gloss: the ${glossLabel} meaning or translation of that unit`,
         },
@@ -128,7 +140,11 @@ export async function POST(request: Request): Promise<NextResponse> {
       );
     }
 
-    return NextResponse.json({ tokens });
+    return await attachUsageToResponse(
+      { tokens },
+      spendResult.usage,
+      spendResult.deviceUsage,
+    );
   } catch (error: unknown) {
     const message: string =
       error instanceof Error ? error.message : "Unknown error";

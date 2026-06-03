@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "@/lib/i18n/TranslationContext";
+import { applyUsageFromApiResponse, type UsageSnapshot } from "@/lib/usage/client";
 import { splitMessageWords } from "@/lib/splitMessageWords";
 import type { LanguageCode, Token } from "@/lib/types";
 
@@ -10,7 +11,8 @@ interface LazyWordTextProps {
   messageLanguage: LanguageCode;
   glossLanguage: LanguageCode;
   variant?: "default" | "onDark";
-  onSpendTokenizeCredit?: () => boolean;
+  canSpendCredit?: () => boolean;
+  onUsageUpdate?: (usage: UsageSnapshot) => void;
 }
 
 function parseTokenizeResponse(data: unknown): Token[] | null {
@@ -51,7 +53,8 @@ export default function LazyWordText({
   messageLanguage,
   glossLanguage,
   variant = "default",
-  onSpendTokenizeCredit,
+  canSpendCredit,
+  onUsageUpdate,
 }: LazyWordTextProps) {
   const { t } = useTranslation();
   const words: string[] = splitMessageWords(text);
@@ -76,7 +79,7 @@ export default function LazyWordText({
       setFetchError(null);
 
       try {
-        if (onSpendTokenizeCredit && !onSpendTokenizeCredit()) {
+        if (canSpendCredit && !canSpendCredit()) {
           throw new Error(t.noCreditsForWordLookup);
         }
 
@@ -91,6 +94,10 @@ export default function LazyWordText({
         });
 
         const data: unknown = await response.json();
+        if (onUsageUpdate) {
+          applyUsageFromApiResponse(data, onUsageUpdate);
+        }
+
         if (!response.ok) {
           const errorMessage: string =
             typeof data === "object" &&
@@ -127,7 +134,8 @@ export default function LazyWordText({
     messageLanguage,
     glossLanguage,
     tokens,
-    onSpendTokenizeCredit,
+    canSpendCredit,
+    onUsageUpdate,
     t.lookupFailed,
     t.noCreditsForWordLookup,
   ]);

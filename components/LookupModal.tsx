@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { getLanguageLabelLocalized } from "@/lib/i18n";
 import { useTranslation } from "@/lib/i18n/TranslationContext";
+import { applyUsageFromApiResponse, type UsageSnapshot } from "@/lib/usage/client";
 import type { LanguageCode } from "@/lib/types";
 
 interface LookupModalProps {
@@ -11,6 +12,8 @@ interface LookupModalProps {
   targetLanguage: LanguageCode;
   onClose: () => void;
   onInsert: (word: string) => void;
+  canSpendCredit?: () => boolean;
+  onUsageUpdate?: (usage: UsageSnapshot) => void;
 }
 
 export default function LookupModal({
@@ -19,6 +22,8 @@ export default function LookupModal({
   targetLanguage,
   onClose,
   onInsert,
+  canSpendCredit,
+  onUsageUpdate,
 }: LookupModalProps) {
   const { t, locale } = useTranslation();
   const [sourceWord, setSourceWord] = useState<string>("");
@@ -55,6 +60,11 @@ export default function LookupModal({
       return;
     }
 
+    if (canSpendCredit && !canSpendCredit()) {
+      setError(t.noCreditsForWordLookup);
+      return;
+    }
+
     setLoading(true);
     setError(null);
     setTranslation(null);
@@ -71,6 +81,9 @@ export default function LookupModal({
       });
 
       const data: unknown = await response.json();
+      if (onUsageUpdate) {
+        applyUsageFromApiResponse(data, onUsageUpdate);
+      }
 
       if (!response.ok) {
         const errorMessage: string =

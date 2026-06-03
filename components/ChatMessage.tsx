@@ -1,4 +1,5 @@
 import type { DisplayMessage, LanguageCode } from "@/lib/types";
+import type { UsageSnapshot } from "@/lib/usage/client";
 import LazyWordText from "./LazyWordText";
 import SpeakButton from "./SpeakButton";
 import UserBubble from "./UserBubble";
@@ -9,7 +10,8 @@ interface ChatMessageProps {
   nativeLanguage: LanguageCode;
   loading?: boolean;
   onAcknowledgeCorrection?: () => void;
-  onSpendTokenizeCredit?: () => boolean;
+  canSpendCredit?: () => boolean;
+  onUsageUpdate?: (usage: UsageSnapshot) => void;
 }
 
 export default function ChatMessage({
@@ -18,7 +20,8 @@ export default function ChatMessage({
   nativeLanguage,
   loading = false,
   onAcknowledgeCorrection,
-  onSpendTokenizeCredit,
+  canSpendCredit,
+  onUsageUpdate,
 }: ChatMessageProps) {
   if (message.role === "user") {
     return (
@@ -28,7 +31,8 @@ export default function ChatMessage({
         nativeLanguage={nativeLanguage}
         loading={loading}
         onAcknowledgeCorrection={onAcknowledgeCorrection}
-        onSpendTokenizeCredit={onSpendTokenizeCredit}
+        canSpendCredit={canSpendCredit}
+        onUsageUpdate={onUsageUpdate}
       />
     );
   }
@@ -40,7 +44,8 @@ export default function ChatMessage({
           text={message.content}
           messageLanguage={targetLanguage}
           glossLanguage={nativeLanguage}
-          onSpendTokenizeCredit={onSpendTokenizeCredit}
+          canSpendCredit={canSpendCredit}
+          onUsageUpdate={onUsageUpdate}
         />
         <SpeakButton
           text={message.content}

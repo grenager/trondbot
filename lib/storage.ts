@@ -19,6 +19,12 @@ export const MAX_STORED_MESSAGES = 50;
 export const INITIAL_FREE_CREDITS = 100;
 export const MAX_TOTAL_CREDITS = 100;
 
+export {
+  ANONYMOUS_FREE_MESSAGES,
+  SIGNED_IN_FREE_CREDITS,
+  GUEST_SCENARIO_ID,
+} from "@/lib/usage/constants";
+
 const LANGUAGE_CODES: ReadonlySet<LanguageCode> = new Set(
   LANGUAGES.map((language) => language.code),
 );

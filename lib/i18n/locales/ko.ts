@@ -18,6 +18,14 @@ export const ko: Translations = {
   startChattingNow: "채팅 시작하기",
   freeCreditsNote:
     "처음 100개 메시지는 무료입니다. 친구를 초대하거나 크레딧을 구매해서 더 받으세요.",
+  trialLimitUsedCredits: "You have used your 10 free credits.",
+  trialLimitSignInForMore: "Sign in to get 100 more free credits.",
+  signInToContinue: "Sign in to continue",
+  signInForMoreMessages:
+    "Sign in with Google to keep chatting. It is still free — no credit card, no payment, just 100 more messages and all conversation topics.",
+  signInPaywallFreeBadge: "100% free · No credit card required",
+  guestScenarioNote:
+    "Sign in to unlock more conversation topics. For now, try getting to know your chat partner.",
   checking: "확인 중…",
   perfect: "완벽해요!",
   corrected: "교정됨",

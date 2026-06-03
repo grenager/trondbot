@@ -64,27 +64,57 @@ export function resolveDisplayName(
   return getDisplayNameFromUser(user);
 }
 
+function readAvatarUrlFromRecord(
+  record: Record<string, unknown>,
+): string | null {
+  const candidates: readonly string[] = [
+    "avatar_url",
+    "picture",
+    "photo_url",
+    "photoURL",
+  ];
+
+  for (const key of candidates) {
+    const value: unknown = record[key];
+    if (typeof value === "string" && value.trim().length > 0) {
+      return value.trim();
+    }
+  }
+
+  return null;
+}
+
 export function getAvatarUrlFromUser(
   user: User | null | undefined,
 ): string | null {
-  if (!user?.user_metadata || !isRecord(user.user_metadata)) {
+  if (!user) {
     return null;
   }
 
-  const metadata: Record<string, unknown> = user.user_metadata;
-
-  if (
-    typeof metadata.avatar_url === "string" &&
-    metadata.avatar_url.trim().length > 0
-  ) {
-    return metadata.avatar_url.trim();
+  if (user.user_metadata && isRecord(user.user_metadata)) {
+    const fromMetadata: string | null = readAvatarUrlFromRecord(
+      user.user_metadata,
+    );
+    if (fromMetadata) {
+      return fromMetadata;
+    }
   }
 
-  if (
-    typeof metadata.picture === "string" &&
-    metadata.picture.trim().length > 0
-  ) {
-    return metadata.picture.trim();
+  for (const identity of user.identities ?? []) {
+    if (identity.provider !== "google") {
+      continue;
+    }
+
+    if (!isRecord(identity.identity_data)) {
+      continue;
+    }
+
+    const fromIdentity: string | null = readAvatarUrlFromRecord(
+      identity.identity_data,
+    );
+    if (fromIdentity) {
+      return fromIdentity;
+    }
   }
 
   return null;

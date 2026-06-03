@@ -18,6 +18,14 @@ export const hi: Translations = {
   startChattingNow: "अभी चैट शुरू करें",
   freeCreditsNote:
     "पहले 100 संदेश मुफ़्त हैं। दोस्त को आमंत्रित करके या क्रेडिट खरीदकर और पाएँ।",
+  trialLimitUsedCredits: "You have used your 10 free credits.",
+  trialLimitSignInForMore: "Sign in to get 100 more free credits.",
+  signInToContinue: "Sign in to continue",
+  signInForMoreMessages:
+    "Sign in with Google to keep chatting. It is still free — no credit card, no payment, just 100 more messages and all conversation topics.",
+  signInPaywallFreeBadge: "100% free · No credit card required",
+  guestScenarioNote:
+    "Sign in to unlock more conversation topics. For now, try getting to know your chat partner.",
   checking: "जाँच हो रही है…",
   perfect: "बढ़िया!",
   corrected: "सुधार किया गया",

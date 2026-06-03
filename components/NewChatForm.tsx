@@ -2,8 +2,8 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import LanguageSelect from "@/components/LanguageSelect";
-import { SCENARIOS } from "@/lib/scenarios";
-import type { ScenarioId } from "@/lib/scenarios";
+import { SCENARIOS, type ScenarioId } from "@/lib/scenarios";
+import { GUEST_SCENARIO_ID } from "@/lib/storage";
 import { useTranslation } from "@/lib/i18n/TranslationContext";
 import type { LanguageCode } from "@/lib/types";
 
@@ -11,6 +11,7 @@ interface NewChatFormProps {
   initialNativeLanguage: LanguageCode;
   initialTargetLanguage: LanguageCode;
   initialScenario: ScenarioId;
+  guestOnly?: boolean;
   onComfortLanguageChange: (nativeLanguage: LanguageCode) => void;
   onTargetLanguageChange: (targetLanguage: LanguageCode) => void;
   onStart: (
@@ -27,6 +28,7 @@ export default function NewChatForm({
   initialNativeLanguage,
   initialTargetLanguage,
   initialScenario,
+  guestOnly = false,
   onComfortLanguageChange,
   onTargetLanguageChange,
   onStart,
@@ -61,15 +63,17 @@ export default function NewChatForm({
 
   function handleSubmit(event: FormEvent<HTMLFormElement>): void {
     event.preventDefault();
+    const scenarioId: ScenarioId = guestOnly ? GUEST_SCENARIO_ID : scenario;
     onStart(
       nativeLanguage,
       targetLanguage,
-      scenario,
-      scenario === "custom" ? customDescription.trim() || undefined : undefined,
+      scenarioId,
+      scenarioId === "custom" ? customDescription.trim() || undefined : undefined,
     );
   }
 
-  const isValid = scenario !== "custom" || customDescription.trim().length > 0;
+  const isValid: boolean =
+    guestOnly || scenario !== "custom" || customDescription.trim().length > 0;
 
   return (
     <form
@@ -92,27 +96,31 @@ export default function NewChatForm({
         value={targetLanguage}
         onChange={handleTargetLanguageChange}
       />
-      <div className="flex flex-col gap-1">
-        <label
-          htmlFor="setup-scenario"
-          className="text-xs font-medium text-stone-500"
-        >
-          {t.chatTopic}
-        </label>
-        <select
-          id="setup-scenario"
-          value={scenario}
-          onChange={(event) => setScenario(event.target.value as ScenarioId)}
-          className="rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm text-stone-800 shadow-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
-        >
-          {SCENARIOS.map((s) => (
-            <option key={s.id} value={s.id}>
-              {t.scenarioLabels[s.id]}
-            </option>
-          ))}
-        </select>
-      </div>
-      {scenario === "custom" ? (
+      {!guestOnly ? (
+        <div className="flex flex-col gap-1">
+          <label
+            htmlFor="setup-scenario"
+            className="text-xs font-medium text-stone-500"
+          >
+            {t.chatTopic}
+          </label>
+          <select
+            id="setup-scenario"
+            value={scenario}
+            onChange={(event) => setScenario(event.target.value as ScenarioId)}
+            className="rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm text-stone-800 shadow-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
+          >
+            {SCENARIOS.map((s) => (
+              <option key={s.id} value={s.id}>
+                {t.scenarioLabels[s.id]}
+              </option>
+            ))}
+          </select>
+        </div>
+      ) : (
+        <p className="text-xs leading-relaxed text-stone-500">{t.guestScenarioNote}</p>
+      )}
+      {!guestOnly && scenario === "custom" ? (
         <div className="flex flex-col gap-1">
           <label
             htmlFor="setup-custom"
