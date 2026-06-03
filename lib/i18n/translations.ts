@@ -79,6 +79,19 @@ export interface Translations {
   lookupFailed: string;
   noCreditsForWordLookup: string;
   lookupNoResult: string;
+  signIn: string;
+  signOut: string;
+  email: string;
+  signInWithGoogle: string;
+  sendSignInCode: string;
+  enterSignInCode: string;
+  codeSentMessage: (email: string) => string;
+  verifyCode: string;
+  useDifferentEmail: string;
+  authError: string;
+  account: string;
+  signedInAs: (email: string) => string;
+  loadingAccount: string;
   appTitle: string;
   appDescription: string;
   scenarioLabels: ScenarioLabels;
@@ -205,6 +218,19 @@ export const en: Translations = {
   lookupFailed: "Lookup failed. Please try again.",
   noCreditsForWordLookup: "No credits left for word lookup.",
   lookupNoResult: "No translation found.",
+  signIn: "Sign in",
+  signOut: "Sign out",
+  email: "Email",
+  signInWithGoogle: "Continue with Google",
+  sendSignInCode: "Send sign-in code",
+  enterSignInCode: "6-digit code",
+  codeSentMessage: (email: string) => `We sent a sign-in code to ${email}.`,
+  verifyCode: "Verify code",
+  useDifferentEmail: "Use a different email",
+  authError: "Authentication failed. Please try again.",
+  account: "Account",
+  signedInAs: (email: string) => `Signed in as ${email}`,
+  loadingAccount: "Loading…",
   appTitle: "Trondbot",
   appDescription: "Simple language learning AI chat",
   scenarioLabels: EN_SCENARIO_LABELS,

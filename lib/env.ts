@@ -1,15 +1,14 @@
-function readEnv(name: string): string | undefined {
-  const raw: string | undefined = process.env[name];
-  if (!raw) {
+function trimEnv(value: string | undefined): string | undefined {
+  if (!value) {
     return undefined;
   }
 
-  const trimmed: string = raw.trim();
+  const trimmed: string = value.trim();
   return trimmed.length > 0 ? trimmed : undefined;
 }
 
 export function getAnthropicApiKey(): string | undefined {
-  return readEnv("ANTHROPIC_API_KEY");
+  return trimEnv(process.env.ANTHROPIC_API_KEY);
 }
 
 export function isAnthropicApiKeyConfigured(): boolean {
@@ -17,11 +16,16 @@ export function isAnthropicApiKeyConfigured(): boolean {
 }
 
 export function getSupabaseUrl(): string | undefined {
-  return readEnv("NEXT_PUBLIC_SUPABASE_URL");
+  // Must use static property access so Next.js inlines this on the client.
+  return trimEnv(process.env.NEXT_PUBLIC_SUPABASE_URL);
 }
 
 export function getSupabaseAnonKey(): string | undefined {
-  return readEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY");
+  // Must use static property access so Next.js inlines these on the client.
+  return (
+    trimEnv(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) ??
+    trimEnv(process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY)
+  );
 }
 
 export function isSupabaseConfigured(): boolean {

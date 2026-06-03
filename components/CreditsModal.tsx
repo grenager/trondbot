@@ -10,6 +10,7 @@ type ModalView = "options" | "invite" | "confirmation";
 interface CreditsModalProps {
   open: boolean;
   credits: number;
+  inviteCode?: string;
   onClose: () => void;
   onPurchase: (creditsToAdd: number) => number;
 }
@@ -17,6 +18,7 @@ interface CreditsModalProps {
 export default function CreditsModal({
   open,
   credits,
+  inviteCode,
   onClose,
   onPurchase,
 }: CreditsModalProps) {
@@ -55,7 +57,7 @@ export default function CreditsModal({
     trackInviteFriend();
     const creditsAdded: number = onPurchase(100);
     setConfirmationCredits(creditsAdded);
-    setInviteUrl(getInviteUrl());
+    setInviteUrl(getInviteUrl(inviteCode));
     setView("invite");
   }
 

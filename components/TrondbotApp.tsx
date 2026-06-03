@@ -8,6 +8,8 @@ import ConfirmDialog from "@/components/ConfirmDialog";
 import AboutModal from "@/components/AboutModal";
 import CreditsModal from "@/components/CreditsModal";
 import CreditsWheel from "@/components/CreditsWheel";
+import AuthModal from "@/components/AuthModal";
+import { AuthProvider, useAuth } from "@/components/AuthProvider";
 import LookupModal from "@/components/LookupModal";
 import NewChatForm from "@/components/NewChatForm";
 import TypingIndicator from "@/components/TypingIndicator";
@@ -98,6 +100,14 @@ function getDisplayMessages(allMessages: DisplayMessage[]): DisplayMessage[] {
 }
 
 export default function TrondbotApp() {
+  return (
+    <AuthProvider>
+      <TrondbotAppContent />
+    </AuthProvider>
+  );
+}
+
+function TrondbotAppContent() {
   const router = useRouter();
   const pathname: string = usePathname();
   const params = useParams<{
@@ -123,9 +133,21 @@ export default function TrondbotApp() {
   const [showNewChatConfirm, setShowNewChatConfirm] = useState<boolean>(false);
   const [showAbout, setShowAbout] = useState<boolean>(false);
   const [showCreditsModal, setShowCreditsModal] = useState<boolean>(false);
+  const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
   const [showLookupModal, setShowLookupModal] = useState<boolean>(false);
   const [credits, setCredits] = useState<number>(INITIAL_FREE_CREDITS);
   const creditsRef = useRef<number>(INITIAL_FREE_CREDITS);
+  const {
+    user,
+    profile,
+    authReady,
+    supabaseEnabled,
+    signInWithGoogle,
+    sendEmailCode,
+    verifyEmailCode,
+    signOut,
+    updateProfileCredits,
+  } = useAuth();
   const [typingAfterAck, setTypingAfterAck] = useState<boolean>(false);
   const [composerMultiline, setComposerMultiline] = useState<boolean>(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -222,6 +244,30 @@ export default function TrondbotApp() {
     // Hydrate once from the initial URL and stored chat state.
     // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional mount-only
   }, []);
+
+  function persistCredits(newCredits: number): void {
+    setCredits(newCredits);
+    if (user) {
+      void updateProfileCredits(newCredits);
+      return;
+    }
+    saveCredits(newCredits);
+  }
+
+  useEffect(() => {
+    if (!hydrated || !authReady) {
+      return;
+    }
+
+    if (user && profile) {
+      setCredits(profile.credits);
+      return;
+    }
+
+    if (!user) {
+      setCredits(loadCredits());
+    }
+  }, [hydrated, authReady, user, profile]);
 
   useEffect(() => {
     if (!hydrated) {
@@ -344,8 +390,7 @@ export default function TrondbotApp() {
       return 0;
     }
     const newCredits: number = credits + creditsAdded;
-    setCredits(newCredits);
-    saveCredits(newCredits);
+    persistCredits(newCredits);
     return creditsAdded;
   }
 
@@ -356,10 +401,9 @@ export default function TrondbotApp() {
 
     const newCredits: number = creditsRef.current - 1;
     creditsRef.current = newCredits;
-    setCredits(newCredits);
-    saveCredits(newCredits);
+    persistCredits(newCredits);
     return true;
-  }, []);
+  }, [user, updateProfileCredits]);
 
   async function startScenario(
     scenarioId: ScenarioId,
@@ -475,8 +519,7 @@ export default function TrondbotApp() {
     });
 
     const newCredits: number = Math.max(0, credits - 1);
-    setCredits(newCredits);
-    saveCredits(newCredits);
+    persistCredits(newCredits);
 
     try {
       const response = await fetchChat({
@@ -681,8 +724,16 @@ export default function TrondbotApp() {
         <CreditsModal
           open={showCreditsModal}
           credits={credits}
+          inviteCode={profile?.invite_code}
           onClose={() => setShowCreditsModal(false)}
           onPurchase={handleCreditsPurchase}
+        />
+        <AuthModal
+          open={showAuthModal}
+          onClose={() => setShowAuthModal(false)}
+          onSignInWithGoogle={signInWithGoogle}
+          onSendEmailCode={sendEmailCode}
+          onVerifyEmailCode={verifyEmailCode}
         />
         <LookupModal
           open={showLookupModal}
@@ -709,6 +760,26 @@ export default function TrondbotApp() {
                   priority
                 />
               </button>
+              {supabaseEnabled ? (
+                user ? (
+                  <button
+                    type="button"
+                    onClick={() => void signOut()}
+                    className="rounded-full px-2.5 py-1 text-xs font-medium text-stone-600 transition-colors hover:bg-stone-100 hover:text-stone-900"
+                    title={profile?.email ? t.signedInAs(profile.email) : t.account}
+                  >
+                    {t.signOut}
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setShowAuthModal(true)}
+                    className="rounded-full px-2.5 py-1 text-xs font-medium text-blue-700 transition-colors hover:bg-blue-50"
+                  >
+                    {t.signIn}
+                  </button>
+                )
+              ) : null}
             </div>
             <CreditsWheel credits={credits} onClick={() => setShowCreditsModal(true)} />
             <button
