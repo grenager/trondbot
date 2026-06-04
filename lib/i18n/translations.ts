@@ -26,6 +26,9 @@ export interface Translations {
   signInToContinue: string;
   signInForMoreMessages: string;
   signInPaywallFreeBadge: string;
+  joinReferralTitle: string;
+  joinReferralMessage: string;
+  joinReferralTryGuest: string;
   guestScenarioNote: string;
   checking: string;
   perfect: string;
@@ -43,6 +46,10 @@ export interface Translations {
   buyCreditsDescription: string;
   inviteFriend: string;
   inviteFriendDescription: string;
+  inviteFriendCreating: string;
+  inviteFriendError: string;
+  referralGraceMessage: string;
+  referralPendingCap: string;
   getInviteLink: string;
   buyNow: string;
   copyLink: string;
@@ -192,6 +199,10 @@ export const en: Translations = {
   signInForMoreMessages:
     "Sign in with Google to keep chatting. It is still free — no credit card, no payment, just 100 more messages and all conversation topics.",
   signInPaywallFreeBadge: "100% free · No credit card required",
+  joinReferralTitle: "You've been invited!",
+  joinReferralMessage:
+    "Your friend invited you to practice languages on Trondbot. Sign in free to start chatting — they'll earn bonus credits when you join.",
+  joinReferralTryGuest: "Or try 10 free messages first",
   guestScenarioNote:
     "Sign in to unlock more conversation topics. For now, try getting to know your chat partner.",
   checking: "Checking…",
@@ -211,7 +222,13 @@ export const en: Translations = {
     `You have ${count} messages remaining.`,
   buyCreditsDescription: "Support Trondbot's development",
   inviteFriend: "Invite a Friend",
-  inviteFriendDescription: "Share your link and get 100 free credits",
+  inviteFriendDescription: "Get 20 credits now + 80 when they sign in",
+  inviteFriendCreating: "Creating your invite link…",
+  inviteFriendError: "Could not create your invite link. Please try again.",
+  referralGraceMessage:
+    "20 credits added! You'll earn 80 more when your friend signs in using your link.",
+  referralPendingCap:
+    "You have too many pending invites. Wait for friends to sign up.",
   getInviteLink: "Get Invite Link",
   buyNow: "Buy Now",
   copyLink: "Copy Link",

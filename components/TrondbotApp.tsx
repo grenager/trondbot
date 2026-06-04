@@ -1,10 +1,11 @@
 "use client";
 
-import { FormEvent, KeyboardEvent, useCallback, useEffect, useRef, useState } from "react";
+import { FormEvent, KeyboardEvent, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import ChatMessage from "@/components/ChatMessage";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import CreditsModal from "@/components/CreditsModal";
+import ReferralCapture from "@/components/ReferralCapture";
 import PaywallPrompt from "@/components/PaywallPrompt";
 import CreditsWheel from "@/components/CreditsWheel";
 import AuthModal from "@/components/AuthModal";
@@ -841,7 +842,11 @@ function TrondbotAppContent() {
           inviteCode={profile?.invite_code}
           onClose={() => setShowCreditsModal(false)}
           onPurchase={handleCreditsPurchase}
+          onReferralCreated={refreshUsage}
         />
+        <Suspense fallback={null}>
+          <ReferralCapture />
+        </Suspense>
         <AuthModal
           open={showAuthModal}
           onClose={() => setShowAuthModal(false)}

@@ -29,9 +29,16 @@ Set `ANTHROPIC_API_KEY` for chat. For accounts and credits, create a [Supabase](
 
 Then run the SQL migration in `supabase/migrations/001_profiles.sql` in the Supabase SQL editor (creates the `profiles` table and signup trigger).
 
-In Supabase **Authentication**:
+In Supabase **Authentication → URL Configuration**:
 
-- **URL Configuration** — add `http://localhost:3000/auth/callback` (and your production URL)
+- **Site URL** — your production URL (e.g. `https://trondbot.com`)
+- **Redirect URLs** — add each callback base URL (no query strings needed). Wildcards are fine:
+  - `http://localhost:3000/auth/callback`
+  - `http://localhost:3001/auth/callback`
+  - `https://trondbot.com/auth/callback`
+  - Or `http://localhost:3001/**` to cover any local path on that port
+
+Supabase supports production and local dev on the **same project** as long as every `redirectTo` host is on this list. If a redirect URL does not match, Supabase falls back to the Site URL (production).
 - **Providers → Google** — enable and add OAuth credentials from Google Cloud Console
 - **Providers → Email** — enable email sign-in; use the email OTP / magic link flow (no passwords)
 

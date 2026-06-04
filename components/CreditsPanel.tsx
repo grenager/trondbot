@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { trackCreditPurchase, trackInviteFriend } from "@/lib/analytics";
 import { useTranslation } from "@/lib/i18n/TranslationContext";
+import { createReferralInvite } from "@/lib/referral/client";
 import { getInviteUrl, MAX_TOTAL_CREDITS } from "@/lib/storage";
 
 type PanelView = "options" | "invite" | "confirmation";
@@ -11,18 +12,22 @@ interface CreditsPanelProps {
   credits: number;
   inviteCode?: string;
   onPurchase: (creditsToAdd: number) => number;
+  onReferralCreated?: () => void | Promise<void>;
 }
 
 export default function CreditsPanel({
   credits,
   inviteCode,
   onPurchase,
+  onReferralCreated,
 }: CreditsPanelProps) {
   const { t } = useTranslation();
   const [view, setView] = useState<PanelView>("options");
   const [confirmationCredits, setConfirmationCredits] = useState<number>(0);
   const [inviteUrl, setInviteUrl] = useState<string>("");
   const [linkCopied, setLinkCopied] = useState<boolean>(false);
+  const [inviteLoading, setInviteLoading] = useState<boolean>(false);
+  const [inviteError, setInviteError] = useState<string | null>(null);
   const atCreditCap: boolean = credits >= MAX_TOTAL_CREDITS;
 
   function handleBuy(): void {
@@ -34,12 +39,29 @@ export default function CreditsPanel({
     }
   }
 
-  function handleInvite(): void {
+  async function handleInvite(): Promise<void> {
     trackInviteFriend();
-    const creditsAdded: number = onPurchase(100);
-    setConfirmationCredits(creditsAdded);
-    setInviteUrl(getInviteUrl(inviteCode));
-    setView("invite");
+    setInviteError(null);
+    setInviteLoading(true);
+
+    try {
+      const result = await createReferralInvite();
+      if (result.error || !result.data) {
+        if (result.error === "PENDING_REFERRAL_CAP") {
+          setInviteError(t.referralPendingCap);
+        } else {
+          setInviteError(t.inviteFriendError);
+        }
+        return;
+      }
+
+      setConfirmationCredits(result.data.graceCredits);
+      setInviteUrl(getInviteUrl(result.data.inviteCode ?? inviteCode));
+      setView("invite");
+      await onReferralCreated?.();
+    } finally {
+      setInviteLoading(false);
+    }
   }
 
   async function handleCopyLink(): Promise<void> {
@@ -75,7 +97,7 @@ export default function CreditsPanel({
       <section className="rounded-xl border border-stone-200 bg-white p-4">
         <h2 className="text-lg font-semibold text-stone-900">{t.creditsAdded}</h2>
         <p className="mt-2 text-sm leading-relaxed text-stone-600">
-          {t.creditsAddedMessage(confirmationCredits)}
+          {t.referralGraceMessage}
         </p>
         <p className="mt-4 text-xs font-medium text-stone-500">
           {t.yourInviteLink}
@@ -134,8 +156,8 @@ export default function CreditsPanel({
 
         <button
           type="button"
-          disabled={atCreditCap}
-          onClick={handleInvite}
+          disabled={atCreditCap || inviteLoading}
+          onClick={() => void handleInvite()}
           className="group w-full rounded-xl border-2 border-green-100 bg-green-50/50 p-4 text-left transition-colors hover:border-green-300 hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <div className="flex items-center justify-between">
@@ -147,9 +169,12 @@ export default function CreditsPanel({
             </span>
           </div>
           <p className="mt-1 text-xs text-stone-500">
-            {t.inviteFriendDescription}
+            {inviteLoading ? t.inviteFriendCreating : t.inviteFriendDescription}
           </p>
         </button>
+        {inviteError ? (
+          <p className="text-xs text-red-600">{inviteError}</p>
+        ) : null}
       </div>
     </section>
   );

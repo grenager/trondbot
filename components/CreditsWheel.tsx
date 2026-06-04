@@ -16,7 +16,8 @@ export default function CreditsWheel({
   onClick,
 }: CreditsWheelProps) {
   const { t } = useTranslation();
-  const ratio: number = maxCredits > 0 ? Math.min(credits / maxCredits, 1) : 0;
+  const displayMax: number = Math.max(maxCredits, credits, 1);
+  const ratio: number = Math.min(credits / displayMax, 1);
   const radius = 9;
   const circumference: number = 2 * Math.PI * radius;
   const strokeDashoffset: number = circumference * (1 - ratio);

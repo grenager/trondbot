@@ -9,6 +9,8 @@ interface AuthModalProps {
   open: boolean;
   onClose: () => void;
   paywall?: boolean;
+  referralInvite?: boolean;
+  onTryGuest?: () => void;
   onSignInWithGoogle: () => Promise<string | null>;
   onSendEmailCode: (email: string) => Promise<string | null>;
   onVerifyEmailCode: (email: string, code: string) => Promise<string | null>;
@@ -18,6 +20,8 @@ export default function AuthModal({
   open,
   onClose,
   paywall = false,
+  referralInvite = false,
+  onTryGuest,
   onSignInWithGoogle,
   onSendEmailCode,
   onVerifyEmailCode,
@@ -145,7 +149,11 @@ export default function AuthModal({
         ) : null}
 
         <h2 className="mb-2 pr-8 text-lg font-semibold text-stone-900">
-          {paywall ? t.signInToContinue : t.signIn}
+          {paywall
+            ? t.signInToContinue
+            : referralInvite
+              ? t.joinReferralTitle
+              : t.signIn}
         </h2>
         {paywall ? (
           <div className="mb-4 space-y-1">
@@ -154,6 +162,16 @@ export default function AuthModal({
             </p>
             <p className="text-sm leading-relaxed text-stone-600">
               {t.trialLimitSignInForMore}
+            </p>
+          </div>
+        ) : null}
+        {referralInvite && !paywall ? (
+          <div className="mb-4 space-y-3">
+            <p className="text-sm leading-relaxed text-stone-600">
+              {t.joinReferralMessage}
+            </p>
+            <p className="inline-flex rounded-full bg-green-50 px-2.5 py-1 text-xs font-medium text-green-800">
+              {t.signInPaywallFreeBadge}
             </p>
           </div>
         ) : null}
@@ -239,20 +257,22 @@ export default function AuthModal({
               {t.signInWithGoogle}
             </button>
 
-            {paywall ? (
+            {paywall || referralInvite ? (
               <>
                 {error ? (
                   <p className="mt-3 text-center text-xs text-red-600">{error}</p>
                 ) : null}
-                <div className="mt-3 flex justify-center">
-                  <p className="inline-flex rounded-full bg-green-50 px-2.5 py-1 text-xs font-medium text-green-800">
-                    {t.signInPaywallFreeBadge}
-                  </p>
-                </div>
+                {paywall ? (
+                  <div className="mt-3 flex justify-center">
+                    <p className="inline-flex rounded-full bg-green-50 px-2.5 py-1 text-xs font-medium text-green-800">
+                      {t.signInPaywallFreeBadge}
+                    </p>
+                  </div>
+                ) : null}
               </>
             ) : null}
 
-            {!paywall ? (
+            {!paywall && !referralInvite ? (
               <>
                 <div className="my-4 flex items-center gap-3">
                   <div className="h-px flex-1 bg-stone-200" />
@@ -291,6 +311,16 @@ export default function AuthModal({
             ) : null}
           </>
         )}
+
+        {referralInvite && onTryGuest ? (
+          <button
+            type="button"
+            onClick={onTryGuest}
+            className="mt-4 w-full text-center text-xs text-stone-500 transition-colors hover:text-stone-700"
+          >
+            {t.joinReferralTryGuest}
+          </button>
+        ) : null}
       </div>
     </div>
   );
