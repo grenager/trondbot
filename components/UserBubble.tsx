@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import type { LanguageCode, UserMessageWithCorrection } from "@/lib/types";
 import type { UsageSnapshot } from "@/lib/usage/client";
 import { useTranslation } from "@/lib/i18n/TranslationContext";
@@ -17,7 +17,7 @@ interface Particle {
   delay: number;
 }
 
-function EmojiRain(): JSX.Element {
+function EmojiRain(): React.ReactElement {
   const particles: Particle[] = useMemo(
     () =>
       Array.from({ length: PARTICLE_COUNT }, (_, i) => ({
