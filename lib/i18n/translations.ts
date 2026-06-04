@@ -113,11 +113,22 @@ export interface Translations {
   navChat: string;
   navHistoryStreaks: string;
   navBuyCredits: string;
+  navVocab: string;
   navSettings: string;
   navAbout: string;
   backToChat: string;
   settingsTitle: string;
   historyTitle: string;
+  vocabTitle: string;
+  vocabEmpty: string;
+  wordList: string;
+  flashcards: string;
+  exportCsv: string;
+  deleteWord: string;
+  flipCard: string;
+  nextCard: string;
+  signInForVocab: string;
+  vocabSaved: string;
   reminderEnabled: string;
   reminderEnabledDescription: string;
   reminderTime: string;
@@ -300,11 +311,22 @@ export const en: Translations = {
   navChat: "Chat",
   navHistoryStreaks: "History & Streaks",
   navBuyCredits: "Refill Credits (Free!)",
+  navVocab: "Vocabulary",
   navSettings: "Settings",
   navAbout: "About",
   backToChat: "Back to chat",
   settingsTitle: "Settings",
   historyTitle: "History & Streaks",
+  vocabTitle: "Vocabulary",
+  vocabEmpty: "No words saved yet. Tap on words in messages or use the dictionary to build your list.",
+  wordList: "Word List",
+  flashcards: "Flashcards",
+  exportCsv: "Export CSV",
+  deleteWord: "Delete word",
+  flipCard: "Tap to flip",
+  nextCard: "Next",
+  signInForVocab: "Sign in to save and review your vocabulary.",
+  vocabSaved: "Saved to your vocab list!",
   reminderEnabled: "Daily practice reminder",
   reminderEnabledDescription: "Get a reminder to practice each day",
   reminderTime: "Reminder time",

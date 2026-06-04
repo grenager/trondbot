@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "@/lib/i18n/TranslationContext";
 import { applyUsageFromApiResponse, type UsageSnapshot } from "@/lib/usage/client";
+import { useVocabSave } from "@/components/VocabContext";
 import { splitMessageWords } from "@/lib/splitMessageWords";
 import type { LanguageCode, Token } from "@/lib/types";
 
@@ -57,6 +58,7 @@ export default function LazyWordText({
   onUsageUpdate,
 }: LazyWordTextProps) {
   const { t } = useTranslation();
+  const vocabSave = useVocabSave();
   const words: string[] = splitMessageWords(text);
   const [tokens, setTokens] = useState<Token[] | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -190,12 +192,29 @@ export default function LazyWordText({
     event.stopPropagation();
     setActiveIndex(index);
 
+    let resolvedTokens: Token[] | null = tokens;
     if (!tokens && !loading) {
       try {
-        await fetchTokens();
+        resolvedTokens = await fetchTokens();
       } catch {
-        // fetchError is set in fetchTokens
+        return;
       }
+    }
+
+    const word: string | undefined = words[index];
+    if (!word || !resolvedTokens) {
+      return;
+    }
+
+    const token: Token | undefined =
+      resolvedTokens[index] ?? resolvedTokens.find((t) => t.word === word);
+    if (token) {
+      vocabSave({
+        word: token.word,
+        translation: token.gloss,
+        sourceLanguage: messageLanguage,
+        targetLanguage: glossLanguage,
+      });
     }
   }
 

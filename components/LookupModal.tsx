@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 import { getLanguageLabelLocalized } from "@/lib/i18n";
 import { useTranslation } from "@/lib/i18n/TranslationContext";
 import { applyUsageFromApiResponse, type UsageSnapshot } from "@/lib/usage/client";
+import { useVocabSave } from "@/components/VocabContext";
 import type { LanguageCode } from "@/lib/types";
 
 interface LookupModalProps {
@@ -26,6 +27,7 @@ export default function LookupModal({
   onUsageUpdate,
 }: LookupModalProps) {
   const { t, locale } = useTranslation();
+  const vocabSave = useVocabSave();
   const [sourceWord, setSourceWord] = useState<string>("");
   const [translation, setTranslation] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -107,6 +109,12 @@ export default function LookupModal({
       }
 
       setTranslation(nextTranslation.trim());
+      vocabSave({
+        word: word,
+        translation: nextTranslation.trim(),
+        sourceLanguage: nativeLanguage,
+        targetLanguage,
+      });
     } catch (lookupError: unknown) {
       const message: string =
         lookupError instanceof Error ? lookupError.message : t.lookupFailed;
