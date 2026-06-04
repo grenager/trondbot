@@ -135,6 +135,7 @@ export const fr: Translations = {
   vocabEmpty: "Aucun mot enregistré. Appuyez sur des mots dans les messages ou utilisez le dictionnaire.",
   wordList: "Liste de mots",
   flashcards: "Cartes mémoire",
+  review: "Réviser",
   exportCsv: "Exporter CSV",
   deleteWord: "Supprimer le mot",
   flipCard: "Appuyez pour retourner",

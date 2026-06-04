@@ -131,6 +131,7 @@ export const ja: Translations = {
   vocabEmpty: "まだ単語が保存されていません。メッセージ内の単語をタップするか辞書を使ってください。",
   wordList: "単語リスト",
   flashcards: "フラッシュカード",
+  review: "復習",
   exportCsv: "CSVエクスポート",
   deleteWord: "単語を削除",
   flipCard: "タップして裏返す",

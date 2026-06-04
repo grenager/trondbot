@@ -131,6 +131,7 @@ export const ko: Translations = {
   vocabEmpty: "저장된 단어가 없습니다. 메시지에서 단어를 탭하거나 사전을 사용하세요.",
   wordList: "단어 목록",
   flashcards: "플래시카드",
+  review: "복습",
   exportCsv: "CSV 내보내기",
   deleteWord: "단어 삭제",
   flipCard: "탭하여 뒤집기",

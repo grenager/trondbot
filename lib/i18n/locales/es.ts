@@ -134,6 +134,7 @@ export const es: Translations = {
   vocabEmpty: "No hay palabras guardadas. Toca las palabras en los mensajes o usa el diccionario.",
   wordList: "Lista de palabras",
   flashcards: "Tarjetas",
+  review: "Repasar",
   exportCsv: "Exportar CSV",
   deleteWord: "Eliminar palabra",
   flipCard: "Toca para voltear",

@@ -123,6 +123,7 @@ export interface Translations {
   vocabEmpty: string;
   wordList: string;
   flashcards: string;
+  review: string;
   exportCsv: string;
   deleteWord: string;
   flipCard: string;
@@ -321,6 +322,7 @@ export const en: Translations = {
   vocabEmpty: "No words saved yet. Tap on words in messages or use the dictionary to build your list.",
   wordList: "Word List",
   flashcards: "Flashcards",
+  review: "Review",
   exportCsv: "Export CSV",
   deleteWord: "Delete word",
   flipCard: "Tap to flip",

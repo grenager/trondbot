@@ -132,6 +132,7 @@ export const ru: Translations = {
   vocabEmpty: "Пока нет сохранённых слов. Нажимайте на слова в сообщениях или используйте словарь.",
   wordList: "Список слов",
   flashcards: "Карточки",
+  review: "Повторить",
   exportCsv: "Экспорт CSV",
   deleteWord: "Удалить слово",
   flipCard: "Нажмите, чтобы перевернуть",

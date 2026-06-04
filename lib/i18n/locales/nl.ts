@@ -134,6 +134,7 @@ export const nl: Translations = {
   vocabEmpty: "Nog geen woorden opgeslagen. Tik op woorden in berichten of gebruik het woordenboek.",
   wordList: "Woordenlijst",
   flashcards: "Flashcards",
+  review: "Oefenen",
   exportCsv: "CSV exporteren",
   deleteWord: "Woord verwijderen",
   flipCard: "Tik om te draaien",

@@ -131,6 +131,7 @@ export const hi: Translations = {
   vocabEmpty: "अभी तक कोई शब्द सहेजा नहीं गया। संदेशों में शब्दों पर टैप करें या शब्दकोश का उपयोग करें।",
   wordList: "शब्द सूची",
   flashcards: "फ्लैशकार्ड",
+  review: "दोहराएं",
   exportCsv: "CSV निर्यात",
   deleteWord: "शब्द हटाएं",
   flipCard: "पलटने के लिए टैप करें",

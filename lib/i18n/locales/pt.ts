@@ -134,6 +134,7 @@ export const pt: Translations = {
   vocabEmpty: "Nenhuma palavra salva. Toque nas palavras nas mensagens ou use o dicionário.",
   wordList: "Lista de palavras",
   flashcards: "Flashcards",
+  review: "Revisar",
   exportCsv: "Exportar CSV",
   deleteWord: "Excluir palavra",
   flipCard: "Toque para virar",

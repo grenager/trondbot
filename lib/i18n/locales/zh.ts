@@ -128,6 +128,7 @@ export const zh: Translations = {
   vocabEmpty: "还没有保存的单词。点击消息中的单词或使用词典来建立你的列表。",
   wordList: "单词列表",
   flashcards: "闪卡",
+  review: "复习",
   exportCsv: "导出CSV",
   deleteWord: "删除单词",
   flipCard: "点击翻转",

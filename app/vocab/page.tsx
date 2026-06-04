@@ -14,14 +14,12 @@ interface VocabEntry {
   created_at: string;
 }
 
-type Tab = "list" | "flashcards";
-
 function VocabContent() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const [entries, setEntries] = useState<VocabEntry[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [tab, setTab] = useState<Tab>("list");
+  const [showFlashcards, setShowFlashcards] = useState<boolean>(false);
 
   const fetchEntries = useCallback(async (): Promise<void> => {
     setLoading(true);
@@ -91,57 +89,6 @@ function VocabContent() {
     );
   }
 
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <button
-          type="button"
-          onClick={() => setTab("list")}
-          className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
-            tab === "list"
-              ? "bg-blue-600 text-white"
-              : "bg-stone-100 text-stone-600 hover:bg-stone-200"
-          }`}
-        >
-          {t.wordList}
-        </button>
-        <button
-          type="button"
-          onClick={() => setTab("flashcards")}
-          className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
-            tab === "flashcards"
-              ? "bg-blue-600 text-white"
-              : "bg-stone-100 text-stone-600 hover:bg-stone-200"
-          }`}
-        >
-          {t.flashcards}
-        </button>
-      </div>
-
-      {tab === "list" ? (
-        <WordList
-          entries={entries}
-          onDelete={handleDelete}
-          onExport={exportCsv}
-        />
-      ) : (
-        <Flashcards entries={entries} />
-      )}
-    </div>
-  );
-}
-
-function WordList({
-  entries,
-  onDelete,
-  onExport,
-}: {
-  entries: VocabEntry[];
-  onDelete: (id: string) => void;
-  onExport: () => void;
-}) {
-  const { t } = useTranslation();
-
   if (entries.length === 0) {
     return (
       <p className="py-8 text-center text-sm text-stone-500">{t.vocabEmpty}</p>
@@ -149,14 +96,23 @@ function WordList({
   }
 
   return (
-    <div className="space-y-3">
-      <button
-        type="button"
-        onClick={onExport}
-        className="rounded-lg border border-stone-200 px-3 py-1.5 text-xs font-medium text-stone-600 transition-colors hover:bg-stone-50"
-      >
-        {t.exportCsv}
-      </button>
+    <>
+      <div className="mb-4 flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setShowFlashcards(true)}
+          className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+        >
+          {t.review}
+        </button>
+        <button
+          type="button"
+          onClick={exportCsv}
+          className="rounded-lg border border-stone-200 px-3 py-1.5 text-xs font-medium text-stone-600 transition-colors hover:bg-stone-50"
+        >
+          {t.exportCsv}
+        </button>
+      </div>
 
       <div className="divide-y divide-stone-100 rounded-xl border border-stone-200 bg-white">
         {entries.map((entry) => (
@@ -170,7 +126,7 @@ function WordList({
             </div>
             <button
               type="button"
-              onClick={() => onDelete(entry.id)}
+              onClick={() => void handleDelete(entry.id)}
               className="ml-3 shrink-0 rounded-md p-1 text-stone-300 transition-colors hover:bg-stone-100 hover:text-stone-600"
               aria-label={t.deleteWord}
             >
@@ -187,11 +143,24 @@ function WordList({
           </div>
         ))}
       </div>
-    </div>
+
+      {showFlashcards ? (
+        <FlashcardModal
+          entries={entries}
+          onClose={() => setShowFlashcards(false)}
+        />
+      ) : null}
+    </>
   );
 }
 
-function Flashcards({ entries }: { entries: VocabEntry[] }) {
+function FlashcardModal({
+  entries,
+  onClose,
+}: {
+  entries: VocabEntry[];
+  onClose: () => void;
+}) {
   const { t } = useTranslation();
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [flipped, setFlipped] = useState<boolean>(false);
@@ -204,15 +173,25 @@ function Flashcards({ entries }: { entries: VocabEntry[] }) {
       [copy[i], copy[j]] = [copy[j]!, copy[i]!];
     }
     setShuffled(copy);
-    setCurrentIndex(0);
-    setFlipped(false);
   }, [entries]);
 
-  if (shuffled.length === 0) {
-    return (
-      <p className="py-8 text-center text-sm text-stone-500">{t.vocabEmpty}</p>
-    );
-  }
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent): void {
+      if (e.key === "Escape") {
+        onClose();
+      } else if (e.key === " " || e.key === "Enter") {
+        e.preventDefault();
+        setFlipped((f) => !f);
+      } else if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+        e.preventDefault();
+        setFlipped(false);
+        setCurrentIndex((prev) => (prev + 1) % shuffled.length);
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose, shuffled.length]);
 
   const card: VocabEntry | undefined = shuffled[currentIndex];
   if (!card) {
@@ -225,32 +204,51 @@ function Flashcards({ entries }: { entries: VocabEntry[] }) {
   }
 
   return (
-    <div className="flex flex-col items-center gap-4 py-4">
-      <p className="text-xs text-stone-400">
-        {currentIndex + 1} / {shuffled.length}
-      </p>
-
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <button
         type="button"
-        onClick={() => setFlipped((f) => !f)}
-        className="flex h-48 w-full max-w-sm items-center justify-center rounded-2xl border-2 border-stone-200 bg-white p-6 shadow-sm transition-all hover:border-blue-300 hover:shadow-md"
-      >
-        <span className="text-center text-xl font-medium text-stone-900">
-          {flipped ? card.translation : card.word}
-        </span>
-      </button>
+        aria-label={t.close}
+        className="absolute inset-0 bg-stone-900/40"
+        onClick={onClose}
+      />
+      <div className="relative flex w-full max-w-sm flex-col items-center gap-5 rounded-2xl bg-white p-6 shadow-xl">
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label={t.close}
+          className="absolute right-4 top-4 rounded-md p-1 text-stone-400 transition-colors hover:bg-stone-100 hover:text-stone-600"
+        >
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <path d="M5 5l10 10M15 5L5 15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+        </button>
 
-      <p className="text-xs text-stone-400">
-        {flipped ? "" : t.flipCard}
-      </p>
+        <p className="text-xs text-stone-400">
+          {currentIndex + 1} / {shuffled.length}
+        </p>
 
-      <button
-        type="button"
-        onClick={handleNext}
-        className="rounded-lg bg-stone-100 px-4 py-2 text-sm font-medium text-stone-700 transition-colors hover:bg-stone-200"
-      >
-        {t.nextCard}
-      </button>
+        <button
+          type="button"
+          onClick={() => setFlipped((f) => !f)}
+          className="flex h-48 w-full items-center justify-center rounded-2xl border-2 border-stone-200 bg-stone-50 p-6 transition-all hover:border-blue-300 hover:shadow-md"
+        >
+          <span className="text-center text-xl font-medium text-stone-900">
+            {flipped ? card.translation : card.word}
+          </span>
+        </button>
+
+        <p className="text-xs text-stone-400">
+          {flipped ? "" : t.flipCard}
+        </p>
+
+        <button
+          type="button"
+          onClick={handleNext}
+          className="rounded-lg bg-stone-100 px-5 py-2 text-sm font-medium text-stone-700 transition-colors hover:bg-stone-200"
+        >
+          {t.nextCard}
+        </button>
+      </div>
     </div>
   );
 }

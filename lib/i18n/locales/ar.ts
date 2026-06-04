@@ -131,6 +131,7 @@ export const ar: Translations = {
   vocabEmpty: "لا توجد كلمات محفوظة بعد. اضغط على الكلمات في الرسائل أو استخدم القاموس.",
   wordList: "قائمة الكلمات",
   flashcards: "بطاقات تعليمية",
+  review: "مراجعة",
   exportCsv: "تصدير CSV",
   deleteWord: "حذف الكلمة",
   flipCard: "اضغط للقلب",

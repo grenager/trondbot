@@ -133,6 +133,7 @@ export const sv: Translations = {
   vocabEmpty: "Inga sparade ord ännu. Tryck på ord i meddelanden eller använd ordboken.",
   wordList: "Ordlista",
   flashcards: "Flashkort",
+  review: "Öva",
   exportCsv: "Exportera CSV",
   deleteWord: "Ta bort ord",
   flipCard: "Tryck för att vända",

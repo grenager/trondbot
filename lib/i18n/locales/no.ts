@@ -133,6 +133,7 @@ export const no: Translations = {
   vocabEmpty: "Ingen ord lagret ennå. Trykk på ord i meldinger eller bruk ordboken for å bygge listen din.",
   wordList: "Ordliste",
   flashcards: "Flashkort",
+  review: "Øv",
   exportCsv: "Eksporter CSV",
   deleteWord: "Slett ord",
   flipCard: "Trykk for å snu",
