@@ -24,6 +24,10 @@ export const ko: Translations = {
   signInForMoreMessages:
     "Sign in with Google to keep chatting. It is still free — no credit card, no payment, just 100 more messages and all conversation topics.",
   signInPaywallFreeBadge: "100% free · No credit card required",
+  joinReferralTitle: "You've been invited!",
+  joinReferralMessage:
+    "Your friend invited you to practice languages on Trondbot. Sign in free to start chatting — they'll earn bonus credits when you join.",
+  joinReferralTryGuest: "Or try 10 free messages first",
   guestScenarioNote:
     "Sign in to unlock more conversation topics. For now, try getting to know your chat partner.",
   checking: "확인 중…",
@@ -44,6 +48,12 @@ export const ko: Translations = {
   buyCreditsDescription: "Trondbot 개발을 응원해 주세요",
   inviteFriend: "친구 초대하기",
   inviteFriendDescription: "링크를 공유하고 100 크레딧을 무료로 받으세요",
+  inviteFriendCreating: "Creating your invite link…",
+  inviteFriendError: "Could not create your invite link. Please try again.",
+  referralGraceMessage:
+    "20 credits added! You'll earn 80 more when your friend signs in using your link.",
+  referralPendingCap:
+    "You have too many pending invites. Wait for friends to sign up.",
   getInviteLink: "초대 링크 받기",
   buyNow: "지금 구매",
   copyLink: "링크 복사",

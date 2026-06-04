@@ -13,6 +13,11 @@ import type { User } from "@supabase/supabase-js";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { parseProfile, resolveDisplayName, getAvatarUrlFromUser } from "@/lib/supabase/profile";
 import type { Profile } from "@/lib/supabase/types";
+import { redeemStoredReferral } from "@/lib/referral/client";
+import {
+  getAuthCallbackUrl,
+  prepareAuthNextPath,
+} from "@/lib/auth/oauthRedirect";
 
 interface AuthContextValue {
   user: User | null;
@@ -22,7 +27,7 @@ interface AuthContextValue {
   authReady: boolean;
   profileLoading: boolean;
   supabaseEnabled: boolean;
-  signInWithGoogle: () => Promise<string | null>;
+  signInWithGoogle: (nextPath?: string) => Promise<string | null>;
   sendEmailCode: (email: string) => Promise<string | null>;
   verifyEmailCode: (email: string, code: string) => Promise<string | null>;
   signOut: () => Promise<void>;
@@ -32,10 +37,6 @@ interface AuthContextValue {
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
-
-function getAuthCallbackUrl(): string {
-  return `${window.location.origin}/auth/callback`;
-}
 
 async function fetchProfile(): Promise<Profile | null> {
   const response = await fetch("/api/user/profile");
@@ -55,6 +56,10 @@ async function fetchProfile(): Promise<Profile | null> {
   }
 
   return parseProfile(data.profile);
+}
+
+async function tryRedeemStoredReferral(): Promise<void> {
+  await redeemStoredReferral();
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -175,6 +180,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (initialUser) {
         setProfileLoading(true);
         try {
+          await tryRedeemStoredReferral();
           const nextProfile: Profile | null = await fetchProfile();
           if (!cancelled) {
             setProfile(nextProfile);
@@ -196,7 +202,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(nextUser);
 
       if (nextUser) {
-        void refreshProfile();
+        void (async () => {
+          await tryRedeemStoredReferral();
+          await refreshProfile();
+        })();
       } else {
         setProfile(null);
       }
@@ -208,10 +217,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [refreshProfile, supabaseEnabled]);
 
-  const signInWithGoogle = useCallback(async (): Promise<string | null> => {
+  const signInWithGoogle = useCallback(
+    async (nextPath?: string): Promise<string | null> => {
     if (!supabaseEnabled) {
       return "Supabase is not configured";
     }
+
+    prepareAuthNextPath(nextPath);
 
     const supabase = createClient();
     const { error } = await supabase.auth.signInWithOAuth({
@@ -222,7 +234,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     return error?.message ?? null;
-  }, [supabaseEnabled]);
+  },
+    [supabaseEnabled],
+  );
 
   const sendEmailCode = useCallback(
     async (email: string): Promise<string | null> => {

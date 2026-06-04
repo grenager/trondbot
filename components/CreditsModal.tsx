@@ -9,6 +9,7 @@ interface CreditsModalProps {
   inviteCode?: string;
   onClose: () => void;
   onPurchase: (creditsToAdd: number) => number;
+  onReferralCreated?: () => void | Promise<void>;
 }
 
 export default function CreditsModal({
@@ -17,6 +18,7 @@ export default function CreditsModal({
   inviteCode,
   onClose,
   onPurchase,
+  onReferralCreated,
 }: CreditsModalProps) {
   const { t } = useTranslation();
 
@@ -56,6 +58,7 @@ export default function CreditsModal({
           credits={credits}
           inviteCode={inviteCode}
           onPurchase={onPurchase}
+          onReferralCreated={onReferralCreated}
         />
       </div>
     </div>

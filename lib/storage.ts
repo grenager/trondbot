@@ -17,7 +17,7 @@ export const CREDITS_KEY = "trondbot-credits";
 export const INVITE_CODE_KEY = "trondbot-invite-code";
 export const MAX_STORED_MESSAGES = 50;
 export const INITIAL_FREE_CREDITS = 100;
-export const MAX_TOTAL_CREDITS = 100;
+export const MAX_TOTAL_CREDITS = 1000;
 
 export {
   ANONYMOUS_FREE_MESSAGES,
@@ -279,7 +279,7 @@ export function getOrCreateInviteCode(): string {
 export function getInviteUrl(inviteCode?: string): string {
   const code: string = inviteCode ?? getOrCreateInviteCode();
   if (typeof window === "undefined") {
-    return `https://trondbot.com/?ref=${code}`;
+    return `https://trondbot.com/join?ref=${code}`;
   }
-  return `${window.location.origin}?ref=${code}`;
+  return `${window.location.origin}/join?ref=${code}`;
 }

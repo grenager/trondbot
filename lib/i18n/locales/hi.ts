@@ -24,6 +24,10 @@ export const hi: Translations = {
   signInForMoreMessages:
     "Sign in with Google to keep chatting. It is still free — no credit card, no payment, just 100 more messages and all conversation topics.",
   signInPaywallFreeBadge: "100% free · No credit card required",
+  joinReferralTitle: "You've been invited!",
+  joinReferralMessage:
+    "Your friend invited you to practice languages on Trondbot. Sign in free to start chatting — they'll earn bonus credits when you join.",
+  joinReferralTryGuest: "Or try 10 free messages first",
   guestScenarioNote:
     "Sign in to unlock more conversation topics. For now, try getting to know your chat partner.",
   checking: "जाँच हो रही है…",
@@ -44,6 +48,12 @@ export const hi: Translations = {
   buyCreditsDescription: "Trondbot के विकास में सहयोग करें",
   inviteFriend: "दोस्त को आमंत्रित करें",
   inviteFriendDescription: "अपना लिंक शेयर करें और 100 मुफ़्त क्रेडिट पाएँ",
+  inviteFriendCreating: "Creating your invite link…",
+  inviteFriendError: "Could not create your invite link. Please try again.",
+  referralGraceMessage:
+    "20 credits added! You'll earn 80 more when your friend signs in using your link.",
+  referralPendingCap:
+    "You have too many pending invites. Wait for friends to sign up.",
   getInviteLink: "आमंत्रण लिंक पाएँ",
   buyNow: "अभी खरीदें",
   copyLink: "लिंक कॉपी करें",

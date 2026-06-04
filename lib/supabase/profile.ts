@@ -131,16 +131,22 @@ export function parseProfile(value: unknown): Profile | null {
     display_name,
     credits,
     invite_code,
+    referred_by,
     created_at,
     updated_at,
   } = value;
 
   if (
     typeof id !== "string" ||
-    (email !== null && typeof email !== "string") ||
-    (display_name !== null && typeof display_name !== "string") ||
+    (email !== null && email !== undefined && typeof email !== "string") ||
+    (display_name !== null &&
+      display_name !== undefined &&
+      typeof display_name !== "string") ||
     typeof credits !== "number" ||
     typeof invite_code !== "string" ||
+    (referred_by !== null &&
+      referred_by !== undefined &&
+      typeof referred_by !== "string") ||
     typeof created_at !== "string" ||
     typeof updated_at !== "string"
   ) {
@@ -153,6 +159,7 @@ export function parseProfile(value: unknown): Profile | null {
     display_name: display_name ?? null,
     credits: clampCredits(credits),
     invite_code,
+    referred_by: referred_by ?? null,
     created_at,
     updated_at,
   };

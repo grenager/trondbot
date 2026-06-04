@@ -41,6 +41,10 @@ function CreditsContent() {
     return creditsAdded;
   }
 
+  function refreshUsage(): void {
+    void fetchUsageSnapshot().then(setUsage);
+  }
+
   if (requiresSignIn) {
     return (
       <div className="py-8">
@@ -54,6 +58,7 @@ function CreditsContent() {
       credits={credits}
       inviteCode={profile?.invite_code}
       onPurchase={handleCreditsPurchase}
+      onReferralCreated={refreshUsage}
     />
   );
 }

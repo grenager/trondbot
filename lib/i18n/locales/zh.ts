@@ -23,6 +23,10 @@ export const zh: Translations = {
   signInForMoreMessages:
     "Sign in with Google to keep chatting. It is still free — no credit card, no payment, just 100 more messages and all conversation topics.",
   signInPaywallFreeBadge: "100% free · No credit card required",
+  joinReferralTitle: "You've been invited!",
+  joinReferralMessage:
+    "Your friend invited you to practice languages on Trondbot. Sign in free to start chatting — they'll earn bonus credits when you join.",
+  joinReferralTryGuest: "Or try 10 free messages first",
   guestScenarioNote:
     "Sign in to unlock more conversation topics. For now, try getting to know your chat partner.",
   checking: "检查中…",
@@ -42,6 +46,12 @@ export const zh: Translations = {
   buyCreditsDescription: "支持 Trondbot 的开发",
   inviteFriend: "邀请朋友",
   inviteFriendDescription: "分享你的链接，获得 100 免费积分",
+  inviteFriendCreating: "Creating your invite link…",
+  inviteFriendError: "Could not create your invite link. Please try again.",
+  referralGraceMessage:
+    "20 credits added! You'll earn 80 more when your friend signs in using your link.",
+  referralPendingCap:
+    "You have too many pending invites. Wait for friends to sign up.",
   getInviteLink: "获取邀请链接",
   buyNow: "立即购买",
   copyLink: "复制链接",
