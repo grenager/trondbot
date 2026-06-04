@@ -36,6 +36,8 @@ export const de: Translations = {
   corrected: "Korrigiert",
   original: "Original:",
   acceptChanges: "Änderungen übernehmen",
+  accept: "Akzeptieren",
+  reject: "Ablehnen",
   plusChat: "+ Chat",
   customScenario: "Eigenes Szenario",
   customScenarioDescription:

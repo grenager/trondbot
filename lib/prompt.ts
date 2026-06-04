@@ -47,7 +47,7 @@ function turnInstructions(
 3. If the user writes in ${targetLabel} but with meaningful errors (grammar, wrong words, unnatural phrasing), include a correction with the fixed ${targetLabel}.
 4. If the message is already correct ${targetLabel}, omit the correction field entirely. Treat the message as correct when the only differences are capitalization, punctuation, or accent marks (e.g. missing period, lowercase instead of uppercase, missing ¿ or ¡). Do not correct these.
 5. Reply conversationally in ${targetLabel} to keep the dialogue going within the scenario.
-6. Keep each reply to about 20 words — short and natural, like normal human chat. Avoid long monologues.`;
+6. STRICT LENGTH LIMIT: Every reply MUST be 10-20 words. Never exceed 20 words. This is a hard rule with no exceptions. Write like a real person texting — short, punchy, natural.`;
 }
 
 function responseRules(
@@ -57,8 +57,8 @@ function responseRules(
 ): string {
   const lengthRule: string =
     scenarioId === "tell-a-story"
-      ? "- When telling the story (after the student says they are ready), keep it to 5-7 sentences. All other replies should stay concise (about 20 words)."
-      : "- Keep replies concise: aim for about 20 words, like a real back-and-forth conversation.";
+      ? "- When telling the story (after the student says they are ready), keep it to 5-7 sentences. All other replies MUST be 10-20 words. No exceptions."
+      : "- HARD LIMIT: Every reply must be 10-20 words. Never exceed 20 words. No exceptions.";
 
   return `Response rules:
 - Write all reply text in ${targetLabel}.

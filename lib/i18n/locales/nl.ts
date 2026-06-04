@@ -36,6 +36,8 @@ export const nl: Translations = {
   corrected: "Gecorrigeerd",
   original: "Origineel:",
   acceptChanges: "Wijzigingen accepteren",
+  accept: "Accepteren",
+  reject: "Afwijzen",
   plusChat: "+ Chat",
   customScenario: "Aangepast scenario",
   customScenarioDescription: "Beschrijf het gesprek dat je wilt voeren.",

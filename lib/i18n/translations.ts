@@ -35,6 +35,8 @@ export interface Translations {
   corrected: string;
   original: string;
   acceptChanges: string;
+  accept: string;
+  reject: string;
   plusChat: string;
   customScenario: string;
   customScenarioDescription: string;
@@ -210,6 +212,8 @@ export const en: Translations = {
   corrected: "Corrected",
   original: "Original:",
   acceptChanges: "Accept Changes",
+  accept: "Accept",
+  reject: "Reject",
   plusChat: "+ Chat",
   customScenario: "Custom scenario",
   customScenarioDescription: "Describe the conversation you want to have.",

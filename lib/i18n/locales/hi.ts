@@ -35,6 +35,8 @@ export const hi: Translations = {
   corrected: "सुधार किया गया",
   original: "मूल:",
   acceptChanges: "बदलाव स्वीकार करें",
+  accept: "स्वीकार",
+  reject: "अस्वीकार",
   plusChat: "+ चैट",
   customScenario: "कस्टम परिदृश्य",
   customScenarioDescription: "वह बातचीत बताएँ जो आप करना चाहते हैं।",

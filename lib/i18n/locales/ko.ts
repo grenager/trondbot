@@ -35,6 +35,8 @@ export const ko: Translations = {
   corrected: "교정됨",
   original: "원문:",
   acceptChanges: "변경 수락",
+  accept: "수락",
+  reject: "거부",
   plusChat: "+ 채팅",
   customScenario: "맞춤 시나리오",
   customScenarioDescription: "원하는 대화 내용을 설명해 주세요.",
