@@ -35,6 +35,8 @@ export const ar: Translations = {
   corrected: "تم التصحيح",
   original: "الأصل:",
   acceptChanges: "قبول التغييرات",
+  accept: "قبول",
+  reject: "رفض",
   plusChat: "+ محادثة",
   customScenario: "مشهد مخصص",
   customScenarioDescription: "صف المحادثة التي تريد إجراءها.",

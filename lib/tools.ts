@@ -4,14 +4,15 @@ export const SCENARIO_OPENING_TOOL_NAME = "scenario_opening";
 export const chatTurnTool = {
   name: CHAT_TURN_TOOL_NAME,
   description:
-    "Return a conversational reply. When correcting the user, include a correction with the fixed text and a brief explanation.",
+    "Return a conversational reply (10-20 words max). When correcting the user, include a correction with the fixed text and a brief explanation.",
   input_schema: {
     type: "object" as const,
     properties: {
       reply: {
         type: "object" as const,
+        description: "Your reply in the target language. MUST be 10-20 words.",
         properties: {
-          text: { type: "string" as const },
+          text: { type: "string" as const, description: "10-20 words max." },
         },
         required: ["text"],
       },

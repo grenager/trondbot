@@ -10,6 +10,7 @@ interface ChatMessageProps {
   nativeLanguage: LanguageCode;
   loading?: boolean;
   onAcknowledgeCorrection?: () => void;
+  onRejectCorrection?: () => void;
   canSpendCredit?: () => boolean;
   onUsageUpdate?: (usage: UsageSnapshot) => void;
 }
@@ -20,6 +21,7 @@ export default function ChatMessage({
   nativeLanguage,
   loading = false,
   onAcknowledgeCorrection,
+  onRejectCorrection,
   canSpendCredit,
   onUsageUpdate,
 }: ChatMessageProps) {
@@ -31,6 +33,7 @@ export default function ChatMessage({
         nativeLanguage={nativeLanguage}
         loading={loading}
         onAcknowledgeCorrection={onAcknowledgeCorrection}
+        onRejectCorrection={onRejectCorrection}
         canSpendCredit={canSpendCredit}
         onUsageUpdate={onUsageUpdate}
       />

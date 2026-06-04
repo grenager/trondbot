@@ -34,6 +34,8 @@ export const zh: Translations = {
   corrected: "已纠正",
   original: "原文：",
   acceptChanges: "接受更改",
+  accept: "接受",
+  reject: "拒绝",
   plusChat: "+ 聊天",
   customScenario: "自定义场景",
   customScenarioDescription: "描述你想进行的对话。",

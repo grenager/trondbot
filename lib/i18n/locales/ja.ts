@@ -35,6 +35,8 @@ export const ja: Translations = {
   corrected: "訂正済み",
   original: "原文：",
   acceptChanges: "変更を受け入れる",
+  accept: "承認",
+  reject: "却下",
   plusChat: "+ チャット",
   customScenario: "カスタムシナリオ",
   customScenarioDescription: "希望する会話の内容を説明してください。",

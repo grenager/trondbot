@@ -123,18 +123,6 @@ export default function SideDrawer({
                 {t.navHistoryStreaks}
               </Link>
             </li>
-            {!hideCreditsNav ? (
-              <li>
-                <Link
-                  href="/credits"
-                  onClick={onClose}
-                  className={navLinkClassName(currentPath === "/credits")}
-                  aria-current={currentPath === "/credits" ? "page" : undefined}
-                >
-                  {t.navBuyCredits}
-                </Link>
-              </li>
-            ) : null}
             <li>
               <Link
                 href="/settings"
@@ -159,6 +147,15 @@ export default function SideDrawer({
         </nav>
 
         <div className="border-t border-stone-100 px-2 py-3">
+          {!hideCreditsNav ? (
+            <Link
+              href="/credits"
+              onClick={onClose}
+              className="mb-2 block w-full rounded-lg bg-blue-600 px-3 py-2.5 text-center text-sm font-medium text-white transition-colors hover:bg-blue-700"
+            >
+              {t.navBuyCredits}
+            </Link>
+          ) : null}
           {supabaseEnabled && !signedIn ? (
             <button
               type="button"

@@ -36,6 +36,8 @@ export const fr: Translations = {
   corrected: "Corrigé",
   original: "Original :",
   acceptChanges: "Accepter les modifications",
+  accept: "Accepter",
+  reject: "Rejeter",
   plusChat: "+ Chat",
   customScenario: "Scénario personnalisé",
   customScenarioDescription:

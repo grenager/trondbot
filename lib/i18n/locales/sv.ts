@@ -36,6 +36,8 @@ export const sv: Translations = {
   corrected: "Korrigerat",
   original: "Original:",
   acceptChanges: "Acceptera ändringar",
+  accept: "Acceptera",
+  reject: "Avvisa",
   plusChat: "+ Chatt",
   customScenario: "Anpassat scenario",
   customScenarioDescription: "Beskriv samtalet du vill ha.",

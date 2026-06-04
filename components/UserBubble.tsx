@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import type { LanguageCode, UserMessageWithCorrection } from "@/lib/types";
 import type { UsageSnapshot } from "@/lib/usage/client";
 import { useTranslation } from "@/lib/i18n/TranslationContext";
@@ -8,12 +8,51 @@ import { debugLog } from "@/lib/debug";
 import LazyWordText from "./LazyWordText";
 import SpeakButton from "./SpeakButton";
 
+const EMOJI_OPTIONS: readonly string[] = ["🎉", "✨", "🌟", "💫", "⭐"];
+const PARTICLE_COUNT = 6;
+
+interface Particle {
+  emoji: string;
+  x: number;
+  delay: number;
+}
+
+function EmojiRain(): JSX.Element {
+  const particles: Particle[] = useMemo(
+    () =>
+      Array.from({ length: PARTICLE_COUNT }, (_, i) => ({
+        emoji: EMOJI_OPTIONS[i % EMOJI_OPTIONS.length]!,
+        x: (i / (PARTICLE_COUNT - 1)) * 60 - 30,
+        delay: Math.random() * 0.3,
+      })),
+    [],
+  );
+
+  return (
+    <span className="pointer-events-none absolute -top-1 left-0 h-0 w-0 overflow-visible" aria-hidden="true">
+      {particles.map((p, i) => (
+        <span
+          key={i}
+          className="absolute animate-emoji-rise text-4xl opacity-0"
+          style={{
+            left: `${p.x - 40}px`,
+            animationDelay: `${p.delay}s`,
+          }}
+        >
+          {p.emoji}
+        </span>
+      ))}
+    </span>
+  );
+}
+
 interface UserBubbleProps {
   message: UserMessageWithCorrection;
   targetLanguage: LanguageCode;
   nativeLanguage: LanguageCode;
   loading?: boolean;
   onAcknowledgeCorrection?: () => void;
+  onRejectCorrection?: () => void;
   canSpendCredit?: () => boolean;
   onUsageUpdate?: (usage: UsageSnapshot) => void;
 }
@@ -27,6 +66,7 @@ export default function UserBubble({
   nativeLanguage,
   loading = false,
   onAcknowledgeCorrection,
+  onRejectCorrection,
   canSpendCredit,
   onUsageUpdate,
 }: UserBubbleProps) {
@@ -50,6 +90,27 @@ export default function UserBubble({
       hasCorrection: message.correction !== undefined,
     });
   }, [loading, message]);
+
+  useEffect(() => {
+    if (!isAwaitingAck || !onAcknowledgeCorrection) {
+      return;
+    }
+
+    const handleKeyDown = (e: KeyboardEvent): void => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        onAcknowledgeCorrection();
+      } else if (e.key === "Escape" && onRejectCorrection) {
+        e.preventDefault();
+        onRejectCorrection();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isAwaitingAck, onAcknowledgeCorrection, onRejectCorrection]);
 
   return (
     <div className="flex flex-col items-end">
@@ -85,9 +146,12 @@ export default function UserBubble({
         ) : null}
 
         {wasAccepted ? (
-          <p className={`${STATUS_LABEL_CLASS} font-medium text-green-600`}>
-            {t.perfect}
-          </p>
+          <div className="relative">
+            <p className={`${STATUS_LABEL_CLASS} font-medium text-green-600`}>
+              {t.perfect}
+            </p>
+            <EmojiRain />
+          </div>
         ) : null}
 
         {wasCorrected && !isAwaitingAck ? (
@@ -145,13 +209,22 @@ export default function UserBubble({
                 variant="correction"
               />
             </div>
-            <button
-              type="button"
-              onClick={onAcknowledgeCorrection}
-              className={`${STATUS_LABEL_CLASS} rounded-lg px-3 py-1.5 font-medium text-blue-600 transition-colors hover:bg-blue-50`}
-            >
-              {t.acceptChanges}
-            </button>
+            <div className="mt-1.5 flex items-center gap-2">
+              <button
+                type="button"
+                onClick={onAcknowledgeCorrection}
+                className="text-xs font-medium text-blue-600 transition-colors hover:text-blue-800"
+              >
+                {t.accept}
+              </button>
+              <button
+                type="button"
+                onClick={onRejectCorrection}
+                className="text-xs font-medium text-stone-400 transition-colors hover:text-stone-600"
+              >
+                {t.reject}
+              </button>
+            </div>
           </>
         ) : null}
       </div>

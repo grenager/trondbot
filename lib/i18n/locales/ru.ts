@@ -36,6 +36,8 @@ export const ru: Translations = {
   corrected: "Исправлено",
   original: "Оригинал:",
   acceptChanges: "Принять изменения",
+  accept: "Принять",
+  reject: "Отклонить",
   plusChat: "+ Чат",
   customScenario: "Свой сценарий",
   customScenarioDescription: "Опишите разговор, который хотите провести.",

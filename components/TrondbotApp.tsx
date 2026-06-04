@@ -804,6 +804,28 @@ function TrondbotAppContent() {
     }, delayMs);
   }
 
+  function rejectCorrection(): void {
+    const ackIndex: number = messages.findIndex(
+      (m) => m.role === "user" && m.awaitingAcknowledgment,
+    );
+    const ackMessage: DisplayMessage | undefined = messages[ackIndex];
+    if (
+      ackIndex === -1 ||
+      !ackMessage ||
+      ackMessage.role !== "user" ||
+      !ackMessage.awaitingAcknowledgment
+    ) {
+      return;
+    }
+
+    const originalText: string = ackMessage.content;
+    setMessages((previous) => previous.slice(0, ackIndex));
+    setInput(originalText);
+    setTimeout(() => {
+      composerRef.current?.focus();
+    }, 0);
+  }
+
   return (
     <TranslationProvider locale={nativeLanguage}>
       <LocaleHtmlLang />
@@ -960,6 +982,11 @@ function TrondbotAppContent() {
                         onAcknowledgeCorrection={
                           message.role === "user" && message.awaitingAcknowledgment
                             ? acknowledgeCorrection
+                            : undefined
+                        }
+                        onRejectCorrection={
+                          message.role === "user" && message.awaitingAcknowledgment
+                            ? rejectCorrection
                             : undefined
                         }
                         canSpendCredit={canSpendCredit}
