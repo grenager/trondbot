@@ -23,6 +23,9 @@ import {
 } from "@/lib/languages";
 import { getScenarioLabel, getTranslations } from "@/lib/i18n";
 import { TranslationProvider } from "@/lib/i18n/TranslationContext";
+import { VocabProvider } from "@/components/VocabContext";
+import { useToast, ToastContainer } from "@/components/Toast";
+import type { VocabSaveResult } from "@/lib/vocab";
 import {
   buildLanguagePath,
   getDefaultLanguagePath,
@@ -183,6 +186,7 @@ function TrondbotAppContent() {
   const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
   const [showLookupModal, setShowLookupModal] = useState<boolean>(false);
   const [usage, setUsage] = useState<UsageSnapshot>(DEFAULT_USAGE);
+  const [vocabCount, setVocabCount] = useState<number | null>(null);
   const {
     user,
     profile,
@@ -305,6 +309,21 @@ function TrondbotAppContent() {
     }
     refreshUsage();
   }, [hydrated, authReady, user, profile?.credits]);
+
+  useEffect(() => {
+    if (!user) {
+      setVocabCount(null);
+      return;
+    }
+    void fetch("/api/vocab/count")
+      .then((r) => r.json())
+      .then((d: unknown) => {
+        if (typeof d === "object" && d !== null && "count" in d) {
+          setVocabCount((d as { count: number }).count);
+        }
+      })
+      .catch(() => {});
+  }, [user]);
 
   useEffect(() => {
     if (!authReady || !user) {
@@ -709,6 +728,19 @@ function TrondbotAppContent() {
   }
 
   const t = getTranslations(nativeLanguage);
+  const { toasts, show: showToast } = useToast();
+
+  const handleVocabResult = useCallback(
+    (result: VocabSaveResult) => {
+      if (result === "saved") {
+        showToast(t.vocabSaved, "success");
+      } else if (result === "unauthorized") {
+        showToast(t.signInForVocab, "info");
+      }
+    },
+    [showToast, t.vocabSaved, t.signInForVocab],
+  );
+
   const scenarioLabel: string =
     scenario === "custom" && customDescription
       ? t.customPrefix(customDescription)
@@ -828,6 +860,7 @@ function TrondbotAppContent() {
 
   return (
     <TranslationProvider locale={nativeLanguage}>
+      <VocabProvider onNotify={handleVocabResult}>
       <LocaleHtmlLang />
       <main className="mx-auto flex h-dvh max-w-2xl flex-col overflow-hidden py-3">
         <ConfirmDialog
@@ -849,6 +882,7 @@ function TrondbotAppContent() {
           avatarUrl={avatarUrl}
           signedIn={signedIn}
           hideCreditsNav={hideCreditsNav}
+          vocabCount={vocabCount}
           supabaseEnabled={supabaseEnabled}
           onSignIn={() => {
             if (hideCreditsNav) {
@@ -1062,6 +1096,8 @@ function TrondbotAppContent() {
           )}
         </section>
       </main>
+      <ToastContainer toasts={toasts} />
+      </VocabProvider>
     </TranslationProvider>
   );
 }

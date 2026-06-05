@@ -21,7 +21,8 @@ type PageTitleKey =
   | "settingsTitle"
   | "historyTitle"
   | "aboutTrondbot"
-  | "getMoreCredits";
+  | "getMoreCredits"
+  | "vocabTitle";
 
 interface SecondaryPageShellProps {
   titleKey: PageTitleKey;
@@ -57,9 +58,20 @@ function SecondaryPageShellContent({
   const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
   const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
   const [usage, setUsage] = useState<UsageSnapshot | null>(null);
+  const [vocabCount, setVocabCount] = useState<number | null>(null);
 
   useEffect(() => {
     void fetchUsageSnapshot().then(setUsage);
+    if (user) {
+      void fetch("/api/vocab/count")
+        .then((r) => r.json())
+        .then((d: unknown) => {
+          if (typeof d === "object" && d !== null && "count" in d) {
+            setVocabCount((d as { count: number }).count);
+          }
+        })
+        .catch(() => {});
+    }
   }, [user]);
 
   const hideCreditsNav: boolean =
@@ -85,6 +97,7 @@ function SecondaryPageShellContent({
         avatarUrl={avatarUrl}
         signedIn={!!user}
         hideCreditsNav={hideCreditsNav}
+        vocabCount={vocabCount}
         supabaseEnabled={supabaseEnabled}
         onSignIn={() => {
           if (hideCreditsNav) {

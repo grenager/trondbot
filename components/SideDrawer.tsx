@@ -16,6 +16,7 @@ interface SideDrawerProps {
   signedIn: boolean;
   hideCreditsNav: boolean;
   supabaseEnabled: boolean;
+  vocabCount: number | null;
   onSignIn: () => void;
 }
 
@@ -30,6 +31,7 @@ export default function SideDrawer({
   signedIn,
   hideCreditsNav,
   supabaseEnabled,
+  vocabCount,
   onSignIn,
 }: SideDrawerProps) {
   const { t } = useTranslation();
@@ -121,6 +123,23 @@ export default function SideDrawer({
                 aria-current={currentPath === "/history" ? "page" : undefined}
               >
                 {t.navHistoryStreaks}
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/vocab"
+                onClick={onClose}
+                className={navLinkClassName(currentPath === "/vocab")}
+                aria-current={currentPath === "/vocab" ? "page" : undefined}
+              >
+                <span className="flex items-center justify-between">
+                  <span>{t.navVocab}</span>
+                  {vocabCount !== null && vocabCount > 0 ? (
+                    <span className="rounded-full bg-blue-100 px-1.5 py-0.5 text-xs font-medium text-blue-700">
+                      {vocabCount}
+                    </span>
+                  ) : null}
+                </span>
               </Link>
             </li>
             <li>
