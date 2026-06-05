@@ -58,7 +58,7 @@ export default function HoverWord({
       {token.word}
       <span
         role="tooltip"
-        className={`pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 whitespace-nowrap rounded-md bg-stone-800 px-2 py-1 text-xs text-white shadow-lg transition-opacity ${
+        className={`pointer-events-none absolute left-1/2 top-full z-10 mt-1 -translate-x-1/2 whitespace-nowrap rounded-md bg-stone-800 px-2 py-1 text-xs text-white shadow-lg transition-opacity ${
           showGloss ? "opacity-100" : "opacity-0"
         }`}
       >

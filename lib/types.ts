@@ -61,6 +61,8 @@ export interface ChatRequestBody {
   scenario: ScenarioId;
   customDescription?: string;
   startScenario?: boolean;
+  userName?: string;
+  localDateTime?: string;
 }
 
 export interface ScenarioOpeningResponse {

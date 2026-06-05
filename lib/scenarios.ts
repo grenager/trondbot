@@ -25,7 +25,7 @@ export const SCENARIOS: readonly Scenario[] = [
     id: "new-friend",
     label: "Getting to know you",
     description:
-      "You are a new friend meeting the student for the first time. Ask getting-to-know-you questions and share a little about yourself.",
+      "You are a friend having a casual conversation. Ask about their life, interests, and what's new. Share a little about yourself too.",
   },
   {
     id: "restaurant-order",

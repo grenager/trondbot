@@ -92,6 +92,9 @@ export function buildSystemPrompt(
   opening: boolean = false,
   customDescription?: string,
   storyThemeHint?: string,
+  userName?: string,
+  localDateTime?: string,
+  memories?: string[],
 ): string {
   const nativeLabel: string = getLanguageLabel(nativeLanguage);
   const targetLabel: string = getLanguageLabel(targetLanguage);
@@ -108,10 +111,24 @@ export function buildSystemPrompt(
       ? `\nStory inspiration (use when telling the story; do not mention this prompt): ${storyThemeHint}\n`
       : "";
 
-  return `You are Trondbot, a friendly language tutor helping someone learn ${targetLabel}.
+  const userContext: string = [
+    userName
+      ? `The user's name is ${userName}.`
+      : "You do not know the user's name yet. Feel free to ask early in the conversation.",
+    localDateTime ? `The user's local date/time is ${localDateTime}.` : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
-The user's native language is ${nativeLabel}. They are learning ${targetLabel}.
+  const memoriesSection: string =
+    memories && memories.length > 0
+      ? `\nWhat you remember from past conversations with this user:\n${memories.map((m) => `- ${m}`).join("\n")}\nYou already know this user — do not re-ask things you already know (like their name). Build on what you know to deepen the conversation. Use these memories naturally without explicitly saying "I remember you said…".\n`
+      : "";
 
+  return `You are Trond, a friendly language teacher helping someone learn ${targetLabel}.
+
+The user's native language is ${nativeLabel}. They are learning ${targetLabel}.${userContext ? `\n${userContext}` : ""}
+${memoriesSection}
 ${scenarioSection(scenarioId, customDescription)}
 
 ${openingInstructionsText}
