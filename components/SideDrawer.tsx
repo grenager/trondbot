@@ -166,15 +166,6 @@ export default function SideDrawer({
         </nav>
 
         <div className="border-t border-stone-100 px-2 py-3">
-          {!hideCreditsNav ? (
-            <Link
-              href="/credits"
-              onClick={onClose}
-              className="mb-2 block w-full rounded-lg bg-blue-600 px-3 py-2.5 text-center text-sm font-medium text-white transition-colors hover:bg-blue-700"
-            >
-              {t.navBuyCredits}
-            </Link>
-          ) : null}
           {supabaseEnabled && !signedIn ? (
             <button
               type="button"
@@ -182,10 +173,18 @@ export default function SideDrawer({
                 onClose();
                 onSignIn();
               }}
-              className="block w-full rounded-lg px-3 py-2.5 text-left text-sm font-medium text-blue-700 transition-colors hover:bg-blue-50"
+              className="block w-full rounded-lg bg-blue-600 px-3 py-2.5 text-center text-sm font-medium text-white transition-colors hover:bg-blue-700"
             >
-              {t.signIn}
+              {t.signInWithGoogle}
             </button>
+          ) : !hideCreditsNav ? (
+            <Link
+              href="/credits"
+              onClick={onClose}
+              className="block w-full rounded-lg bg-blue-600 px-3 py-2.5 text-center text-sm font-medium text-white transition-colors hover:bg-blue-700"
+            >
+              {t.navBuyCredits}
+            </Link>
           ) : null}
         </div>
       </aside>
