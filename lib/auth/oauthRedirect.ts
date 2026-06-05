@@ -25,8 +25,12 @@ export function setAuthNextPath(nextPath: string): void {
 }
 
 export function getAuthCallbackUrl(): string {
+  const siteUrl: string | undefined = process.env.NEXT_PUBLIC_SITE_URL;
+  if (siteUrl) {
+    return `${siteUrl.replace(/\/$/, "")}/auth/callback`;
+  }
   if (typeof window === "undefined") {
-    return "https://trondbot.com/auth/callback";
+    return "https://www.trondbot.com/auth/callback";
   }
   return `${window.location.origin}/auth/callback`;
 }
