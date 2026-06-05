@@ -6,8 +6,18 @@ import {
   sanitizeAuthNextPath,
 } from "@/lib/auth/oauthRedirect";
 
+function getPublicOrigin(requestUrl: URL): string {
+  const siteUrl: string | undefined = process.env.NEXT_PUBLIC_SITE_URL;
+  if (siteUrl) {
+    return siteUrl.replace(/\/$/, "");
+  }
+  return requestUrl.origin;
+}
+
 export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url);
+  const requestUrl = new URL(request.url);
+  const searchParams: URLSearchParams = requestUrl.searchParams;
+  const origin: string = getPublicOrigin(requestUrl);
   const code: string | null = searchParams.get("code");
   const cookieStore = await cookies();
   const cookieNextRaw: string | undefined = cookieStore.get(AUTH_NEXT_COOKIE_NAME)
