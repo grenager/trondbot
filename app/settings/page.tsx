@@ -14,7 +14,7 @@ import {
 
 function SettingsContent() {
   const { t, locale } = useTranslation();
-  const { user, profile, displayName, supabaseEnabled, updateProfileDisplayName } = useAuth();
+  const { user, profile, displayName, supabaseEnabled, updateProfileDisplayName, signOut } = useAuth();
   const storedState = loadStoredState();
   const [settings, setSettings] = useState<UserSettings>(loadUserSettings);
   const [displayNameInput, setDisplayNameInput] = useState<string>("");
@@ -128,6 +128,16 @@ function SettingsContent() {
 
       {savedMessage ? (
         <p className="text-center text-sm text-green-700">{savedMessage}</p>
+      ) : null}
+
+      {supabaseEnabled && user ? (
+        <button
+          type="button"
+          onClick={() => void signOut()}
+          className="mt-8 w-full text-center text-xs text-stone-400 hover:text-stone-600 transition-colors"
+        >
+          {t.signOut}
+        </button>
       ) : null}
     </form>
   );
