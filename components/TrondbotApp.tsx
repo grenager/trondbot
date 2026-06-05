@@ -445,6 +445,13 @@ function TrondbotAppContent() {
   }
 
   function confirmNewChat(): void {
+    if (signedIn && messages.length >= 4) {
+      void fetch("/api/memories", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: toApiMessages(messages) }),
+      });
+    }
     setMessages([]);
     setInput("");
     setError(null);
@@ -517,6 +524,8 @@ function TrondbotAppContent() {
           scenario: effectiveScenario,
           customDescription: effectiveCustomDesc,
           startScenario: true,
+          userName: displayName ?? undefined,
+          localDateTime: new Date().toLocaleString(),
         });
 
       debugLog("chat", "startScenario: response received", {
@@ -617,6 +626,8 @@ function TrondbotAppContent() {
           targetLanguage,
           scenario,
           customDescription,
+          userName: displayName ?? undefined,
+          localDateTime: new Date().toLocaleString(),
         });
 
       debugLog("chat", "handleSubmit: response received", {

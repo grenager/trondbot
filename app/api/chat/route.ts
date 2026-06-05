@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { NextResponse } from "next/server";
 import { getAnthropicApiKey } from "@/lib/env";
+import { fetchRecentMemories } from "@/lib/memories";
 import { buildSystemPrompt } from "@/lib/prompt";
 import {
   CHAT_TURN_TOOL_NAME,
@@ -148,6 +149,9 @@ export async function POST(request: Request): Promise<NextResponse> {
   const chatBody: ChatRequestBody = body;
   const requestId: string = crypto.randomUUID().slice(0, 8);
   const usageSnapshot = await getUsageSnapshot();
+  const memories: string[] = usageSnapshot.signedIn
+    ? await fetchRecentMemories()
+    : [];
   const anthropic = new Anthropic({ apiKey });
 
   logChatInfo("request received", {
@@ -176,6 +180,10 @@ export async function POST(request: Request): Promise<NextResponse> {
         chatBody.scenario,
         true,
         chatBody.customDescription,
+        undefined,
+        chatBody.userName,
+        chatBody.localDateTime,
+        memories,
       );
 
       const openingUserMessage: string = "Begin the scenario now.";
@@ -282,6 +290,9 @@ export async function POST(request: Request): Promise<NextResponse> {
       false,
       chatBody.customDescription,
       storyThemeHint,
+      chatBody.userName,
+      chatBody.localDateTime,
+      memories,
     );
     const anthropicMessages = toAnthropicMessages(chatBody.messages);
     const turnMaxTokens: number =
