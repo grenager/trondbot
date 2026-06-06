@@ -35,7 +35,7 @@ export default function StreakBadge({
 
   const label: string = todayCompleted
     ? String(streak)
-    : `${todaySent}/${todayThreshold}`;
+    : `${todaySent}/${todayThreshold} for streak`;
 
   return (
     <Link
