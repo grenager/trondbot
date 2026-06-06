@@ -159,6 +159,17 @@ export const de: Translations = {
   noActivityYet: "No activity yet. Start chatting to build your streak!",
   currentSession: "Current session",
   messagesSent: (count: number) => `${count} messages sent`,
+  streakFire: "Streak",
+  streakStarted: "Great job! You've started a streak!",
+  streakCongrats: (days: number) =>
+    days === 1
+      ? "Great job! You've started a streak!"
+      : `Great job, you're on a ${days}-day streak!`,
+  messagesToStreak: (remaining: number) =>
+    remaining === 1
+      ? "1 more message to extend your streak today"
+      : `${remaining} more messages to extend your streak today`,
+  streakCompletedToday: "Streak extended! Keep chatting to practice more.",
   saveSettings: "Save settings",
   settingsSaved: "Settings saved",
   appTitle: "Trondbot",
