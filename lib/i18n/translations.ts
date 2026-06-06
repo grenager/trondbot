@@ -147,7 +147,6 @@ export interface Translations {
   currentSession: string;
   messagesSent: (count: number) => string;
   streakFire: string;
-  streakStartPrompt: string;
   streakStarted: string;
   streakCongrats: (days: number) => string;
   messagesToStreak: (remaining: number) => string;
@@ -355,7 +354,6 @@ export const en: Translations = {
   currentSession: "Current session",
   messagesSent: (count: number) => `${count} messages sent`,
   streakFire: "Streak",
-  streakStartPrompt: "Chat to start streak!",
   streakStarted: "Great job! You've started a streak!",
   streakCongrats: (days: number) =>
     days === 1

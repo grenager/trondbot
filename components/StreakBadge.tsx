@@ -6,10 +6,19 @@ import { useTranslation } from "@/lib/i18n/TranslationContext";
 
 interface StreakBadgeProps {
   streak: number;
+  todaySent: number;
+  todayThreshold: number;
+  todayCompleted: boolean;
   celebrating: boolean;
 }
 
-export default function StreakBadge({ streak, celebrating }: StreakBadgeProps) {
+export default function StreakBadge({
+  streak,
+  todaySent,
+  todayThreshold,
+  todayCompleted,
+  celebrating,
+}: StreakBadgeProps) {
   const { t } = useTranslation();
   const [pulse, setPulse] = useState<boolean>(false);
 
@@ -24,13 +33,17 @@ export default function StreakBadge({ streak, celebrating }: StreakBadgeProps) {
     return () => clearTimeout(timer);
   }, [celebrating]);
 
+  const label: string = todayCompleted
+    ? String(streak)
+    : `${todaySent}/${todayThreshold}`;
+
   return (
     <Link
       href="/history"
       className={`flex items-center gap-1 rounded-full px-2 py-1 transition-all hover:bg-stone-100 ${
         pulse ? "animate-bounce" : ""
       }`}
-      aria-label={t.dayStreak(streak)}
+      aria-label={todayCompleted ? t.dayStreak(streak) : `${todaySent}/${todayThreshold}`}
     >
       <span
         className={`text-base transition-transform ${
@@ -43,8 +56,8 @@ export default function StreakBadge({ streak, celebrating }: StreakBadgeProps) {
       >
         🔥
       </span>
-      <span className="text-xs font-semibold text-stone-700">
-        {streak > 0 ? streak : t.streakStartPrompt}
+      <span className={`text-xs font-semibold ${todayCompleted ? "text-stone-700" : "text-stone-400"}`}>
+        {label}
       </span>
     </Link>
   );

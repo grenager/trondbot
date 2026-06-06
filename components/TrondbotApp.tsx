@@ -982,6 +982,9 @@ function TrondbotAppContent() {
             </button>
             <StreakBadge
               streak={streakCount}
+              todaySent={todayProgress.sent}
+              todayThreshold={todayProgress.threshold}
+              todayCompleted={todayProgress.completed}
               celebrating={streakCelebrating}
             />
             <button
