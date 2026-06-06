@@ -149,6 +149,7 @@ export const zh: Translations = {
   longestStreak: "Longest streak",
   totalMessages: "Total messages",
   recentActivity: "Recent activity",
+  streakExplanation: "Send 10 messages in a day to keep your streak going. Miss a day and it resets!",
   noActivityYet: "No activity yet. Start chatting to build your streak!",
   currentSession: "Current session",
   messagesSent: (count: number) => `${count} messages sent`,
