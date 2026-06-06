@@ -133,6 +133,23 @@ export default function LookupModal({
     onClose();
   }
 
+  useEffect(() => {
+    if (!open || !translation) {
+      return;
+    }
+
+    function handleKeyDown(event: KeyboardEvent): void {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        handleInsert();
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- handleInsert depends on translation which is in deps
+  }, [open, translation]);
+
   const sourceLabel: string = getLanguageLabelLocalized(nativeLanguage, locale);
   const targetLabel: string = getLanguageLabelLocalized(targetLanguage, locale);
 
