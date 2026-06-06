@@ -210,10 +210,10 @@ export default function LazyWordText({
       resolvedTokens[index] ?? resolvedTokens.find((t) => t.word === word);
     if (token) {
       vocabSave({
-        word: token.word,
-        translation: token.gloss,
-        sourceLanguage: messageLanguage,
-        targetLanguage: glossLanguage,
+        word: token.gloss,
+        translation: token.word,
+        sourceLanguage: glossLanguage,
+        targetLanguage: messageLanguage,
       });
     }
   }

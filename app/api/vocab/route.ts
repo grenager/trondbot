@@ -71,11 +71,21 @@ export async function POST(request: Request): Promise<NextResponse> {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
+  const stripPunctuation = (text: string): string =>
+    text.replace(/^[\p{P}\p{S}]+|[\p{P}\p{S}]+$/gu, "").trim();
+
+  const cleanWord: string = stripPunctuation(body.word.trim());
+  const cleanTranslation: string = stripPunctuation(body.translation.trim());
+
+  if (!cleanWord || !cleanTranslation) {
+    return NextResponse.json({ error: "Word is empty after cleaning" }, { status: 400 });
+  }
+
   const { error } = await supabase.from("vocab").upsert(
     {
       user_id: user.id,
-      word: body.word.trim(),
-      translation: body.translation.trim(),
+      word: cleanWord,
+      translation: cleanTranslation,
       source_language: body.sourceLanguage,
       target_language: body.targetLanguage,
     },
