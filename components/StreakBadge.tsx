@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useTranslation } from "@/lib/i18n/TranslationContext";
 
@@ -24,8 +25,9 @@ export default function StreakBadge({ streak, celebrating }: StreakBadgeProps) {
   }, [celebrating]);
 
   return (
-    <div
-      className={`flex items-center gap-1 transition-transform ${
+    <Link
+      href="/history"
+      className={`flex items-center gap-1 rounded-full px-2 py-1 transition-all hover:bg-stone-100 ${
         pulse ? "animate-bounce" : ""
       }`}
       aria-label={t.dayStreak(streak)}
@@ -44,6 +46,6 @@ export default function StreakBadge({ streak, celebrating }: StreakBadgeProps) {
       <span className="text-xs font-semibold text-stone-700">
         {streak}
       </span>
-    </div>
+    </Link>
   );
 }
