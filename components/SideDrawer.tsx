@@ -17,7 +17,42 @@ interface SideDrawerProps {
   hideCreditsNav: boolean;
   supabaseEnabled: boolean;
   vocabCount: number | null;
+  credits: number;
+  maxCredits: number;
+  onCreditsClick: () => void;
   onSignIn: () => void;
+}
+
+function CreditsMiniWheel({
+  credits,
+  maxCredits,
+}: {
+  credits: number;
+  maxCredits: number;
+}) {
+  const displayMax: number = Math.max(maxCredits, credits, 1);
+  const ratio: number = Math.min(credits / displayMax, 1);
+  const radius = 7;
+  const circumference: number = 2 * Math.PI * radius;
+  const strokeDashoffset: number = circumference * (1 - ratio);
+  const color: string = ratio > 0.2 ? "#3b82f6" : "#ef4444";
+
+  return (
+    <svg width="16" height="16" className="-rotate-90">
+      <circle cx="8" cy="8" r={radius} fill="none" stroke="#e7e5e4" strokeWidth="2" />
+      <circle
+        cx="8"
+        cy="8"
+        r={radius}
+        fill="none"
+        stroke={color}
+        strokeWidth="2"
+        strokeDasharray={circumference}
+        strokeDashoffset={strokeDashoffset}
+        strokeLinecap="round"
+      />
+    </svg>
+  );
 }
 
 export default function SideDrawer({
@@ -32,6 +67,9 @@ export default function SideDrawer({
   hideCreditsNav,
   supabaseEnabled,
   vocabCount,
+  credits,
+  maxCredits,
+  onCreditsClick,
   onSignIn,
 }: SideDrawerProps) {
   const { t } = useTranslation();
@@ -142,6 +180,21 @@ export default function SideDrawer({
                 </span>
               </Link>
             </li>
+            {!hideCreditsNav ? (
+              <li>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    onCreditsClick();
+                  }}
+                  className="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100"
+                >
+                  <span>{t.creditsLabel(credits)}</span>
+                  <CreditsMiniWheel credits={credits} maxCredits={maxCredits} />
+                </button>
+              </li>
+            ) : null}
             <li>
               <Link
                 href="/settings"

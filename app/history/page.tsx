@@ -59,6 +59,10 @@ function HistoryContent() {
         </div>
       </section>
 
+      <p className="text-center text-xs text-stone-500">
+        {t.streakExplanation}
+      </p>
+
       <section className="rounded-xl border border-stone-200 bg-white p-4">
         <h2 className="text-sm font-semibold text-stone-900">
           {t.currentSession}

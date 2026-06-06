@@ -59,6 +59,7 @@ function SecondaryPageShellContent({
   const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
   const [usage, setUsage] = useState<UsageSnapshot | null>(null);
   const [vocabCount, setVocabCount] = useState<number | null>(null);
+  const [showCreditsModal, setShowCreditsModal] = useState<boolean>(false);
 
   useEffect(() => {
     void fetchUsageSnapshot().then(setUsage);
@@ -98,6 +99,9 @@ function SecondaryPageShellContent({
         signedIn={!!user}
         hideCreditsNav={hideCreditsNav}
         vocabCount={vocabCount}
+        credits={usage?.remaining ?? 0}
+        maxCredits={usage?.maxCredits ?? 1}
+        onCreditsClick={() => setShowCreditsModal(!showCreditsModal)}
         supabaseEnabled={supabaseEnabled}
         onSignIn={() => {
           if (hideCreditsNav) {

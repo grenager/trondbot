@@ -142,9 +142,15 @@ export interface Translations {
   longestStreak: string;
   totalMessages: string;
   recentActivity: string;
+  streakExplanation: string;
   noActivityYet: string;
   currentSession: string;
   messagesSent: (count: number) => string;
+  streakFire: string;
+  streakStarted: string;
+  streakCongrats: (days: number) => string;
+  messagesToStreak: (remaining: number) => string;
+  streakCompletedToday: string;
   saveSettings: string;
   settingsSaved: string;
   appTitle: string;
@@ -343,9 +349,21 @@ export const en: Translations = {
   longestStreak: "Longest streak",
   totalMessages: "Total messages",
   recentActivity: "Recent activity",
+  streakExplanation: "Send 10 messages in a day to keep your streak going. Miss a day and it resets!",
   noActivityYet: "No activity yet. Start chatting to build your streak!",
   currentSession: "Current session",
   messagesSent: (count: number) => `${count} messages sent`,
+  streakFire: "Streak",
+  streakStarted: "Great job! You've started a streak!",
+  streakCongrats: (days: number) =>
+    days === 1
+      ? "Great job! You've started a streak!"
+      : `Great job, you're on a ${days}-day streak!`,
+  messagesToStreak: (remaining: number) =>
+    remaining === 1
+      ? "1 more message to extend your streak today"
+      : `${remaining} more messages to extend your streak today`,
+  streakCompletedToday: "Streak extended! Keep chatting to practice more.",
   saveSettings: "Save settings",
   settingsSaved: "Settings saved",
   appTitle: "Trondbot",

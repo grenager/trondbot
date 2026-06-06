@@ -8,6 +8,7 @@ import CreditsModal from "@/components/CreditsModal";
 import ReferralCapture from "@/components/ReferralCapture";
 import PaywallPrompt from "@/components/PaywallPrompt";
 import CreditsWheel from "@/components/CreditsWheel";
+import StreakBadge from "@/components/StreakBadge";
 import AuthModal from "@/components/AuthModal";
 import SideDrawer from "@/components/SideDrawer";
 import UserAvatar from "@/components/UserAvatar";
@@ -48,7 +49,13 @@ import {
   type UsageSnapshot,
 } from "@/lib/usage/client";
 import { trackNewChat, trackSendMessage } from "@/lib/analytics";
-import { recordMessageSent } from "@/lib/activity";
+import {
+  recordMessageSent,
+  getTodayProgress,
+  STREAK_THRESHOLD,
+  type TodayProgress,
+} from "@/lib/activity";
+import { getActivityStats } from "@/lib/activity";
 import { debugLog } from "@/lib/debug";
 import { fetchChat, getFetchErrorMessage } from "@/lib/fetchChat";
 import type {
@@ -200,6 +207,14 @@ function TrondbotAppContent() {
   } = useAuth();
   const [typingAfterAck, setTypingAfterAck] = useState<boolean>(false);
   const [composerMultiline, setComposerMultiline] = useState<boolean>(false);
+  const [streakCount, setStreakCount] = useState<number>(0);
+  const [todayProgress, setTodayProgress] = useState<TodayProgress>({
+    sent: 0,
+    threshold: STREAK_THRESHOLD,
+    remaining: STREAK_THRESHOLD,
+    completed: false,
+  });
+  const [streakCelebrating, setStreakCelebrating] = useState<boolean>(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const composerRef = useRef<HTMLTextAreaElement>(null);
   const lastComposerInputLengthRef = useRef<number>(0);
@@ -302,6 +317,15 @@ function TrondbotAppContent() {
     // Hydrate once from the initial URL and stored chat state.
     // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional mount-only
   }, []);
+
+  useEffect(() => {
+    if (!hydrated) {
+      return;
+    }
+    const stats = getActivityStats();
+    setStreakCount(stats.currentStreak);
+    setTodayProgress(getTodayProgress());
+  }, [hydrated]);
 
   useEffect(() => {
     if (!hydrated || !authReady) {
@@ -610,7 +634,15 @@ function TrondbotAppContent() {
     setLoading(true);
     setError(null);
     trackSendMessage(nativeLanguage, targetLanguage, scenario);
-    recordMessageSent();
+    const progress: TodayProgress = recordMessageSent();
+    const wasCompleted: boolean = todayProgress.completed;
+    setTodayProgress(progress);
+    if (progress.completed && !wasCompleted) {
+      const stats = getActivityStats();
+      setStreakCount(stats.currentStreak);
+      setStreakCelebrating(true);
+      setTimeout(() => setStreakCelebrating(false), 3000);
+    }
     debugLog("chat", "handleSubmit: request sent", {
       contentLength: trimmedInput.length,
       messageCount: apiMessages.length,
@@ -894,6 +926,9 @@ function TrondbotAppContent() {
           signedIn={signedIn}
           hideCreditsNav={hideCreditsNav}
           vocabCount={vocabCount}
+          credits={credits}
+          maxCredits={usage.maxCredits}
+          onCreditsClick={() => setShowCreditsModal(true)}
           supabaseEnabled={supabaseEnabled}
           onSignIn={() => {
             if (hideCreditsNav) {
@@ -945,16 +980,12 @@ function TrondbotAppContent() {
                 signedIn={!!user}
               />
             </button>
-            <CreditsWheel
-              credits={credits}
-              maxCredits={usage.maxCredits}
-              disabled={hideCreditsNav}
-              onClick={() => {
-                if (hideCreditsNav) {
-                  return;
-                }
-                setShowCreditsModal(true);
-              }}
+            <StreakBadge
+              streak={streakCount}
+              todaySent={todayProgress.sent}
+              todayThreshold={todayProgress.threshold}
+              todayCompleted={todayProgress.completed}
+              celebrating={streakCelebrating}
             />
             <button
               type="button"
@@ -1054,6 +1085,24 @@ function TrondbotAppContent() {
                 <p className="border-t border-stone-100 px-3 py-1.5 text-xs text-red-600">
                   {error}
                 </p>
+              ) : null}
+
+              {!showSetupForm && !usage.requiresSignIn ? (
+                <div className="shrink-0 px-3 pt-1.5">
+                  {streakCelebrating ? (
+                    <p className="text-center text-xs font-medium text-amber-600">
+                      {t.streakCongrats(streakCount)}
+                    </p>
+                  ) : todayProgress.completed ? (
+                    <p className="text-center text-xs text-stone-400">
+                      {t.streakCompletedToday}
+                    </p>
+                  ) : (
+                    <p className="text-center text-xs text-stone-500">
+                      {t.messagesToStreak(todayProgress.remaining)}
+                    </p>
+                  )}
+                </div>
               ) : null}
 
               <form
