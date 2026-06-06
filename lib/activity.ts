@@ -44,7 +44,7 @@ function migrateLegacy(raw: Record<string, unknown>): ActivityData {
     const dailyCounts: Record<string, number> = {};
     for (const date of legacyDates) {
       if (typeof date === "string") {
-        dailyCounts[date] = STREAK_THRESHOLD;
+        dailyCounts[date] = 1;
       }
     }
     return { dailyCounts, totalMessages };
