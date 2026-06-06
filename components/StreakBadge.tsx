@@ -44,7 +44,7 @@ export default function StreakBadge({ streak, celebrating }: StreakBadgeProps) {
         🔥
       </span>
       <span className="text-xs font-semibold text-stone-700">
-        {streak}
+        {streak > 0 ? streak : t.streakStartPrompt}
       </span>
     </Link>
   );
