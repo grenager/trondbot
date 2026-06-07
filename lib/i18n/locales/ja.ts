@@ -134,6 +134,8 @@ export const ja: Translations = {
   flashcards: "フラッシュカード",
   review: "復習",
   exportCsv: "CSVエクスポート",
+  editWord: "Edit word",
+  saveWord: "Save",
   deleteWord: "単語を削除",
   flipCard: "タップして裏返す",
   nextCard: "次へ",

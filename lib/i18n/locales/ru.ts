@@ -135,6 +135,8 @@ export const ru: Translations = {
   flashcards: "Карточки",
   review: "Повторить",
   exportCsv: "Экспорт CSV",
+  editWord: "Edit word",
+  saveWord: "Save",
   deleteWord: "Удалить слово",
   flipCard: "Нажмите, чтобы перевернуть",
   nextCard: "Далее",

@@ -137,6 +137,8 @@ export const pt: Translations = {
   flashcards: "Flashcards",
   review: "Revisar",
   exportCsv: "Exportar CSV",
+  editWord: "Edit word",
+  saveWord: "Save",
   deleteWord: "Excluir palavra",
   flipCard: "Toque para virar",
   nextCard: "Próximo",

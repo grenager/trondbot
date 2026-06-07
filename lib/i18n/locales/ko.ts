@@ -134,6 +134,8 @@ export const ko: Translations = {
   flashcards: "플래시카드",
   review: "복습",
   exportCsv: "CSV 내보내기",
+  editWord: "Edit word",
+  saveWord: "Save",
   deleteWord: "단어 삭제",
   flipCard: "탭하여 뒤집기",
   nextCard: "다음",

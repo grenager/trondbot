@@ -134,6 +134,8 @@ export const ar: Translations = {
   flashcards: "بطاقات تعليمية",
   review: "مراجعة",
   exportCsv: "تصدير CSV",
+  editWord: "Edit word",
+  saveWord: "Save",
   deleteWord: "حذف الكلمة",
   flipCard: "اضغط للقلب",
   nextCard: "التالي",

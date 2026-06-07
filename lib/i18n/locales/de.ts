@@ -138,6 +138,8 @@ export const de: Translations = {
   flashcards: "Karteikarten",
   review: "Üben",
   exportCsv: "CSV exportieren",
+  editWord: "Edit word",
+  saveWord: "Save",
   deleteWord: "Wort löschen",
   flipCard: "Tippen zum Umdrehen",
   nextCard: "Weiter",

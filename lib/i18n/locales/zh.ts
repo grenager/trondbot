@@ -131,6 +131,8 @@ export const zh: Translations = {
   flashcards: "闪卡",
   review: "复习",
   exportCsv: "导出CSV",
+  editWord: "Edit word",
+  saveWord: "Save",
   deleteWord: "删除单词",
   flipCard: "点击翻转",
   nextCard: "下一个",

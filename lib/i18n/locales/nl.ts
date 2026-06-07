@@ -137,6 +137,8 @@ export const nl: Translations = {
   flashcards: "Flashcards",
   review: "Oefenen",
   exportCsv: "CSV exporteren",
+  editWord: "Edit word",
+  saveWord: "Save",
   deleteWord: "Woord verwijderen",
   flipCard: "Tik om te draaien",
   nextCard: "Volgende",

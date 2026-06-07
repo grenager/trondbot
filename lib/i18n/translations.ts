@@ -127,6 +127,8 @@ export interface Translations {
   review: string;
   exportCsv: string;
   deleteWord: string;
+  editWord: string;
+  saveWord: string;
   flipCard: string;
   nextCard: string;
   signInForVocab: string;
@@ -333,6 +335,8 @@ export const en: Translations = {
   review: "Review",
   exportCsv: "Export CSV",
   deleteWord: "Delete word",
+  editWord: "Edit word",
+  saveWord: "Save",
   flipCard: "Tap to flip",
   nextCard: "Next",
   signInForVocab: "Sign in to save and review your vocabulary.",

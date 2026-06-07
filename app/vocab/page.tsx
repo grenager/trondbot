@@ -20,6 +20,10 @@ function VocabContent() {
   const [entries, setEntries] = useState<VocabEntry[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [showFlashcards, setShowFlashcards] = useState<boolean>(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editWord, setEditWord] = useState<string>("");
+  const [editTranslation, setEditTranslation] = useState<string>("");
+  const [saving, setSaving] = useState<boolean>(false);
 
   const fetchEntries = useCallback(async (): Promise<void> => {
     setLoading(true);
@@ -52,6 +56,60 @@ function VocabContent() {
       setLoading(false);
     }
   }, [user, fetchEntries]);
+
+  function startEditing(entry: VocabEntry): void {
+    setEditingId(entry.id);
+    setEditWord(entry.word);
+    setEditTranslation(entry.translation);
+  }
+
+  async function handleSaveEdit(): Promise<void> {
+    if (!editingId || saving) {
+      return;
+    }
+
+    const trimmedWord: string = editWord.trim();
+    const trimmedTranslation: string = editTranslation.trim();
+    if (!trimmedWord || !trimmedTranslation) {
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const res = await fetch("/api/vocab", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: editingId,
+          word: trimmedWord,
+          translation: trimmedTranslation,
+        }),
+      });
+
+      const data: unknown = await res.json();
+      if (
+        res.ok &&
+        typeof data === "object" &&
+        data !== null &&
+        "word" in data &&
+        "translation" in data
+      ) {
+        const updated = data as { word: string; translation: string };
+        setEntries((prev) =>
+          prev.map((e) =>
+            e.id === editingId
+              ? { ...e, word: updated.word, translation: updated.translation }
+              : e,
+          ),
+        );
+      }
+    } catch {
+      // Silently fail; entry stays unchanged.
+    } finally {
+      setSaving(false);
+      setEditingId(null);
+    }
+  }
 
   async function handleDelete(id: string): Promise<void> {
     setEntries((prev) => prev.filter((e) => e.id !== id));
@@ -116,30 +174,83 @@ function VocabContent() {
 
       <div className="divide-y divide-stone-100 rounded-xl border border-stone-200 bg-white">
         {entries.map((entry) => (
-          <div
-            key={entry.id}
-            className="flex items-center justify-between px-4 py-3"
-          >
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-stone-900">{entry.word}</p>
-              <p className="text-xs text-stone-500">{entry.translation}</p>
-            </div>
-            <button
-              type="button"
-              onClick={() => void handleDelete(entry.id)}
-              className="ml-3 shrink-0 rounded-md p-1 text-stone-300 transition-colors hover:bg-stone-100 hover:text-stone-600"
-              aria-label={t.deleteWord}
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                aria-hidden="true"
-              >
-                <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
-              </svg>
-            </button>
+          <div key={entry.id} className="px-4 py-3">
+            {editingId === entry.id ? (
+              <div className="space-y-2">
+                <input
+                  type="text"
+                  value={editWord}
+                  onChange={(e) => setEditWord(e.target.value)}
+                  className="w-full rounded-lg border border-stone-200 px-2.5 py-1.5 text-sm text-stone-900 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      void handleSaveEdit();
+                    } else if (e.key === "Escape") {
+                      setEditingId(null);
+                    }
+                  }}
+                />
+                <input
+                  type="text"
+                  value={editTranslation}
+                  onChange={(e) => setEditTranslation(e.target.value)}
+                  className="w-full rounded-lg border border-stone-200 px-2.5 py-1.5 text-sm text-stone-900 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      void handleSaveEdit();
+                    } else if (e.key === "Escape") {
+                      setEditingId(null);
+                    }
+                  }}
+                />
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => void handleSaveEdit()}
+                    disabled={saving || !editWord.trim() || !editTranslation.trim()}
+                    className="rounded-lg bg-blue-600 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-blue-700 disabled:bg-stone-300"
+                  >
+                    {t.saveWord}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditingId(null)}
+                    className="rounded-lg border border-stone-200 px-3 py-1 text-xs font-medium text-stone-600 transition-colors hover:bg-stone-50"
+                  >
+                    {t.cancel}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={() => startEditing(entry)}
+                  className="min-w-0 flex-1 text-left"
+                  aria-label={t.editWord}
+                >
+                  <p className="text-sm font-medium text-stone-900">{entry.word}</p>
+                  <p className="text-xs text-stone-500">{entry.translation}</p>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void handleDelete(entry.id)}
+                  className="ml-3 shrink-0 rounded-md p-1 text-stone-300 transition-colors hover:bg-stone-100 hover:text-stone-600"
+                  aria-label={t.deleteWord}
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
+                  </svg>
+                </button>
+              </div>
+            )}
           </div>
         ))}
       </div>

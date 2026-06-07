@@ -136,6 +136,8 @@ export const sv: Translations = {
   flashcards: "Flashkort",
   review: "Öva",
   exportCsv: "Exportera CSV",
+  editWord: "Edit word",
+  saveWord: "Save",
   deleteWord: "Ta bort ord",
   flipCard: "Tryck för att vända",
   nextCard: "Nästa",

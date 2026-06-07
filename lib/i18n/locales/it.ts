@@ -138,6 +138,8 @@ export const it: Translations = {
   flashcards: "Flashcard",
   review: "Ripassa",
   exportCsv: "Esporta CSV",
+  editWord: "Edit word",
+  saveWord: "Save",
   deleteWord: "Elimina parola",
   flipCard: "Tocca per girare",
   nextCard: "Avanti",

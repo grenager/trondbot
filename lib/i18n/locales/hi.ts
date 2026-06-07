@@ -134,6 +134,8 @@ export const hi: Translations = {
   flashcards: "फ्लैशकार्ड",
   review: "दोहराएं",
   exportCsv: "CSV निर्यात",
+  editWord: "Edit word",
+  saveWord: "Save",
   deleteWord: "शब्द हटाएं",
   flipCard: "पलटने के लिए टैप करें",
   nextCard: "अगला",
