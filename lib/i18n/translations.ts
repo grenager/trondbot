@@ -70,6 +70,7 @@ export interface Translations {
   stopAudio: string;
   playMessage: string;
   agentIsTyping: string;
+  retry: string;
   somethingWentWrong: string;
   failedToStartScenario: string;
   failedToSendMessage: string;
@@ -120,13 +121,17 @@ export interface Translations {
   settingsTitle: string;
   historyTitle: string;
   vocabTitle: string;
+  vocabSearchPlaceholder: string;
   vocabEmpty: string;
   wordList: string;
   flashcards: string;
   review: string;
   exportCsv: string;
   deleteWord: string;
+  editWord: string;
+  saveWord: string;
   flipCard: string;
+  flashcardKeyboardHint: string;
   nextCard: string;
   signInForVocab: string;
   vocabSaved: string;
@@ -272,6 +277,7 @@ export const en: Translations = {
   stopAudio: "Stop audio",
   playMessage: "Play message",
   agentIsTyping: "Agent is typing",
+  retry: "Retry",
   somethingWentWrong: "Something went wrong",
   failedToStartScenario: "Failed to start scenario",
   failedToSendMessage: "Failed to send message",
@@ -325,13 +331,17 @@ export const en: Translations = {
   settingsTitle: "Settings",
   historyTitle: "History & Streaks",
   vocabTitle: "Vocabulary",
+  vocabSearchPlaceholder: "Search vocabulary…",
   vocabEmpty: "No words saved yet. Tap on words in messages or use the dictionary to build your list.",
   wordList: "Word List",
   flashcards: "Flashcards",
   review: "Review",
   exportCsv: "Export CSV",
   deleteWord: "Delete word",
+  editWord: "Edit word",
+  saveWord: "Save",
   flipCard: "Tap to flip",
+  flashcardKeyboardHint: "Space to flip · ← → to navigate",
   nextCard: "Next",
   signInForVocab: "Sign in to save and review your vocabulary.",
   vocabSaved: "Saved to your vocab list!",

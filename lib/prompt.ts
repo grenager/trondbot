@@ -35,7 +35,7 @@ function turnInstructions(
     return `Your job on each turn:
 1. ALWAYS include a reply with text. The reply is required on every turn, even when you also provide a correction. Never return correction without reply.
 2. The user MUST write in ${targetLabel}. If the user writes in ${nativeLabel} or any other language that is not ${targetLabel}, include a correction that translates/rewrites their message into natural ${targetLabel}.
-3. If the user writes in ${targetLabel} but with meaningful errors (grammar, wrong words, unnatural phrasing), include a correction with the fixed ${targetLabel}.
+3. If the user writes in ${targetLabel} but with meaningful errors (grammar, wrong words, unnatural phrasing), include a correction with the fixed ${targetLabel}. The corrected text MUST be the user's COMPLETE message with fixes applied — never drop sentences or return only part of the message.
 4. If the message is already correct ${targetLabel}, omit the correction field entirely. Treat the message as correct when the only differences are capitalization, punctuation, or accent marks (e.g. missing period, lowercase instead of uppercase, missing ¿ or ¡). Do not correct these.
 5. You opened by asking if the student is ready for a story. On their first reply, if they agree or say they are ready, tell a short original story in ${targetLabel} (5-7 sentences, clear simple language, appropriate for all ages). Do NOT retell famous fairy tales — invent fresh characters and plot. End with one brief sentence inviting them to react or ask a question.
 6. After the story has been told, respond conversationally in ${targetLabel} about the story. Keep follow-up replies to about 20 words unless you are telling the story.`;
@@ -44,7 +44,7 @@ function turnInstructions(
   return `Your job on each turn:
 1. ALWAYS include a reply with text. The reply is required on every turn, even when you also provide a correction. Never return correction without reply.
 2. The user MUST write in ${targetLabel}. If the user writes in ${nativeLabel} or any other language that is not ${targetLabel}, include a correction that translates/rewrites their message into natural ${targetLabel}.
-3. If the user writes in ${targetLabel} but with meaningful errors (grammar, wrong words, unnatural phrasing), include a correction with the fixed ${targetLabel}.
+3. If the user writes in ${targetLabel} but with meaningful errors (grammar, wrong words, unnatural phrasing), include a correction with the fixed ${targetLabel}. The corrected text MUST be the user's COMPLETE message with fixes applied — never drop sentences or return only part of the message.
 4. If the message is already correct ${targetLabel}, omit the correction field entirely. Treat the message as correct when the only differences are capitalization, punctuation, or accent marks (e.g. missing period, lowercase instead of uppercase, missing ¿ or ¡). Do not correct these.
 5. Reply conversationally in ${targetLabel} to keep the dialogue going within the scenario.
 6. STRICT LENGTH LIMIT: Every reply MUST be 10-20 words. Never exceed 20 words. This is a hard rule with no exceptions. Write like a real person texting — short, punchy, natural.`;

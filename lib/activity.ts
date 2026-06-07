@@ -28,8 +28,15 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
 
+function toLocalDateString(date: Date): string {
+  const year: number = date.getFullYear();
+  const month: string = String(date.getMonth() + 1).padStart(2, "0");
+  const day: string = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 function getTodayDateString(): string {
-  return new Date().toISOString().slice(0, 10);
+  return toLocalDateString(new Date());
 }
 
 function migrateLegacy(raw: Record<string, unknown>): ActivityData {
@@ -142,7 +149,7 @@ function computeStreak(qualifiedDates: ReadonlySet<string>, fromDate: Date): num
   const cursor = new Date(fromDate);
 
   while (true) {
-    const dateKey: string = cursor.toISOString().slice(0, 10);
+    const dateKey: string = toLocalDateString(cursor);
     if (!qualifiedDates.has(dateKey)) {
       break;
     }
@@ -171,8 +178,7 @@ function computeLongestStreak(dailyCounts: Record<string, number>): number {
     const currentDate = new Date(qualifiedDates[index]!);
     previous.setDate(previous.getDate() + 1);
     const isConsecutive: boolean =
-      previous.toISOString().slice(0, 10) ===
-      currentDate.toISOString().slice(0, 10);
+      toLocalDateString(previous) === toLocalDateString(currentDate);
 
     if (isConsecutive) {
       current += 1;
@@ -225,8 +231,8 @@ export function getActivityStats(): ActivityStats {
   const yesterday = new Date(today);
   yesterday.setDate(yesterday.getDate() - 1);
 
-  const todayKey: string = today.toISOString().slice(0, 10);
-  const yesterdayKey: string = yesterday.toISOString().slice(0, 10);
+  const todayKey: string = toLocalDateString(today);
+  const yesterdayKey: string = toLocalDateString(yesterday);
 
   let currentStreak = 0;
   if (qualified.has(todayKey)) {
