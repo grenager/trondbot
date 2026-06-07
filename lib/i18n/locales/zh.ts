@@ -126,6 +126,7 @@ export const zh: Translations = {
   settingsTitle: "Settings",
   historyTitle: "History & Streaks",
   vocabTitle: "词汇表",
+  vocabSearchPlaceholder: "Search vocabulary…",
   vocabEmpty: "还没有保存的单词。点击消息中的单词或使用词典来建立你的列表。",
   wordList: "单词列表",
   flashcards: "闪卡",

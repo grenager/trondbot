@@ -129,6 +129,7 @@ export const ja: Translations = {
   settingsTitle: "Settings",
   historyTitle: "History & Streaks",
   vocabTitle: "単語帳",
+  vocabSearchPlaceholder: "Search vocabulary…",
   vocabEmpty: "まだ単語が保存されていません。メッセージ内の単語をタップするか辞書を使ってください。",
   wordList: "単語リスト",
   flashcards: "フラッシュカード",

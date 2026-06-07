@@ -133,6 +133,7 @@ export const fr: Translations = {
   settingsTitle: "Settings",
   historyTitle: "History & Streaks",
   vocabTitle: "Vocabulaire",
+  vocabSearchPlaceholder: "Search vocabulary…",
   vocabEmpty: "Aucun mot enregistré. Appuyez sur des mots dans les messages ou utilisez le dictionnaire.",
   wordList: "Liste de mots",
   flashcards: "Cartes mémoire",

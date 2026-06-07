@@ -132,6 +132,7 @@ export const nl: Translations = {
   settingsTitle: "Settings",
   historyTitle: "History & Streaks",
   vocabTitle: "Woordenlijst",
+  vocabSearchPlaceholder: "Search vocabulary…",
   vocabEmpty: "Nog geen woorden opgeslagen. Tik op woorden in berichten of gebruik het woordenboek.",
   wordList: "Woordenlijst",
   flashcards: "Flashcards",

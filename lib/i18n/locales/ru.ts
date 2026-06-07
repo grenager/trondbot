@@ -130,6 +130,7 @@ export const ru: Translations = {
   settingsTitle: "Settings",
   historyTitle: "History & Streaks",
   vocabTitle: "Словарь",
+  vocabSearchPlaceholder: "Search vocabulary…",
   vocabEmpty: "Пока нет сохранённых слов. Нажимайте на слова в сообщениях или используйте словарь.",
   wordList: "Список слов",
   flashcards: "Карточки",

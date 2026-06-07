@@ -129,6 +129,7 @@ export const ar: Translations = {
   settingsTitle: "Settings",
   historyTitle: "History & Streaks",
   vocabTitle: "المفردات",
+  vocabSearchPlaceholder: "Search vocabulary…",
   vocabEmpty: "لا توجد كلمات محفوظة بعد. اضغط على الكلمات في الرسائل أو استخدم القاموس.",
   wordList: "قائمة الكلمات",
   flashcards: "بطاقات تعليمية",

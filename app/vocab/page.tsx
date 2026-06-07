@@ -20,6 +20,7 @@ function VocabContent() {
   const [entries, setEntries] = useState<VocabEntry[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [showFlashcards, setShowFlashcards] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editWord, setEditWord] = useState<string>("");
   const [editTranslation, setEditTranslation] = useState<string>("");
@@ -172,8 +173,29 @@ function VocabContent() {
         </button>
       </div>
 
+      <div className="mb-3">
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder={t.vocabSearchPlaceholder}
+          className="w-full rounded-lg border border-stone-200 px-3 py-2 text-sm text-stone-900 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
+        />
+      </div>
+
       <div className="divide-y divide-stone-100 rounded-xl border border-stone-200 bg-white">
-        {entries.map((entry) => (
+        {entries
+          .filter((entry) => {
+            if (!searchQuery.trim()) {
+              return true;
+            }
+            const q: string = searchQuery.toLowerCase();
+            return (
+              entry.word.toLowerCase().includes(q) ||
+              entry.translation.toLowerCase().includes(q)
+            );
+          })
+          .map((entry) => (
           <div key={entry.id} className="px-4 py-3">
             {editingId === entry.id ? (
               <div className="space-y-2">
@@ -224,31 +246,45 @@ function VocabContent() {
               </div>
             ) : (
               <div className="flex items-center justify-between">
-                <button
-                  type="button"
-                  onClick={() => startEditing(entry)}
-                  className="min-w-0 flex-1 text-left"
-                  aria-label={t.editWord}
-                >
+                <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-stone-900">{entry.word}</p>
                   <p className="text-xs text-stone-500">{entry.translation}</p>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => void handleDelete(entry.id)}
-                  className="ml-3 shrink-0 rounded-md p-1 text-stone-300 transition-colors hover:bg-stone-100 hover:text-stone-600"
-                  aria-label={t.deleteWord}
-                >
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                    aria-hidden="true"
+                </div>
+                <div className="ml-3 flex shrink-0 items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => startEditing(entry)}
+                    className="rounded-md p-1 text-stone-300 transition-colors hover:bg-stone-100 hover:text-stone-600"
+                    aria-label={t.editWord}
                   >
-                    <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
-                  </svg>
-                </button>
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path d="m5.433 13.917 1.262-3.155A4 4 0 0 1 7.58 9.42l6.92-6.918a2.121 2.121 0 0 1 3 3l-6.92 6.918c-.383.383-.84.685-1.343.886l-3.154 1.262a.5.5 0 0 1-.65-.65Z" />
+                      <path d="M3.5 5.75c0-.69.56-1.25 1.25-1.25H10A.75.75 0 0 0 10 3H4.75A2.75 2.75 0 0 0 2 5.75v9.5A2.75 2.75 0 0 0 4.75 18h9.5A2.75 2.75 0 0 0 17 15.25V10a.75.75 0 0 0-1.5 0v5.25c0 .69-.56 1.25-1.25 1.25h-9.5c-.69 0-1.25-.56-1.25-1.25v-9.5Z" />
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void handleDelete(entry.id)}
+                    className="rounded-md p-1 text-stone-300 transition-colors hover:bg-stone-100 hover:text-stone-600"
+                    aria-label={t.deleteWord}
+                  >
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
+                    </svg>
+                  </button>
+                </div>
               </div>
             )}
           </div>

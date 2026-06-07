@@ -131,6 +131,7 @@ export const no: Translations = {
   settingsTitle: "Settings",
   historyTitle: "History & Streaks",
   vocabTitle: "Ordliste",
+  vocabSearchPlaceholder: "Search vocabulary…",
   vocabEmpty: "Ingen ord lagret ennå. Trykk på ord i meldinger eller bruk ordboken for å bygge listen din.",
   wordList: "Ordliste",
   flashcards: "Flashkort",

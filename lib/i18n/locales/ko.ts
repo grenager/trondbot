@@ -129,6 +129,7 @@ export const ko: Translations = {
   settingsTitle: "Settings",
   historyTitle: "History & Streaks",
   vocabTitle: "단어장",
+  vocabSearchPlaceholder: "Search vocabulary…",
   vocabEmpty: "저장된 단어가 없습니다. 메시지에서 단어를 탭하거나 사전을 사용하세요.",
   wordList: "단어 목록",
   flashcards: "플래시카드",

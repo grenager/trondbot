@@ -121,6 +121,7 @@ export interface Translations {
   settingsTitle: string;
   historyTitle: string;
   vocabTitle: string;
+  vocabSearchPlaceholder: string;
   vocabEmpty: string;
   wordList: string;
   flashcards: string;
@@ -329,6 +330,7 @@ export const en: Translations = {
   settingsTitle: "Settings",
   historyTitle: "History & Streaks",
   vocabTitle: "Vocabulary",
+  vocabSearchPlaceholder: "Search vocabulary…",
   vocabEmpty: "No words saved yet. Tap on words in messages or use the dictionary to build your list.",
   wordList: "Word List",
   flashcards: "Flashcards",

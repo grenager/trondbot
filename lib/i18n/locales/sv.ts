@@ -131,6 +131,7 @@ export const sv: Translations = {
   settingsTitle: "Settings",
   historyTitle: "History & Streaks",
   vocabTitle: "Ordlista",
+  vocabSearchPlaceholder: "Search vocabulary…",
   vocabEmpty: "Inga sparade ord ännu. Tryck på ord i meddelanden eller använd ordboken.",
   wordList: "Ordlista",
   flashcards: "Flashkort",

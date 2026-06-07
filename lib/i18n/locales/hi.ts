@@ -129,6 +129,7 @@ export const hi: Translations = {
   settingsTitle: "Settings",
   historyTitle: "History & Streaks",
   vocabTitle: "शब्दावली",
+  vocabSearchPlaceholder: "Search vocabulary…",
   vocabEmpty: "अभी तक कोई शब्द सहेजा नहीं गया। संदेशों में शब्दों पर टैप करें या शब्दकोश का उपयोग करें।",
   wordList: "शब्द सूची",
   flashcards: "फ्लैशकार्ड",

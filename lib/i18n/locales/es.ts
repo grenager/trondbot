@@ -132,6 +132,7 @@ export const es: Translations = {
   settingsTitle: "Settings",
   historyTitle: "History & Streaks",
   vocabTitle: "Vocabulario",
+  vocabSearchPlaceholder: "Search vocabulary…",
   vocabEmpty: "No hay palabras guardadas. Toca las palabras en los mensajes o usa el diccionario.",
   wordList: "Lista de palabras",
   flashcards: "Tarjetas",
