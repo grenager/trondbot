@@ -77,6 +77,7 @@ export const hi: Translations = {
   stopAudio: "ऑडियो रोकें",
   playMessage: "संदेश चलाएँ",
   agentIsTyping: "एजेंट टाइप कर रहा है",
+  retry: "Retry",
   somethingWentWrong: "कुछ गलत हो गया",
   failedToStartScenario: "परिदृश्य शुरू नहीं हो सका",
   failedToSendMessage: "संदेश भेजा नहीं जा सका",

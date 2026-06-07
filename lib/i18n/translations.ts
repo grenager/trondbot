@@ -70,6 +70,7 @@ export interface Translations {
   stopAudio: string;
   playMessage: string;
   agentIsTyping: string;
+  retry: string;
   somethingWentWrong: string;
   failedToStartScenario: string;
   failedToSendMessage: string;
@@ -272,6 +273,7 @@ export const en: Translations = {
   stopAudio: "Stop audio",
   playMessage: "Play message",
   agentIsTyping: "Agent is typing",
+  retry: "Retry",
   somethingWentWrong: "Something went wrong",
   failedToStartScenario: "Failed to start scenario",
   failedToSendMessage: "Failed to send message",

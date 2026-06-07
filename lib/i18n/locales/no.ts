@@ -78,6 +78,7 @@ export const no: Translations = {
   stopAudio: "Stopp lyd",
   playMessage: "Spill av melding",
   agentIsTyping: "Agenten skriver",
+  retry: "Retry",
   somethingWentWrong: "Noe gikk galt",
   failedToStartScenario: "Kunne ikke starte scenario",
   failedToSendMessage: "Kunne ikke sende melding",

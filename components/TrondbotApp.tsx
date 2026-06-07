@@ -611,44 +611,16 @@ function TrondbotAppContent() {
     }
   }
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
-    event.preventDefault();
-
-    const trimmedInput: string = input.trim();
-    if (!trimmedInput || loading) {
-      return;
-    }
-
-    if (usage.requiresSignIn || usage.remaining <= 0) {
-      return;
-    }
-
-    const userMessage: UserMessageWithCorrection = {
-      role: "user",
-      content: trimmedInput,
-    };
-
-    setMessages((previous) => [...previous, userMessage]);
-    const apiMessages: DisplayMessage[] = [...messages, userMessage];
-    setInput("");
+  async function sendUserMessage(
+    userMessage: UserMessageWithCorrection,
+    apiMessages: DisplayMessage[],
+  ): Promise<void> {
     setLoading(true);
     setError(null);
-    trackSendMessage(nativeLanguage, targetLanguage, scenario);
-    const progress: TodayProgress = recordMessageSent();
-    const wasCompleted: boolean = todayProgress.completed;
-    setTodayProgress(progress);
-    if (progress.completed && !wasCompleted) {
-      const stats = getActivityStats();
-      setStreakCount(stats.currentStreak);
-      setStreakCelebrating(true);
-      setTimeout(() => setStreakCelebrating(false), 3000);
-    }
-    debugLog("chat", "handleSubmit: request sent", {
-      contentLength: trimmedInput.length,
+
+    debugLog("chat", "sendUserMessage: request sent", {
+      contentLength: userMessage.content.length,
       messageCount: apiMessages.length,
-      nativeLanguage,
-      targetLanguage,
-      scenario,
     });
 
     try {
@@ -662,7 +634,7 @@ function TrondbotAppContent() {
           localDateTime: new Date().toLocaleString(),
         });
 
-      debugLog("chat", "handleSubmit: response received", {
+      debugLog("chat", "sendUserMessage: response received", {
         ok: response.ok,
         status: response.status,
       });
@@ -671,11 +643,11 @@ function TrondbotAppContent() {
       try {
         data = await response.json();
       } catch (parseError: unknown) {
-        debugLog("chat", "handleSubmit: failed to parse JSON", parseError);
+        debugLog("chat", "sendUserMessage: failed to parse JSON", parseError);
         throw new Error(getTranslations(nativeLanguage).failedToSendMessage);
       }
 
-      debugLog("chat", "handleSubmit: response parsed", {
+      debugLog("chat", "sendUserMessage: response parsed", {
         hasCorrection:
           typeof data === "object" &&
           data !== null &&
@@ -725,7 +697,7 @@ function TrondbotAppContent() {
       const agentResponse: AgentResponse = data as AgentResponse;
 
       if (agentResponse.correction) {
-        debugLog("chat", "handleSubmit: applying correction", {
+        debugLog("chat", "sendUserMessage: applying correction", {
           correctedLength: agentResponse.correction.corrected.length,
         });
         const userAwaitingAck: UserMessageWithCorrection = {
@@ -739,7 +711,7 @@ function TrondbotAppContent() {
           userAwaitingAck,
         ]);
       } else {
-        debugLog("chat", "handleSubmit: message accepted", {
+        debugLog("chat", "sendUserMessage: message accepted", {
           replyLength: agentResponse.reply.text.length,
         });
         const userAccepted: UserMessageWithCorrection = {
@@ -756,18 +728,70 @@ function TrondbotAppContent() {
           assistantMessage,
         ]);
       }
-      debugLog("chat", "handleSubmit: complete");
+      debugLog("chat", "sendUserMessage: complete");
     } catch (submitError: unknown) {
       const message: string = getFetchErrorMessage(
         submitError,
         getTranslations(nativeLanguage).failedToSendMessage,
       );
-      debugLog("chat", "handleSubmit: failed", { message, submitError });
+      debugLog("chat", "sendUserMessage: failed", { message, submitError });
       setError(message);
     } finally {
-      debugLog("chat", "handleSubmit: finally, clearing loading");
+      debugLog("chat", "sendUserMessage: finally, clearing loading");
       setLoading(false);
     }
+  }
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
+    event.preventDefault();
+
+    const trimmedInput: string = input.trim();
+    if (!trimmedInput || loading) {
+      return;
+    }
+
+    if (usage.requiresSignIn || usage.remaining <= 0) {
+      return;
+    }
+
+    const userMessage: UserMessageWithCorrection = {
+      role: "user",
+      content: trimmedInput,
+    };
+
+    setMessages((previous) => [...previous, userMessage]);
+    const apiMessages: DisplayMessage[] = [...messages, userMessage];
+    setInput("");
+    trackSendMessage(nativeLanguage, targetLanguage, scenario);
+    const progress: TodayProgress = recordMessageSent();
+    const wasCompleted: boolean = todayProgress.completed;
+    setTodayProgress(progress);
+    if (progress.completed && !wasCompleted) {
+      const stats = getActivityStats();
+      setStreakCount(stats.currentStreak);
+      setStreakCelebrating(true);
+      setTimeout(() => setStreakCelebrating(false), 3000);
+    }
+
+    await sendUserMessage(userMessage, apiMessages);
+  }
+
+  function handleRetry(): void {
+    if (loading) {
+      return;
+    }
+
+    const lastMessage: DisplayMessage | undefined = messages.at(-1);
+    if (!lastMessage || lastMessage.role !== "user") {
+      return;
+    }
+
+    const userMessage: UserMessageWithCorrection = {
+      role: "user",
+      content: lastMessage.content,
+    };
+
+    void sendUserMessage(userMessage, messages);
   }
 
   const t = getTranslations(nativeLanguage);
@@ -1082,9 +1106,17 @@ function TrondbotAppContent() {
               ) : null}
 
               {error ? (
-                <p className="border-t border-stone-100 px-3 py-1.5 text-xs text-red-600">
-                  {error}
-                </p>
+                <div className="flex items-center justify-between border-t border-stone-100 px-3 py-1.5">
+                  <p className="text-xs text-red-600">{error}</p>
+                  <button
+                    type="button"
+                    onClick={handleRetry}
+                    disabled={loading}
+                    className="ml-2 shrink-0 rounded-md px-2 py-1 text-xs font-medium text-blue-600 transition-colors hover:bg-blue-50 disabled:opacity-50"
+                  >
+                    {t.retry}
+                  </button>
+                </div>
               ) : null}
 
               {!showSetupForm && !usage.requiresSignIn ? (

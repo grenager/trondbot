@@ -78,6 +78,7 @@ export const nl: Translations = {
   stopAudio: "Audio stoppen",
   playMessage: "Bericht afspelen",
   agentIsTyping: "Agent is aan het typen",
+  retry: "Retry",
   somethingWentWrong: "Er is iets misgegaan",
   failedToStartScenario: "Scenario starten mislukt",
   failedToSendMessage: "Bericht verzenden mislukt",

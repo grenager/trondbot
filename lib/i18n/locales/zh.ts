@@ -75,6 +75,7 @@ export const zh: Translations = {
   stopAudio: "停止音频",
   playMessage: "播放消息",
   agentIsTyping: "智能体正在输入",
+  retry: "Retry",
   somethingWentWrong: "出了点问题",
   failedToStartScenario: "无法启动场景",
   failedToSendMessage: "无法发送消息",

@@ -79,6 +79,7 @@ export const it: Translations = {
   stopAudio: "Ferma audio",
   playMessage: "Riproduci messaggio",
   agentIsTyping: "L'agente sta scrivendo",
+  retry: "Retry",
   somethingWentWrong: "Qualcosa è andato storto",
   failedToStartScenario: "Impossibile avviare lo scenario",
   failedToSendMessage: "Impossibile inviare il messaggio",

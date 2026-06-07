@@ -77,6 +77,7 @@ export const ar: Translations = {
   stopAudio: "إيقاف الصوت",
   playMessage: "تشغيل الرسالة",
   agentIsTyping: "الوكيل يكتب",
+  retry: "Retry",
   somethingWentWrong: "حدث خطأ ما",
   failedToStartScenario: "فشل بدء المشهد",
   failedToSendMessage: "فشل إرسال الرسالة",

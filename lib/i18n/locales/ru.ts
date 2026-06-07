@@ -78,6 +78,7 @@ export const ru: Translations = {
   stopAudio: "Остановить аудио",
   playMessage: "Воспроизвести сообщение",
   agentIsTyping: "Агент печатает",
+  retry: "Retry",
   somethingWentWrong: "Что-то пошло не так",
   failedToStartScenario: "Не удалось запустить сценарий",
   failedToSendMessage: "Не удалось отправить сообщение",

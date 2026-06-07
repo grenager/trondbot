@@ -78,6 +78,7 @@ export const es: Translations = {
   stopAudio: "Detener audio",
   playMessage: "Reproducir mensaje",
   agentIsTyping: "El agente está escribiendo",
+  retry: "Retry",
   somethingWentWrong: "Algo salió mal",
   failedToStartScenario: "No se pudo iniciar el escenario",
   failedToSendMessage: "No se pudo enviar el mensaje",

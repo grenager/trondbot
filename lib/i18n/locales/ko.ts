@@ -77,6 +77,7 @@ export const ko: Translations = {
   stopAudio: "오디오 중지",
   playMessage: "메시지 재생",
   agentIsTyping: "에이전트가 입력 중",
+  retry: "Retry",
   somethingWentWrong: "문제가 발생했습니다",
   failedToStartScenario: "시나리오 시작 실패",
   failedToSendMessage: "메시지 전송 실패",

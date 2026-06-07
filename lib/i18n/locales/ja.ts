@@ -77,6 +77,7 @@ export const ja: Translations = {
   stopAudio: "音声を停止",
   playMessage: "メッセージを再生",
   agentIsTyping: "エージェントが入力中",
+  retry: "Retry",
   somethingWentWrong: "問題が発生しました",
   failedToStartScenario: "シナリオの開始に失敗しました",
   failedToSendMessage: "メッセージの送信に失敗しました",
