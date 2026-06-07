@@ -89,7 +89,7 @@ export async function POST(request: Request): Promise<NextResponse> {
       source_language: body.sourceLanguage,
       target_language: body.targetLanguage,
     },
-    { onConflict: "user_id,word,source_language,target_language" },
+    { onConflict: "user_id,translation,source_language,target_language" },
   );
 
   if (error) {
