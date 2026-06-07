@@ -254,12 +254,12 @@ function VocabContent() {
                   <button
                     type="button"
                     onClick={() => startEditing(entry)}
-                    className="rounded-md p-1 text-stone-300 transition-colors hover:bg-stone-100 hover:text-stone-600"
+                    className="rounded-md p-2 text-stone-300 transition-colors hover:bg-stone-100 hover:text-stone-600"
                     aria-label={t.editWord}
                   >
                     <svg
-                      width="14"
-                      height="14"
+                      width="16"
+                      height="16"
                       viewBox="0 0 20 20"
                       fill="currentColor"
                       aria-hidden="true"
@@ -271,12 +271,12 @@ function VocabContent() {
                   <button
                     type="button"
                     onClick={() => void handleDelete(entry.id)}
-                    className="rounded-md p-1 text-stone-300 transition-colors hover:bg-stone-100 hover:text-stone-600"
+                    className="rounded-md p-2 text-stone-300 transition-colors hover:bg-stone-100 hover:text-stone-600"
                     aria-label={t.deleteWord}
                   >
                     <svg
-                      width="14"
-                      height="14"
+                      width="16"
+                      height="16"
                       viewBox="0 0 20 20"
                       fill="currentColor"
                       aria-hidden="true"
