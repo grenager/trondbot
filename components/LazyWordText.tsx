@@ -14,6 +14,8 @@ interface LazyWordTextProps {
   variant?: "default" | "onDark";
   canSpendCredit?: () => boolean;
   onUsageUpdate?: (usage: UsageSnapshot) => void;
+  changedIndices?: Set<number>;
+  changedVariant?: "error" | "fix";
 }
 
 function parseTokenizeResponse(data: unknown): Token[] | null {
@@ -56,6 +58,8 @@ export default function LazyWordText({
   variant = "default",
   canSpendCredit,
   onUsageUpdate,
+  changedIndices,
+  changedVariant = "error",
 }: LazyWordTextProps) {
   const { t } = useTranslation();
   const vocabSave = useVocabSave();
@@ -228,11 +232,17 @@ export default function LazyWordText({
       {words.map((word, index) => {
         const isActive: boolean = activeIndex === index;
         const gloss: string | null = getGloss(index);
+        const isChanged: boolean = changedIndices?.has(index) ?? false;
+        const changedClass: string = isChanged
+          ? changedVariant === "fix"
+            ? "decoration-blue-500 underline decoration-wavy underline-offset-2"
+            : "decoration-red-500 underline decoration-wavy underline-offset-2"
+          : "";
 
         return (
           <span key={`${word}-${index}`}>
             <span
-              className={`relative inline cursor-pointer border-b border-dotted ${underlineClass}`}
+              className={`relative inline cursor-pointer border-b border-dotted ${underlineClass} ${changedClass}`}
               onClick={(event) => void handleWordClick(index, event)}
             >
               {word}

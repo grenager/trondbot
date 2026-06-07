@@ -5,6 +5,7 @@ import type { LanguageCode, UserMessageWithCorrection } from "@/lib/types";
 import type { UsageSnapshot } from "@/lib/usage/client";
 import { useTranslation } from "@/lib/i18n/TranslationContext";
 import { debugLog } from "@/lib/debug";
+import { getWordDiff, type WordDiffResult } from "@/lib/wordDiff";
 import LazyWordText from "./LazyWordText";
 import SpeakButton from "./SpeakButton";
 
@@ -78,6 +79,13 @@ export default function UserBubble({
   const wasAccepted: boolean = !!message.accepted;
   const wasCorrected: boolean = !!message.originalContent;
 
+  const wordDiff: WordDiffResult | null = useMemo(() => {
+    if (!isAwaitingAck || !message.correction) {
+      return null;
+    }
+    return getWordDiff(message.content, message.correction.corrected);
+  }, [isAwaitingAck, message.correction, message.content]);
+
   useEffect(() => {
     if (!loading) {
       return;
@@ -123,6 +131,8 @@ export default function UserBubble({
             variant="onDark"
             canSpendCredit={canSpendCredit}
             onUsageUpdate={onUsageUpdate}
+            changedIndices={wordDiff?.originalChanged}
+            changedVariant="error"
           />
           <SpeakButton
             text={message.content}
@@ -201,7 +211,9 @@ export default function UserBubble({
                 messageLanguage={targetLanguage}
                 glossLanguage={nativeLanguage}
                 canSpendCredit={canSpendCredit}
-            onUsageUpdate={onUsageUpdate}
+                onUsageUpdate={onUsageUpdate}
+                changedIndices={wordDiff?.correctedChanged}
+                changedVariant="fix"
               />
               <SpeakButton
                 text={message.correction.corrected}

@@ -50,6 +50,25 @@ export default function LookupModal({
     return () => clearTimeout(timer);
   }, [open]);
 
+  useEffect(() => {
+    if (!open || !translation) {
+      return;
+    }
+
+    function handleKeyDown(event: KeyboardEvent): void {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        if (translation) {
+          onInsert(translation);
+          onClose();
+        }
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [open, translation, onInsert, onClose]);
+
   if (!open) {
     return null;
   }
@@ -132,23 +151,6 @@ export default function LookupModal({
     onInsert(translation);
     onClose();
   }
-
-  useEffect(() => {
-    if (!open || !translation) {
-      return;
-    }
-
-    function handleKeyDown(event: KeyboardEvent): void {
-      if (event.key === "Enter") {
-        event.preventDefault();
-        handleInsert();
-      }
-    }
-
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- handleInsert depends on translation which is in deps
-  }, [open, translation]);
 
   const sourceLabel: string = getLanguageLabelLocalized(nativeLanguage, locale);
   const targetLabel: string = getLanguageLabelLocalized(targetLanguage, locale);
