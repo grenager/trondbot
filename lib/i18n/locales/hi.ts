@@ -138,6 +138,7 @@ export const hi: Translations = {
   editWord: "Edit word",
   saveWord: "Save",
   deleteWord: "शब्द हटाएं",
+  flashcardKeyboardHint: "Space to flip · ← → to navigate",
   flipCard: "पलटने के लिए टैप करें",
   nextCard: "अगला",
   signInForVocab: "अपनी शब्दावली सहेजने और अभ्यास करने के लिए साइन इन करें।",

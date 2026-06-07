@@ -141,6 +141,7 @@ export const es: Translations = {
   editWord: "Edit word",
   saveWord: "Save",
   deleteWord: "Eliminar palabra",
+  flashcardKeyboardHint: "Space to flip · ← → to navigate",
   flipCard: "Toca para voltear",
   nextCard: "Siguiente",
   signInForVocab: "Inicia sesión para guardar y practicar tu vocabulario.",

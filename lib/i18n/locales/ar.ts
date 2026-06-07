@@ -138,6 +138,7 @@ export const ar: Translations = {
   editWord: "Edit word",
   saveWord: "Save",
   deleteWord: "حذف الكلمة",
+  flashcardKeyboardHint: "Space to flip · ← → to navigate",
   flipCard: "اضغط للقلب",
   nextCard: "التالي",
   signInForVocab: "سجل الدخول لحفظ ومراجعة مفرداتك.",

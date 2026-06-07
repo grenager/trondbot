@@ -131,6 +131,7 @@ export interface Translations {
   editWord: string;
   saveWord: string;
   flipCard: string;
+  flashcardKeyboardHint: string;
   nextCard: string;
   signInForVocab: string;
   vocabSaved: string;
@@ -340,6 +341,7 @@ export const en: Translations = {
   editWord: "Edit word",
   saveWord: "Save",
   flipCard: "Tap to flip",
+  flashcardKeyboardHint: "Space to flip · ← → to navigate",
   nextCard: "Next",
   signInForVocab: "Sign in to save and review your vocabulary.",
   vocabSaved: "Saved to your vocab list!",

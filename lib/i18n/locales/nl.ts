@@ -141,6 +141,7 @@ export const nl: Translations = {
   editWord: "Edit word",
   saveWord: "Save",
   deleteWord: "Woord verwijderen",
+  flashcardKeyboardHint: "Space to flip · ← → to navigate",
   flipCard: "Tik om te draaien",
   nextCard: "Volgende",
   signInForVocab: "Log in om je woordenschat op te slaan en te oefenen.",

@@ -140,6 +140,7 @@ export const sv: Translations = {
   editWord: "Edit word",
   saveWord: "Save",
   deleteWord: "Ta bort ord",
+  flashcardKeyboardHint: "Space to flip · ← → to navigate",
   flipCard: "Tryck för att vända",
   nextCard: "Nästa",
   signInForVocab: "Logga in för att spara och öva på din ordlista.",

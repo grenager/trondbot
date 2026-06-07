@@ -135,6 +135,7 @@ export const zh: Translations = {
   editWord: "Edit word",
   saveWord: "Save",
   deleteWord: "删除单词",
+  flashcardKeyboardHint: "Space to flip · ← → to navigate",
   flipCard: "点击翻转",
   nextCard: "下一个",
   signInForVocab: "登录以保存和复习你的词汇。",

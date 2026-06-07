@@ -139,6 +139,7 @@ export const ru: Translations = {
   editWord: "Edit word",
   saveWord: "Save",
   deleteWord: "Удалить слово",
+  flashcardKeyboardHint: "Space to flip · ← → to navigate",
   flipCard: "Нажмите, чтобы перевернуть",
   nextCard: "Далее",
   signInForVocab: "Войдите, чтобы сохранять и повторять слова.",

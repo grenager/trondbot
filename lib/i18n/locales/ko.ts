@@ -138,6 +138,7 @@ export const ko: Translations = {
   editWord: "Edit word",
   saveWord: "Save",
   deleteWord: "단어 삭제",
+  flashcardKeyboardHint: "Space to flip · ← → to navigate",
   flipCard: "탭하여 뒤집기",
   nextCard: "다음",
   signInForVocab: "로그인하여 단어를 저장하고 복습하세요.",

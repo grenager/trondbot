@@ -326,13 +326,17 @@ function FlashcardModal({
     function handleKeyDown(e: KeyboardEvent): void {
       if (e.key === "Escape") {
         onClose();
-      } else if (e.key === " " || e.key === "Enter") {
+      } else if (e.key === " ") {
         e.preventDefault();
         setFlipped((f) => !f);
       } else if (e.key === "ArrowRight" || e.key === "ArrowDown") {
         e.preventDefault();
         setFlipped(false);
         setCurrentIndex((prev) => (prev + 1) % shuffled.length);
+      } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+        e.preventDefault();
+        setFlipped(false);
+        setCurrentIndex((prev) => (prev - 1 + shuffled.length) % shuffled.length);
       }
     }
 
@@ -343,6 +347,11 @@ function FlashcardModal({
   const card: VocabEntry | undefined = shuffled[currentIndex];
   if (!card) {
     return null;
+  }
+
+  function handlePrevious(): void {
+    setFlipped(false);
+    setCurrentIndex((prev) => (prev - 1 + shuffled.length) % shuffled.length);
   }
 
   function handleNext(): void {
@@ -388,13 +397,26 @@ function FlashcardModal({
           {flipped ? "" : t.flipCard}
         </p>
 
-        <button
-          type="button"
-          onClick={handleNext}
-          className="rounded-lg bg-stone-100 px-5 py-2 text-sm font-medium text-stone-700 transition-colors hover:bg-stone-200"
-        >
-          {t.nextCard}
-        </button>
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={handlePrevious}
+            className="rounded-lg bg-stone-100 px-5 py-2 text-sm font-medium text-stone-700 transition-colors hover:bg-stone-200"
+          >
+            ←
+          </button>
+          <button
+            type="button"
+            onClick={handleNext}
+            className="rounded-lg bg-stone-100 px-5 py-2 text-sm font-medium text-stone-700 transition-colors hover:bg-stone-200"
+          >
+            {t.nextCard} →
+          </button>
+        </div>
+
+        <p className="text-center text-[10px] text-stone-300">
+          {t.flashcardKeyboardHint}
+        </p>
       </div>
     </div>
   );

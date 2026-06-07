@@ -138,6 +138,7 @@ export const ja: Translations = {
   editWord: "Edit word",
   saveWord: "Save",
   deleteWord: "単語を削除",
+  flashcardKeyboardHint: "Space to flip · ← → to navigate",
   flipCard: "タップして裏返す",
   nextCard: "次へ",
   signInForVocab: "ログインして単語を保存・復習しましょう。",
