@@ -74,8 +74,15 @@ export async function POST(request: Request): Promise<NextResponse> {
   const stripPunctuation = (text: string): string =>
     text.replace(/^[\p{P}\p{S}]+|[\p{P}\p{S}]+$/gu, "").trim();
 
-  const cleanWord: string = stripPunctuation(body.word.trim()).toLowerCase();
-  const cleanTranslation: string = stripPunctuation(body.translation.trim()).toLowerCase();
+  let cleanWord: string = stripPunctuation(body.word.trim()).toLowerCase();
+  let cleanTranslation: string = stripPunctuation(body.translation.trim()).toLowerCase();
+  let sourceLang: string = body.sourceLanguage;
+  let targetLang: string = body.targetLanguage;
+
+  if (sourceLang > targetLang) {
+    [cleanWord, cleanTranslation] = [cleanTranslation, cleanWord];
+    [sourceLang, targetLang] = [targetLang, sourceLang];
+  }
 
   if (!cleanWord || !cleanTranslation) {
     return NextResponse.json({ error: "Word is empty after cleaning" }, { status: 400 });
@@ -86,10 +93,10 @@ export async function POST(request: Request): Promise<NextResponse> {
       user_id: user.id,
       word: cleanWord,
       translation: cleanTranslation,
-      source_language: body.sourceLanguage,
-      target_language: body.targetLanguage,
+      source_language: sourceLang,
+      target_language: targetLang,
     },
-    { onConflict: "user_id,translation,source_language,target_language" },
+    { onConflict: "user_id,word,source_language,target_language" },
   );
 
   if (error) {

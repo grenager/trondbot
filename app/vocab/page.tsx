@@ -19,7 +19,7 @@ function VocabContent() {
   const { user } = useAuth();
   const [entries, setEntries] = useState<VocabEntry[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [showFlashcards, setShowFlashcards] = useState<boolean>(false);
+  const [flashcardDirection, setFlashcardDirection] = useState<"source-to-target" | "target-to-source" | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editWord, setEditWord] = useState<string>("");
@@ -159,10 +159,17 @@ function VocabContent() {
       <div className="mb-4 flex items-center gap-2">
         <button
           type="button"
-          onClick={() => setShowFlashcards(true)}
+          onClick={() => setFlashcardDirection("source-to-target")}
           className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
         >
-          {t.review}
+          {t.review} →
+        </button>
+        <button
+          type="button"
+          onClick={() => setFlashcardDirection("target-to-source")}
+          className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+        >
+          ← {t.review}
         </button>
         <button
           type="button"
@@ -291,10 +298,11 @@ function VocabContent() {
         ))}
       </div>
 
-      {showFlashcards ? (
+      {flashcardDirection !== null ? (
         <FlashcardModal
           entries={entries}
-          onClose={() => setShowFlashcards(false)}
+          direction={flashcardDirection}
+          onClose={() => setFlashcardDirection(null)}
         />
       ) : null}
     </>
@@ -303,24 +311,24 @@ function VocabContent() {
 
 function FlashcardModal({
   entries,
+  direction,
   onClose,
 }: {
   entries: VocabEntry[];
+  direction: "source-to-target" | "target-to-source";
   onClose: () => void;
 }) {
   const { t } = useTranslation();
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [flipped, setFlipped] = useState<boolean>(false);
-  const [shuffled, setShuffled] = useState<VocabEntry[]>([]);
-
-  useEffect(() => {
+  const [shuffled, setShuffled] = useState<VocabEntry[]>(() => {
     const copy: VocabEntry[] = [...entries];
     for (let i: number = copy.length - 1; i > 0; i--) {
       const j: number = Math.floor(Math.random() * (i + 1));
       [copy[i], copy[j]] = [copy[j]!, copy[i]!];
     }
-    setShuffled(copy);
-  }, [entries]);
+    return copy;
+  });
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent): void {
@@ -389,7 +397,9 @@ function FlashcardModal({
           className="flex h-48 w-full items-center justify-center rounded-2xl border-2 border-stone-200 bg-stone-50 p-6 transition-all hover:border-blue-300 hover:shadow-md"
         >
           <span className="text-center text-xl font-medium text-stone-900">
-            {flipped ? card.translation : card.word}
+            {flipped
+              ? (direction === "source-to-target" ? card.translation : card.word)
+              : (direction === "source-to-target" ? card.word : card.translation)}
           </span>
         </button>
 
