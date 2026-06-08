@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import SecondaryPageShell from "@/components/SecondaryPageShell";
 import { useTranslation } from "@/lib/i18n/TranslationContext";
 import { useAuth } from "@/components/AuthProvider";
@@ -12,6 +12,7 @@ interface VocabEntry {
   source_language: string;
   target_language: string;
   created_at: string;
+  last_reviewed_at: string | null;
 }
 
 function VocabContent() {
@@ -323,12 +324,42 @@ function FlashcardModal({
   const [flipped, setFlipped] = useState<boolean>(false);
   const [shuffled, setShuffled] = useState<VocabEntry[]>(() => {
     const copy: VocabEntry[] = [...entries];
-    for (let i: number = copy.length - 1; i > 0; i--) {
-      const j: number = Math.floor(Math.random() * (i + 1));
-      [copy[i], copy[j]] = [copy[j]!, copy[i]!];
+    copy.sort((a, b) => {
+      const aTime: number = a.last_reviewed_at ? new Date(a.last_reviewed_at).getTime() : 0;
+      const bTime: number = b.last_reviewed_at ? new Date(b.last_reviewed_at).getTime() : 0;
+      return aTime - bTime;
+    });
+    // Light shuffle within similar staleness tiers (4-hour window)
+    const TIER_MS = 4 * 60 * 60 * 1000;
+    for (let i = 0; i < copy.length - 1; i++) {
+      const iTime: number = copy[i]!.last_reviewed_at ? new Date(copy[i]!.last_reviewed_at!).getTime() : 0;
+      let j: number = i + 1;
+      while (j < copy.length) {
+        const jTime: number = copy[j]!.last_reviewed_at ? new Date(copy[j]!.last_reviewed_at!).getTime() : 0;
+        if (jTime - iTime > TIER_MS) break;
+        j++;
+      }
+      // Shuffle within [i, j)
+      for (let k: number = j - 1; k > i; k--) {
+        const r: number = i + Math.floor(Math.random() * (k - i + 1));
+        [copy[k], copy[r]] = [copy[r]!, copy[k]!];
+      }
+      i = j - 1;
     }
     return copy;
   });
+
+  const reviewedIds = useRef<Set<string>>(new Set());
+
+  function markReviewed(id: string): void {
+    if (reviewedIds.current.has(id)) return;
+    reviewedIds.current.add(id);
+    void fetch("/api/vocab/review", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+  }
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent): void {
@@ -336,7 +367,13 @@ function FlashcardModal({
         onClose();
       } else if (e.key === " ") {
         e.preventDefault();
-        setFlipped((f) => !f);
+        setFlipped((prev) => {
+          if (!prev) {
+            const c: VocabEntry | undefined = shuffled[currentIndex];
+            if (c) markReviewed(c.id);
+          }
+          return !prev;
+        });
       } else if (e.key === "ArrowRight" || e.key === "ArrowDown") {
         e.preventDefault();
         setFlipped(false);
@@ -350,7 +387,7 @@ function FlashcardModal({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [onClose, shuffled.length]);
+  }, [onClose, shuffled, currentIndex]);
 
   const card: VocabEntry | undefined = shuffled[currentIndex];
   if (!card) {
@@ -393,7 +430,12 @@ function FlashcardModal({
 
         <button
           type="button"
-          onClick={() => setFlipped((f) => !f)}
+          onClick={() => {
+            setFlipped((prev) => {
+              if (!prev) markReviewed(card.id);
+              return !prev;
+            });
+          }}
           className="flex h-48 w-full items-center justify-center rounded-2xl border-2 border-stone-200 bg-stone-50 p-6 transition-all hover:border-blue-300 hover:shadow-md"
         >
           <span className="text-center text-xl font-medium text-stone-900">

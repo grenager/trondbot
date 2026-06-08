@@ -38,7 +38,7 @@ export async function GET(): Promise<NextResponse> {
 
   const { data, error } = await supabase
     .from("vocab")
-    .select("id, word, translation, source_language, target_language, created_at")
+    .select("id, word, translation, source_language, target_language, created_at, last_reviewed_at")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 
