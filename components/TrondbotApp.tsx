@@ -431,10 +431,10 @@ function TrondbotAppContent() {
     event: KeyboardEvent<HTMLTextAreaElement>,
   ): void {
     if (event.key === "Tab" && !event.shiftKey) {
-      const match: RegExpMatchArray | null = input.match(/\/(\S+)$/);
+      const match: RegExpMatchArray | null = input.match(/\/(\S.*)$/);
       if (match) {
         event.preventDefault();
-        const lookupWord: string = match[1];
+        const lookupWord: string = match[1].trim();
         if (lookupWord) {
           void handleSlashTranslate(lookupWord, match[0]);
         }
@@ -891,7 +891,7 @@ function TrondbotAppContent() {
     usage.remaining <= 0;
   const hasComposerInput: boolean = input.trim().length > 0;
   const slashLookupMatch: RegExpMatchArray | null = input.match(
-    /\/(\S+)$/,
+    /\/(\S.*)$/,
   );
   const slashLookupActive: boolean = slashLookupMatch !== null;
 
