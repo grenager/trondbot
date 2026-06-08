@@ -128,6 +128,7 @@ export const nl: Translations = {
   navChat: "Chat",
   navHistoryStreaks: "History & Streaks",
   navBuyCredits: "Refill Credits (Free!)",
+  outOfCreditsMessage: "Geen credits meer. Open het menu (☰) om bij te vullen.",
   navVocab: "Woordenlijst",
   navSettings: "Settings",
   navAbout: "About",

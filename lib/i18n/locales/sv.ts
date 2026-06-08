@@ -127,6 +127,7 @@ export const sv: Translations = {
   navChat: "Chat",
   navHistoryStreaks: "History & Streaks",
   navBuyCredits: "Refill Credits (Free!)",
+  outOfCreditsMessage: "Du har inga krediter kvar. Öppna menyn (☰) för att fylla på.",
   navVocab: "Ordlista",
   navSettings: "Settings",
   navAbout: "About",

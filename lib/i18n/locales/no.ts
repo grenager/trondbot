@@ -127,6 +127,7 @@ export const no: Translations = {
   navChat: "Chat",
   navHistoryStreaks: "History & Streaks",
   navBuyCredits: "Refill Credits (Free!)",
+  outOfCreditsMessage: "Du er tom for kreditter. Åpne menyen (☰) for å fylle på.",
   navVocab: "Ordliste",
   navSettings: "Settings",
   navAbout: "About",

@@ -121,6 +121,7 @@ export const zh: Translations = {
   navChat: "Chat",
   navHistoryStreaks: "History & Streaks",
   navBuyCredits: "Refill Credits (Free!)",
+  outOfCreditsMessage: "积分已用完。打开菜单（☰）充值。",
   navVocab: "词汇表",
   navSettings: "Settings",
   navAbout: "About",

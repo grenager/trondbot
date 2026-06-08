@@ -126,6 +126,7 @@ export const ru: Translations = {
   navChat: "Chat",
   navHistoryStreaks: "History & Streaks",
   navBuyCredits: "Refill Credits (Free!)",
+  outOfCreditsMessage: "Кредиты закончились. Откройте меню (☰) для пополнения.",
   navVocab: "Словарь",
   navSettings: "Settings",
   navAbout: "About",

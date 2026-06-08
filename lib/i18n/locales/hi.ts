@@ -125,6 +125,7 @@ export const hi: Translations = {
   navChat: "Chat",
   navHistoryStreaks: "History & Streaks",
   navBuyCredits: "Refill Credits (Free!)",
+  outOfCreditsMessage: "क्रेडिट खत्म हो गए। रीफिल के लिए मेनू (☰) खोलें।",
   navVocab: "शब्दावली",
   navSettings: "Settings",
   navAbout: "About",

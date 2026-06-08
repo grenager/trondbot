@@ -125,6 +125,7 @@ export const ja: Translations = {
   navChat: "Chat",
   navHistoryStreaks: "History & Streaks",
   navBuyCredits: "Refill Credits (Free!)",
+  outOfCreditsMessage: "クレジットがありません。メニュー（☰）からチャージしてください。",
   navVocab: "単語帳",
   navSettings: "Settings",
   navAbout: "About",
