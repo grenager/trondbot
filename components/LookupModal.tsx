@@ -102,9 +102,6 @@ export default function LookupModal({
       });
 
       const data: unknown = await response.json();
-      if (onUsageUpdate) {
-        applyUsageFromApiResponse(data, onUsageUpdate);
-      }
 
       if (!response.ok) {
         const errorMessage: string =
@@ -115,6 +112,10 @@ export default function LookupModal({
             ? data.error
             : t.lookupFailed;
         throw new Error(errorMessage);
+      }
+
+      if (onUsageUpdate) {
+        applyUsageFromApiResponse(data, onUsageUpdate);
       }
 
       const nextTranslation: unknown =
