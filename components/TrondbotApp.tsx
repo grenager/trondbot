@@ -184,6 +184,7 @@ function TrondbotAppContent() {
   const [messages, setMessages] = useState<DisplayMessage[]>([]);
   const [input, setInput] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
+  const [translating, setTranslating] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [hydrated, setHydrated] = useState<boolean>(false);
   const [showSetupForm, setShowSetupForm] = useState<boolean>(false);
@@ -472,7 +473,7 @@ function TrondbotAppContent() {
       return false;
     }
 
-    setLoading(true);
+    setTranslating(true);
     try {
       const response = await fetch("/api/lookup", {
         method: "POST",
@@ -518,7 +519,7 @@ function TrondbotAppContent() {
     } catch {
       return false;
     } finally {
-      setLoading(false);
+      setTranslating(false);
     }
   }
 
@@ -1085,7 +1086,6 @@ function TrondbotAppContent() {
               type="button"
               disabled={
                 loading ||
-                awaitingAcknowledgment ||
                 typingAfterAck ||
                 outOfCredits
               }
