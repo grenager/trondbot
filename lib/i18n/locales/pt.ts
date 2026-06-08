@@ -128,6 +128,7 @@ export const pt: Translations = {
   navChat: "Chat",
   navHistoryStreaks: "History & Streaks",
   navBuyCredits: "Refill Credits (Free!)",
+  outOfCreditsMessage: "Seus créditos acabaram. Abra o menu (☰) para recarregar.",
   navVocab: "Vocabulário",
   navSettings: "Settings",
   navAbout: "About",

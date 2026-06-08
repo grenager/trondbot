@@ -116,6 +116,7 @@ export interface Translations {
   navChat: string;
   navHistoryStreaks: string;
   navBuyCredits: string;
+  outOfCreditsMessage: string;
   navVocab: string;
   navSettings: string;
   navAbout: string;
@@ -329,6 +330,8 @@ export const en: Translations = {
   navChat: "Chat",
   navHistoryStreaks: "History & Streaks",
   navBuyCredits: "Refill Credits (Free!)",
+  outOfCreditsMessage:
+    "You're out of credits. Open the menu (☰) to refill.",
   navVocab: "Vocabulary",
   navSettings: "Settings",
   navAbout: "About",

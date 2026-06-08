@@ -1175,6 +1175,14 @@ function TrondbotAppContent() {
                 </div>
               ) : null}
 
+              {!usage.requiresSignIn && usage.remaining <= 0 ? (
+                <div className="shrink-0 border-t border-stone-100 bg-amber-50 px-3 py-2.5">
+                  <p className="text-center text-xs font-medium text-amber-700">
+                    {t.outOfCreditsMessage}
+                  </p>
+                </div>
+              ) : null}
+
               {error ? (
                 <div className="flex items-center justify-between border-t border-stone-100 px-3 py-1.5">
                   <p className="text-xs text-red-600">{error}</p>

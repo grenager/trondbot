@@ -125,6 +125,7 @@ export const ar: Translations = {
   navChat: "Chat",
   navHistoryStreaks: "History & Streaks",
   navBuyCredits: "Refill Credits (Free!)",
+  outOfCreditsMessage: "لقد نفدت رصيدك. افتح القائمة (☰) لإعادة التعبئة.",
   navVocab: "المفردات",
   navSettings: "Settings",
   navAbout: "About",

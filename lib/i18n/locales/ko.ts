@@ -125,6 +125,7 @@ export const ko: Translations = {
   navChat: "Chat",
   navHistoryStreaks: "History & Streaks",
   navBuyCredits: "Refill Credits (Free!)",
+  outOfCreditsMessage: "크레딧이 부족합니다. 메뉴(☰)에서 충전하세요.",
   navVocab: "단어장",
   navSettings: "Settings",
   navAbout: "About",
