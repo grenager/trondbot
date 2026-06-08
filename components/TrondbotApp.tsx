@@ -486,6 +486,11 @@ function TrondbotAppContent() {
       });
 
       const data: unknown = await response.json();
+
+      if (!response.ok) {
+        return false;
+      }
+
       if (data && typeof data === "object" && "usage" in data) {
         const parsed: UsageSnapshot | null = parseUsageSnapshot(
           (data as { usage: unknown }).usage,
@@ -493,10 +498,6 @@ function TrondbotAppContent() {
         if (parsed) {
           setUsage(parsed);
         }
-      }
-
-      if (!response.ok) {
-        return false;
       }
 
       const translation: unknown =
