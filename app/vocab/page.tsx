@@ -1,9 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import SecondaryPageShell from "@/components/SecondaryPageShell";
 import { useTranslation } from "@/lib/i18n/TranslationContext";
 import { useAuth } from "@/components/AuthProvider";
+import { isSpeechSupported, speakText, stopSpeaking } from "@/lib/tts";
+import type { LanguageCode } from "@/lib/types";
 
 interface VocabEntry {
   id: string;
@@ -12,6 +14,7 @@ interface VocabEntry {
   source_language: string;
   target_language: string;
   created_at: string;
+  last_reviewed_at: string | null;
 }
 
 function VocabContent() {
@@ -19,7 +22,7 @@ function VocabContent() {
   const { user } = useAuth();
   const [entries, setEntries] = useState<VocabEntry[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [showFlashcards, setShowFlashcards] = useState<boolean>(false);
+  const [flashcardDirection, setFlashcardDirection] = useState<"source-to-target" | "target-to-source" | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editWord, setEditWord] = useState<string>("");
@@ -159,10 +162,17 @@ function VocabContent() {
       <div className="mb-4 flex items-center gap-2">
         <button
           type="button"
-          onClick={() => setShowFlashcards(true)}
+          onClick={() => setFlashcardDirection("source-to-target")}
           className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
         >
-          {t.review}
+          {t.review} →
+        </button>
+        <button
+          type="button"
+          onClick={() => setFlashcardDirection("target-to-source")}
+          className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+        >
+          ← {t.review}
         </button>
         <button
           type="button"
@@ -291,10 +301,11 @@ function VocabContent() {
         ))}
       </div>
 
-      {showFlashcards ? (
+      {flashcardDirection !== null ? (
         <FlashcardModal
           entries={entries}
-          onClose={() => setShowFlashcards(false)}
+          direction={flashcardDirection}
+          onClose={() => setFlashcardDirection(null)}
         />
       ) : null}
     </>
@@ -303,24 +314,54 @@ function VocabContent() {
 
 function FlashcardModal({
   entries,
+  direction,
   onClose,
 }: {
   entries: VocabEntry[];
+  direction: "source-to-target" | "target-to-source";
   onClose: () => void;
 }) {
   const { t } = useTranslation();
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [flipped, setFlipped] = useState<boolean>(false);
-  const [shuffled, setShuffled] = useState<VocabEntry[]>([]);
-
-  useEffect(() => {
+  const [shuffled, setShuffled] = useState<VocabEntry[]>(() => {
     const copy: VocabEntry[] = [...entries];
-    for (let i: number = copy.length - 1; i > 0; i--) {
-      const j: number = Math.floor(Math.random() * (i + 1));
-      [copy[i], copy[j]] = [copy[j]!, copy[i]!];
+    copy.sort((a, b) => {
+      const aTime: number = a.last_reviewed_at ? new Date(a.last_reviewed_at).getTime() : 0;
+      const bTime: number = b.last_reviewed_at ? new Date(b.last_reviewed_at).getTime() : 0;
+      return aTime - bTime;
+    });
+    // Light shuffle within similar staleness tiers (4-hour window)
+    const TIER_MS = 4 * 60 * 60 * 1000;
+    for (let i = 0; i < copy.length - 1; i++) {
+      const iTime: number = copy[i]!.last_reviewed_at ? new Date(copy[i]!.last_reviewed_at!).getTime() : 0;
+      let j: number = i + 1;
+      while (j < copy.length) {
+        const jTime: number = copy[j]!.last_reviewed_at ? new Date(copy[j]!.last_reviewed_at!).getTime() : 0;
+        if (jTime - iTime > TIER_MS) break;
+        j++;
+      }
+      // Shuffle within [i, j)
+      for (let k: number = j - 1; k > i; k--) {
+        const r: number = i + Math.floor(Math.random() * (k - i + 1));
+        [copy[k], copy[r]] = [copy[r]!, copy[k]!];
+      }
+      i = j - 1;
     }
-    setShuffled(copy);
-  }, [entries]);
+    return copy;
+  });
+
+  const reviewedIds = useRef<Set<string>>(new Set());
+
+  function markReviewed(id: string): void {
+    if (reviewedIds.current.has(id)) return;
+    reviewedIds.current.add(id);
+    void fetch("/api/vocab/review", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+  }
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent): void {
@@ -328,7 +369,13 @@ function FlashcardModal({
         onClose();
       } else if (e.key === " ") {
         e.preventDefault();
-        setFlipped((f) => !f);
+        setFlipped((prev) => {
+          if (!prev) {
+            const c: VocabEntry | undefined = shuffled[currentIndex];
+            if (c) markReviewed(c.id);
+          }
+          return !prev;
+        });
       } else if (e.key === "ArrowRight" || e.key === "ArrowDown") {
         e.preventDefault();
         setFlipped(false);
@@ -342,7 +389,7 @@ function FlashcardModal({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [onClose, shuffled.length]);
+  }, [onClose, shuffled, currentIndex]);
 
   const card: VocabEntry | undefined = shuffled[currentIndex];
   if (!card) {
@@ -385,17 +432,37 @@ function FlashcardModal({
 
         <button
           type="button"
-          onClick={() => setFlipped((f) => !f)}
+          onClick={() => {
+            setFlipped((prev) => {
+              if (!prev) markReviewed(card.id);
+              return !prev;
+            });
+          }}
           className="flex h-48 w-full items-center justify-center rounded-2xl border-2 border-stone-200 bg-stone-50 p-6 transition-all hover:border-blue-300 hover:shadow-md"
         >
           <span className="text-center text-xl font-medium text-stone-900">
-            {flipped ? card.translation : card.word}
+            {flipped
+              ? (direction === "source-to-target" ? card.translation : card.word)
+              : (direction === "source-to-target" ? card.word : card.translation)}
           </span>
         </button>
 
         <p className="text-xs text-stone-400">
           {flipped ? "" : t.flipCard}
         </p>
+
+        <PronounceButton
+          text={
+            flipped
+              ? (direction === "source-to-target" ? card.translation : card.word)
+              : (direction === "source-to-target" ? card.word : card.translation)
+          }
+          language={
+            flipped
+              ? (direction === "source-to-target" ? card.target_language : card.source_language)
+              : (direction === "source-to-target" ? card.source_language : card.target_language)
+          }
+        />
 
         <div className="flex gap-3">
           <button
@@ -419,6 +486,56 @@ function FlashcardModal({
         </p>
       </div>
     </div>
+  );
+}
+
+function PronounceButton({ text, language }: { text: string; language: string }) {
+  const { t } = useTranslation();
+  const [speaking, setSpeaking] = useState<boolean>(false);
+
+  useEffect(() => {
+    return () => { stopSpeaking(); };
+  }, []);
+
+  if (!isSpeechSupported()) {
+    return null;
+  }
+
+  function handleClick(): void {
+    if (speaking) {
+      stopSpeaking();
+      setSpeaking(false);
+      return;
+    }
+    void speakText(text, language as LanguageCode, {
+      onStart: () => setSpeaking(false),
+      onEnd: () => setSpeaking(false),
+    });
+    setSpeaking(true);
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleClick}
+      aria-label={speaking ? t.stopAudio : t.playMessage}
+      className="rounded-full p-2 text-stone-400 transition-colors hover:bg-stone-100 hover:text-stone-700"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="h-5 w-5"
+        aria-hidden="true"
+      >
+        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+        <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+      </svg>
+    </button>
   );
 }
 
