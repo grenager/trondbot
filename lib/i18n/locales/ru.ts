@@ -104,6 +104,9 @@ export const ru: Translations = {
   lookupFailed: "Поиск не удался. Попробуйте снова.",
   noCreditsForWordLookup: "Недостаточно кредитов для поиска слов.",
   lookupNoResult: "Перевод не найден.",
+  lookupSlashHint:
+    "Совет: введите /слово в поле ввода и нажмите Tab для быстрого перевода.",
+  lookupSlashTabHint: "для перевода",
   signIn: "Sign in",
   signOut: "Sign out",
   email: "Email",

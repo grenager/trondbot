@@ -429,6 +429,17 @@ function TrondbotAppContent() {
   function handleComposerKeyDown(
     event: KeyboardEvent<HTMLTextAreaElement>,
   ): void {
+    if (event.key === "Tab" && !event.shiftKey) {
+      const match: RegExpMatchArray | null = input.match(/\/(\S+)$/);
+      if (match) {
+        event.preventDefault();
+        const lookupWord: string = match[1];
+        if (lookupWord) {
+          void handleSlashTranslate(lookupWord, match[0]);
+        }
+        return;
+      }
+    }
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       event.currentTarget.form?.requestSubmit();
@@ -454,6 +465,61 @@ function TrondbotAppContent() {
     requestAnimationFrame(() => {
       composerRef.current?.focus();
     });
+  }
+
+  async function handleSlashTranslate(word: string, token: string): Promise<boolean> {
+    if (!canSpendCredit()) {
+      return false;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch("/api/lookup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          word,
+          nativeLanguage,
+          targetLanguage,
+        }),
+      });
+
+      const data: unknown = await response.json();
+      if (data && typeof data === "object" && "usage" in data) {
+        const parsed: UsageSnapshot | null = parseUsageSnapshot(
+          (data as { usage: unknown }).usage,
+        );
+        if (parsed) {
+          setUsage(parsed);
+        }
+      }
+
+      if (!response.ok) {
+        return false;
+      }
+
+      const translation: unknown =
+        typeof data === "object" && data !== null && "translation" in data
+          ? (data as { translation: unknown }).translation
+          : null;
+
+      if (typeof translation !== "string" || translation.trim().length === 0) {
+        return false;
+      }
+
+      setInput((prev) => {
+        const idx: number = prev.lastIndexOf(token);
+        if (idx === -1) {
+          return translation.trim();
+        }
+        return prev.slice(0, idx) + translation.trim() + prev.slice(idx + token.length);
+      });
+      return true;
+    } catch {
+      return false;
+    } finally {
+      setLoading(false);
+    }
   }
 
   function handleNewChatClick(): void {
@@ -823,6 +889,10 @@ function TrondbotAppContent() {
     usage.requiresSignIn ||
     usage.remaining <= 0;
   const hasComposerInput: boolean = input.trim().length > 0;
+  const slashLookupMatch: RegExpMatchArray | null = input.match(
+    /\/(\S+)$/,
+  );
+  const slashLookupActive: boolean = slashLookupMatch !== null;
 
   const lookupButton = (
     <button
@@ -1180,6 +1250,17 @@ function TrondbotAppContent() {
                     <div className="flex items-center justify-between px-1.5 pb-1.5">
                       {lookupButton}
                       {sendButton}
+                    </div>
+                  ) : null}
+                  {slashLookupActive && slashLookupMatch ? (
+                    <div className="flex items-center gap-1.5 px-3 pb-1.5 pt-0.5">
+                      <span className="rounded bg-stone-100 px-1.5 py-0.5 font-mono text-[11px] font-medium text-stone-500">
+                        {slashLookupMatch[0]}
+                      </span>
+                      <span className="text-[11px] text-stone-400">
+                        <kbd className="rounded border border-stone-200 bg-stone-50 px-1 py-0.5 font-sans text-[10px] font-medium text-stone-500">tab</kbd>
+                        {" "}{t.lookupSlashTabHint}
+                      </span>
                     </div>
                   ) : null}
                 </div>

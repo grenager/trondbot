@@ -103,6 +103,9 @@ export const ko: Translations = {
   lookupFailed: "찾기에 실패했습니다. 다시 시도해 주세요.",
   noCreditsForWordLookup: "단어 찾기에 사용할 크레딧이 없습니다.",
   lookupNoResult: "번역을 찾을 수 없습니다.",
+  lookupSlashHint:
+    "팁: 입력창에 /단어를 입력하고 Tab을 누르면 빠르게 번역됩니다.",
+  lookupSlashTabHint: "번역하기",
   signIn: "Sign in",
   signOut: "Sign out",
   email: "Email",

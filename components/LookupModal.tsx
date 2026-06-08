@@ -190,6 +190,9 @@ export default function LookupModal({
           {t.lookupTitle}
         </h2>
         <p className="mt-1 text-xs text-stone-500">{t.lookupDescription}</p>
+        <p className="mt-1.5 text-xs text-stone-400 italic">
+          {t.lookupSlashHint}
+        </p>
 
         <form onSubmit={handleLookup} className="mt-4 space-y-3">
           <label className="block">

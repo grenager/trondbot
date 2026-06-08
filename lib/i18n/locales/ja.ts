@@ -103,6 +103,9 @@ export const ja: Translations = {
   lookupFailed: "検索に失敗しました。もう一度お試しください。",
   noCreditsForWordLookup: "単語検索に使えるクレジットがありません。",
   lookupNoResult: "翻訳が見つかりませんでした。",
+  lookupSlashHint:
+    "ヒント：入力欄に /単語 と入力してTabを押すと素早く翻訳できます。",
+  lookupSlashTabHint: "翻訳する",
   signIn: "Sign in",
   signOut: "Sign out",
   email: "Email",

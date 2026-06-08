@@ -107,6 +107,9 @@ export const de: Translations = {
   lookupFailed: "Suche fehlgeschlagen. Bitte erneut versuchen.",
   noCreditsForWordLookup: "Keine Credits mehr für Wortsuche.",
   lookupNoResult: "Keine Übersetzung gefunden.",
+  lookupSlashHint:
+    "Tipp: Gib /Wort im Eingabefeld ein und drücke Tab für eine schnelle Übersetzung.",
+  lookupSlashTabHint: "zum Übersetzen",
   signIn: "Sign in",
   signOut: "Sign out",
   email: "Email",

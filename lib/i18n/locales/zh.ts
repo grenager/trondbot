@@ -100,6 +100,8 @@ export const zh: Translations = {
   lookupFailed: "查询失败，请重试。",
   noCreditsForWordLookup: "没有剩余积分进行单词查询。",
   lookupNoResult: "未找到翻译。",
+  lookupSlashHint: "提示：在输入框中输入 /词语 并按 Tab 即可快速翻译。",
+  lookupSlashTabHint: "翻译",
   signIn: "Sign in",
   signOut: "Sign out",
   email: "Email",
