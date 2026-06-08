@@ -105,6 +105,9 @@ export const sv: Translations = {
   lookupFailed: "Uppslaget misslyckades. Försök igen.",
   noCreditsForWordLookup: "Inga krediter kvar för orduppslag.",
   lookupNoResult: "Ingen översättning hittades.",
+  lookupSlashHint:
+    "Tips: skriv /ord i fältet och tryck Tab för snabb översättning.",
+  lookupSlashTabHint: "för att översätta",
   signIn: "Sign in",
   signOut: "Sign out",
   email: "Email",

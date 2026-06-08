@@ -103,6 +103,9 @@ export const hi: Translations = {
   lookupFailed: "खोज विफल। कृपया पुनः प्रयास करें।",
   noCreditsForWordLookup: "शब्द खोज के लिए कोई क्रेडिट शेष नहीं।",
   lookupNoResult: "कोई अनुवाद नहीं मिला।",
+  lookupSlashHint:
+    "सुझाव: इनपुट में /शब्द टाइप करें और तुरंत अनुवाद के लिए Tab दबाएँ।",
+  lookupSlashTabHint: "अनुवाद करने के लिए",
   signIn: "Sign in",
   signOut: "Sign out",
   email: "Email",

@@ -106,6 +106,9 @@ export const nl: Translations = {
   lookupFailed: "Opzoeken mislukt. Probeer het opnieuw.",
   noCreditsForWordLookup: "Geen credits meer voor woordopzoeking.",
   lookupNoResult: "Geen vertaling gevonden.",
+  lookupSlashHint:
+    "Tip: typ /woord in het invoerveld en druk op Tab voor een snelle vertaling.",
+  lookupSlashTabHint: "om te vertalen",
   signIn: "Sign in",
   signOut: "Sign out",
   email: "Email",

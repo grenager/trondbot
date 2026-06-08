@@ -107,6 +107,9 @@ export const it: Translations = {
   lookupFailed: "Ricerca non riuscita. Riprova.",
   noCreditsForWordLookup: "Nessun credito rimasto per la ricerca parole.",
   lookupNoResult: "Nessuna traduzione trovata.",
+  lookupSlashHint:
+    "Suggerimento: digita /parola nel campo e premi Tab per una traduzione rapida.",
+  lookupSlashTabHint: "per tradurre",
   signIn: "Sign in",
   signOut: "Sign out",
   email: "Email",

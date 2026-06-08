@@ -103,6 +103,9 @@ export const ar: Translations = {
   lookupFailed: "فشل البحث. يرجى المحاولة مرة أخرى.",
   noCreditsForWordLookup: "لا يوجد رصيد متبٍ للبحث عن الكلمات.",
   lookupNoResult: "لم يتم العثور على ترجمة.",
+  lookupSlashHint:
+    "نصيحة: اكتب /كلمة في حقل الإدخال واضغط Tab للحصول على ترجمة سريعة.",
+  lookupSlashTabHint: "للترجمة",
   signIn: "Sign in",
   signOut: "Sign out",
   email: "Email",
