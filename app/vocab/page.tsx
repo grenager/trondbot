@@ -4,6 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import SecondaryPageShell from "@/components/SecondaryPageShell";
 import { useTranslation } from "@/lib/i18n/TranslationContext";
 import { useAuth } from "@/components/AuthProvider";
+import { isSpeechSupported, speakText, stopSpeaking } from "@/lib/tts";
+import type { LanguageCode } from "@/lib/types";
 
 interface VocabEntry {
   id: string;
@@ -449,6 +451,19 @@ function FlashcardModal({
           {flipped ? "" : t.flipCard}
         </p>
 
+        <PronounceButton
+          text={
+            flipped
+              ? (direction === "source-to-target" ? card.translation : card.word)
+              : (direction === "source-to-target" ? card.word : card.translation)
+          }
+          language={
+            flipped
+              ? (direction === "source-to-target" ? card.target_language : card.source_language)
+              : (direction === "source-to-target" ? card.source_language : card.target_language)
+          }
+        />
+
         <div className="flex gap-3">
           <button
             type="button"
@@ -471,6 +486,56 @@ function FlashcardModal({
         </p>
       </div>
     </div>
+  );
+}
+
+function PronounceButton({ text, language }: { text: string; language: string }) {
+  const { t } = useTranslation();
+  const [speaking, setSpeaking] = useState<boolean>(false);
+
+  useEffect(() => {
+    return () => { stopSpeaking(); };
+  }, []);
+
+  if (!isSpeechSupported()) {
+    return null;
+  }
+
+  function handleClick(): void {
+    if (speaking) {
+      stopSpeaking();
+      setSpeaking(false);
+      return;
+    }
+    void speakText(text, language as LanguageCode, {
+      onStart: () => setSpeaking(false),
+      onEnd: () => setSpeaking(false),
+    });
+    setSpeaking(true);
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleClick}
+      aria-label={speaking ? t.stopAudio : t.playMessage}
+      className="rounded-full p-2 text-stone-400 transition-colors hover:bg-stone-100 hover:text-stone-700"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="h-5 w-5"
+        aria-hidden="true"
+      >
+        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+        <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+      </svg>
+    </button>
   );
 }
 
