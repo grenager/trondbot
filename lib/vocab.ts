@@ -5,7 +5,7 @@ export interface VocabSaveParams {
   targetLanguage: string;
 }
 
-export type VocabSaveResult = "saved" | "unauthorized" | "error";
+export type VocabSaveResult = "saved" | "already_saved" | "unauthorized" | "error";
 
 /**
  * Save a vocab entry. Returns the outcome so callers can show feedback.
@@ -22,7 +22,18 @@ export async function saveVocabEntry(params: VocabSaveParams): Promise<VocabSave
       return "unauthorized";
     }
 
-    return response.ok ? "saved" : "error";
+    if (!response.ok) {
+      return "error";
+    }
+
+    const data: unknown = await response.json();
+    const existed: boolean =
+      typeof data === "object" &&
+      data !== null &&
+      "existed" in data &&
+      (data as Record<string, unknown>).existed === true;
+
+    return existed ? "already_saved" : "saved";
   } catch {
     return "error";
   }

@@ -15,6 +15,7 @@ interface LookupModalProps {
   onInsert: (word: string) => void;
   canSpendCredit?: () => boolean;
   onUsageUpdate?: (usage: UsageSnapshot) => void;
+  composerContext?: string;
 }
 
 export default function LookupModal({
@@ -25,6 +26,7 @@ export default function LookupModal({
   onInsert,
   canSpendCredit,
   onUsageUpdate,
+  composerContext,
 }: LookupModalProps) {
   const { t, locale } = useTranslation();
   const vocabSave = useVocabSave();
@@ -91,6 +93,7 @@ export default function LookupModal({
     setTranslation(null);
 
     try {
+      const context: string = (composerContext ?? "").trim();
       const response = await fetch("/api/lookup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -98,6 +101,7 @@ export default function LookupModal({
           word,
           nativeLanguage,
           targetLanguage,
+          ...(context ? { context } : {}),
         }),
       });
 

@@ -81,6 +81,17 @@ export async function POST(request: Request): Promise<NextResponse> {
     return NextResponse.json({ error: "Word is empty after cleaning" }, { status: 400 });
   }
 
+  const { data: existing } = await supabase
+    .from("vocab")
+    .select("id")
+    .eq("user_id", user.id)
+    .eq("translation", cleanTranslation)
+    .eq("source_language", body.sourceLanguage)
+    .eq("target_language", body.targetLanguage)
+    .maybeSingle();
+
+  const existed: boolean = existing !== null;
+
   const { error } = await supabase.from("vocab").upsert(
     {
       user_id: user.id,
@@ -96,7 +107,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, existed });
 }
 
 interface VocabUpdateBody {
