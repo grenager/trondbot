@@ -1289,10 +1289,24 @@ function TrondbotAppContent() {
                       <span className="rounded bg-stone-100 px-1.5 py-0.5 font-mono text-[11px] font-medium text-stone-500">
                         {slashLookupMatch[0]}
                       </span>
-                      <span className="text-[11px] text-stone-400">
-                        <kbd className="rounded border border-stone-200 bg-stone-50 px-1 py-0.5 font-sans text-[10px] font-medium text-stone-500">tab</kbd>
-                        {" "}{t.lookupSlashTabHint}
-                      </span>
+                      {translating ? (
+                        <svg className="h-3 w-3 animate-spin text-stone-400" viewBox="0 0 16 16" fill="none">
+                          <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="2" opacity="0.3" />
+                          <path d="M14 8a6 6 0 0 0-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                        </svg>
+                      ) : (
+                        <span className="text-[11px] text-stone-400">
+                          <kbd className="rounded border border-stone-200 bg-stone-50 px-1 py-0.5 font-sans text-[10px] font-medium text-stone-500">tab</kbd>
+                          {" "}{t.lookupSlashTabHint}
+                        </span>
+                      )}
+                    </div>
+                  ) : translating ? (
+                    <div className="flex items-center gap-1.5 px-3 pb-1.5 pt-0.5">
+                      <svg className="h-3 w-3 animate-spin text-stone-400" viewBox="0 0 16 16" fill="none">
+                        <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="2" opacity="0.3" />
+                        <path d="M14 8a6 6 0 0 0-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                      </svg>
                     </div>
                   ) : null}
                 </div>
