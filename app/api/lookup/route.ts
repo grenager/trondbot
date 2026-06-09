@@ -17,6 +17,7 @@ interface LookupRequestBody {
   word: string;
   nativeLanguage: LanguageCode;
   targetLanguage: LanguageCode;
+  context?: string;
 }
 
 function isLookupRequestBody(value: unknown): value is LookupRequestBody {
@@ -25,14 +26,22 @@ function isLookupRequestBody(value: unknown): value is LookupRequestBody {
   }
 
   const record = value as Record<string, unknown>;
-  return (
-    typeof record.word === "string" &&
-    record.word.trim().length > 0 &&
-    typeof record.nativeLanguage === "string" &&
-    isLanguageCode(record.nativeLanguage) &&
-    typeof record.targetLanguage === "string" &&
-    isLanguageCode(record.targetLanguage)
-  );
+  if (
+    typeof record.word !== "string" ||
+    record.word.trim().length === 0 ||
+    typeof record.nativeLanguage !== "string" ||
+    !isLanguageCode(record.nativeLanguage) ||
+    typeof record.targetLanguage !== "string" ||
+    !isLanguageCode(record.targetLanguage)
+  ) {
+    return false;
+  }
+
+  if (record.context !== undefined && typeof record.context !== "string") {
+    return false;
+  }
+
+  return true;
 }
 
 function parseTranslation(value: unknown): string | null {
@@ -79,6 +88,11 @@ export async function POST(request: Request): Promise<NextResponse> {
   const sourceLabel: string = getLanguageLabel(body.nativeLanguage);
   const targetLabel: string = getLanguageLabel(body.targetLanguage);
   const word: string = body.word.trim();
+  const context: string = (body.context ?? "").trim();
+
+  const contextHint: string = context
+    ? ` The word appears in this context (in ${targetLabel}): "${context}"`
+    : "";
 
   try {
     const anthropic = new Anthropic({ apiKey });
@@ -88,12 +102,13 @@ export async function POST(request: Request): Promise<NextResponse> {
       system:
         "You are a concise bilingual dictionary for language learners. " +
         "Return only valid JSON with a single translation field. " +
-        "Pick the most natural, common translation. No explanation.",
+        "Pick the most natural, common translation. " +
+        "If context is provided, use it to disambiguate meaning. No explanation.",
       messages: [
         {
           role: "user",
           content:
-            `Translate this ${sourceLabel} word or short phrase into ${targetLabel}: "${word}"\n` +
+            `Translate this ${sourceLabel} word or short phrase into ${targetLabel}: "${word}"${contextHint}\n` +
             'Respond with JSON only: {"translation":"..."}',
         },
       ],

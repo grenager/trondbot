@@ -185,6 +185,11 @@ function TrondbotAppContent() {
   const [input, setInput] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [translating, setTranslating] = useState<boolean>(false);
+  const [slashSuggestion, setSlashSuggestion] = useState<{
+    token: string;
+    word: string;
+    translation: string;
+  } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [hydrated, setHydrated] = useState<boolean>(false);
   const [showSetupForm, setShowSetupForm] = useState<boolean>(false);
@@ -430,18 +435,34 @@ function TrondbotAppContent() {
   function handleComposerKeyDown(
     event: KeyboardEvent<HTMLTextAreaElement>,
   ): void {
+    if (event.key === "Escape" && slashSuggestion) {
+      event.preventDefault();
+      setSlashSuggestion(null);
+      return;
+    }
     if (event.key === "Tab" && !event.shiftKey) {
+      if (slashSuggestion) {
+        event.preventDefault();
+        acceptSlashSuggestion();
+        return;
+      }
       const match: RegExpMatchArray | null = input.match(/\/(\S.*)$/);
       if (match) {
         event.preventDefault();
         const lookupWord: string = match[1].trim();
-        if (lookupWord) {
-          void handleSlashTranslate(lookupWord, match[0]);
+        if (lookupWord && match.index !== undefined) {
+          const precedingText: string = input.slice(0, match.index).trim();
+          void handleSlashTranslate(lookupWord, match[0], precedingText);
         }
         return;
       }
     }
     if (event.key === "Enter" && !event.shiftKey) {
+      if (slashSuggestion) {
+        event.preventDefault();
+        acceptSlashSuggestion();
+        return;
+      }
       event.preventDefault();
       event.currentTarget.form?.requestSubmit();
     }
@@ -468,12 +489,13 @@ function TrondbotAppContent() {
     });
   }
 
-  async function handleSlashTranslate(word: string, token: string): Promise<boolean> {
+  async function handleSlashTranslate(word: string, token: string, context: string): Promise<boolean> {
     if (!canSpendCredit()) {
       return false;
     }
 
     setTranslating(true);
+    setSlashSuggestion(null);
     try {
       const response = await fetch("/api/lookup", {
         method: "POST",
@@ -482,6 +504,7 @@ function TrondbotAppContent() {
           word,
           nativeLanguage,
           targetLanguage,
+          ...(context ? { context } : {}),
         }),
       });
 
@@ -509,19 +532,29 @@ function TrondbotAppContent() {
         return false;
       }
 
-      setInput((prev) => {
-        const idx: number = prev.lastIndexOf(token);
-        if (idx === -1) {
-          return translation.trim();
-        }
-        return prev.slice(0, idx) + translation.trim() + prev.slice(idx + token.length);
-      });
+      setSlashSuggestion({ token, word, translation: translation.trim() });
       return true;
     } catch {
       return false;
     } finally {
       setTranslating(false);
     }
+  }
+
+  function acceptSlashSuggestion(): void {
+    if (!slashSuggestion) {
+      return;
+    }
+
+    const { token, translation } = slashSuggestion;
+    setInput((prev) => {
+      const idx: number = prev.lastIndexOf(token);
+      if (idx === -1) {
+        return translation;
+      }
+      return prev.slice(0, idx) + translation + prev.slice(idx + token.length);
+    });
+    setSlashSuggestion(null);
   }
 
   function handleNewChatClick(): void {
@@ -1083,6 +1116,7 @@ function TrondbotAppContent() {
           onInsert={insertIntoComposer}
           canSpendCredit={canSpendCredit}
           onUsageUpdate={applyUsageSnapshot}
+          composerContext={input}
         />
         <header className="mb-2 shrink-0 px-3">
           <div className="flex items-center justify-between gap-3">
@@ -1262,7 +1296,16 @@ function TrondbotAppContent() {
                       autoCorrect="on"
                       spellCheck
                       value={input}
-                      onChange={(event) => setInput(event.target.value)}
+                      onChange={(event) => {
+                        const next: string = event.target.value;
+                        setInput(next);
+                        if (
+                          slashSuggestion &&
+                          !next.includes(slashSuggestion.token)
+                        ) {
+                          setSlashSuggestion(null);
+                        }
+                      }}
                       onKeyDown={handleComposerKeyDown}
                       placeholder={
                         awaitingAcknowledgment
@@ -1284,7 +1327,30 @@ function TrondbotAppContent() {
                       {sendButton}
                     </div>
                   ) : null}
-                  {slashLookupActive && slashLookupMatch ? (
+                  {slashSuggestion ? (
+                    <div className="flex items-center gap-2 px-3 pb-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={acceptSlashSuggestion}
+                        className="flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-700 shadow-sm transition-colors hover:bg-blue-100"
+                      >
+                        <span className="text-blue-900">{slashSuggestion.translation}</span>
+                        <span className="flex items-center gap-1 text-[10px] font-normal text-blue-400">
+                          <kbd className="rounded border border-blue-200 bg-white px-1 py-0.5 font-sans font-medium text-blue-500">↵</kbd>
+                        </span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSlashSuggestion(null)}
+                        className="rounded-md p-1 text-stone-400 transition-colors hover:bg-stone-100 hover:text-stone-600"
+                        aria-label={t.close}
+                      >
+                        <svg width="14" height="14" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                          <path d="M5 5l10 10M15 5L5 15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                        </svg>
+                      </button>
+                    </div>
+                  ) : slashLookupActive && slashLookupMatch ? (
                     <div className="flex items-center gap-1.5 px-3 pb-1.5 pt-0.5">
                       <span className="rounded bg-stone-100 px-1.5 py-0.5 font-mono text-[11px] font-medium text-stone-500">
                         {slashLookupMatch[0]}
