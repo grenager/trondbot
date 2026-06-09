@@ -27,6 +27,7 @@ function VocabContent() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editWord, setEditWord] = useState<string>("");
   const [editTranslation, setEditTranslation] = useState<string>("");
+  const [editSwapped, setEditSwapped] = useState<boolean>(false);
   const [saving, setSaving] = useState<boolean>(false);
 
   const fetchEntries = useCallback(async (): Promise<void> => {
@@ -65,6 +66,7 @@ function VocabContent() {
     setEditingId(entry.id);
     setEditWord(entry.word);
     setEditTranslation(entry.translation);
+    setEditSwapped(false);
   }
 
   async function handleSaveEdit(): Promise<void> {
@@ -87,6 +89,7 @@ function VocabContent() {
           id: editingId,
           word: trimmedWord,
           translation: trimmedTranslation,
+          swapLanguages: editSwapped,
         }),
       });
 
@@ -98,11 +101,18 @@ function VocabContent() {
         "word" in data &&
         "translation" in data
       ) {
-        const updated = data as { word: string; translation: string };
+        const updated = data as { word: string; translation: string; source_language?: string; target_language?: string };
         setEntries((prev) =>
           prev.map((e) =>
             e.id === editingId
-              ? { ...e, word: updated.word, translation: updated.translation }
+              ? {
+                  ...e,
+                  word: updated.word,
+                  translation: updated.translation,
+                  ...(updated.source_language && updated.target_language
+                    ? { source_language: updated.source_language, target_language: updated.target_language }
+                    : {}),
+                }
               : e,
           ),
         );
@@ -239,6 +249,19 @@ function VocabContent() {
                 <div className="flex gap-2">
                   <button
                     type="button"
+                    onClick={() => {
+                      const prevWord: string = editWord;
+                      setEditWord(editTranslation);
+                      setEditTranslation(prevWord);
+                      setEditSwapped((prev) => !prev);
+                    }}
+                    className="rounded-lg border border-stone-200 px-3 py-1 text-xs font-medium text-stone-600 transition-colors hover:bg-stone-50"
+                    aria-label="Swap word and translation"
+                  >
+                    ⇄
+                  </button>
+                  <button
+                    type="button"
                     onClick={() => void handleSaveEdit()}
                     disabled={saving || !editWord.trim() || !editTranslation.trim()}
                     className="rounded-lg bg-blue-600 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-blue-700 disabled:bg-stone-300"
@@ -257,8 +280,8 @@ function VocabContent() {
             ) : (
               <div className="flex items-center justify-between">
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-stone-900">{entry.word}</p>
-                  <p className="text-xs text-stone-500">{entry.translation}</p>
+                  <p className="text-sm font-medium text-stone-900">{entry.translation}</p>
+                  <p className="text-xs text-stone-500">{entry.word}</p>
                 </div>
                 <div className="ml-3 flex shrink-0 items-center gap-1">
                   <button
@@ -331,8 +354,7 @@ function FlashcardModal({
       const bTime: number = b.last_reviewed_at ? new Date(b.last_reviewed_at).getTime() : 0;
       return aTime - bTime;
     });
-    // Light shuffle within similar staleness tiers (4-hour window)
-    const TIER_MS = 4 * 60 * 60 * 1000;
+    const TIER_MS: number = 4 * 60 * 60 * 1000;
     for (let i = 0; i < copy.length - 1; i++) {
       const iTime: number = copy[i]!.last_reviewed_at ? new Date(copy[i]!.last_reviewed_at!).getTime() : 0;
       let j: number = i + 1;
@@ -341,7 +363,6 @@ function FlashcardModal({
         if (jTime - iTime > TIER_MS) break;
         j++;
       }
-      // Shuffle within [i, j)
       for (let k: number = j - 1; k > i; k--) {
         const r: number = i + Math.floor(Math.random() * (k - i + 1));
         [copy[k], copy[r]] = [copy[r]!, copy[k]!];

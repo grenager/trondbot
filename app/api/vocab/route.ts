@@ -92,9 +92,9 @@ export async function POST(request: Request): Promise<NextResponse> {
     .from("vocab")
     .select("id")
     .eq("user_id", user.id)
-    .eq("translation", cleanTranslation)
-    .eq("source_language", body.sourceLanguage)
-    .eq("target_language", body.targetLanguage)
+    .eq("word", cleanWord)
+    .eq("source_language", sourceLang)
+    .eq("target_language", targetLang)
     .maybeSingle();
 
   const existed: boolean = existing !== null;
@@ -121,6 +121,7 @@ interface VocabUpdateBody {
   id: string;
   word: string;
   translation: string;
+  swapLanguages?: boolean;
 }
 
 function isVocabUpdateBody(value: unknown): value is VocabUpdateBody {
@@ -128,14 +129,20 @@ function isVocabUpdateBody(value: unknown): value is VocabUpdateBody {
     return false;
   }
   const r = value as Record<string, unknown>;
-  return (
-    typeof r.id === "string" &&
-    r.id.length > 0 &&
-    typeof r.word === "string" &&
-    r.word.trim().length > 0 &&
-    typeof r.translation === "string" &&
-    r.translation.trim().length > 0
-  );
+  if (
+    typeof r.id !== "string" ||
+    r.id.length === 0 ||
+    typeof r.word !== "string" ||
+    r.word.trim().length === 0 ||
+    typeof r.translation !== "string" ||
+    r.translation.trim().length === 0
+  ) {
+    return false;
+  }
+  if (r.swapLanguages !== undefined && typeof r.swapLanguages !== "boolean") {
+    return false;
+  }
+  return true;
 }
 
 export async function PATCH(request: Request): Promise<NextResponse> {
@@ -170,9 +177,25 @@ export async function PATCH(request: Request): Promise<NextResponse> {
     return NextResponse.json({ error: "Fields are empty after cleaning" }, { status: 400 });
   }
 
+  const updateFields: Record<string, string> = { word: cleanWord, translation: cleanTranslation };
+
+  if (body.swapLanguages) {
+    const { data: existing } = await supabase
+      .from("vocab")
+      .select("source_language, target_language")
+      .eq("id", body.id)
+      .eq("user_id", user.id)
+      .single();
+
+    if (existing) {
+      updateFields.source_language = existing.target_language;
+      updateFields.target_language = existing.source_language;
+    }
+  }
+
   const { error } = await supabase
     .from("vocab")
-    .update({ word: cleanWord, translation: cleanTranslation })
+    .update(updateFields)
     .eq("id", body.id)
     .eq("user_id", user.id);
 
@@ -180,7 +203,14 @@ export async function PATCH(request: Request): Promise<NextResponse> {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ ok: true, word: cleanWord, translation: cleanTranslation });
+  return NextResponse.json({
+    ok: true,
+    word: cleanWord,
+    translation: cleanTranslation,
+    ...(updateFields.source_language
+      ? { source_language: updateFields.source_language, target_language: updateFields.target_language }
+      : {}),
+  });
 }
 
 export async function DELETE(request: Request): Promise<NextResponse> {
