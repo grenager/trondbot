@@ -41,6 +41,7 @@ export async function getUsageSnapshot(): Promise<UsageSnapshot> {
 
   if (!isSupabaseConfigured()) {
     const remaining: number = getAnonymousRemaining(deviceUsage);
+    console.log("[usage] supabase not configured, anonymous remaining:", remaining);
     return {
       signedIn: false,
       remaining,
@@ -62,12 +63,15 @@ export async function getUsageSnapshot(): Promise<UsageSnapshot> {
         .eq("id", user.id)
         .maybeSingle();
 
+      console.log("[usage] getUsageSnapshot user:", user.id, "profile:", profile, "error:", error);
+
       const credits: number =
         typeof profile?.credits === "number" && Number.isFinite(profile.credits)
           ? Math.max(0, Math.floor(profile.credits))
           : 0;
 
       if (error) {
+        console.error("[usage] profile fetch error, returning 0:", error.message);
         return {
           signedIn: true,
           remaining: 0,
@@ -83,8 +87,10 @@ export async function getUsageSnapshot(): Promise<UsageSnapshot> {
         requiresSignIn: false,
       };
     }
-  } catch {
-    // Fall back to anonymous usage if Supabase is unavailable.
+
+    console.log("[usage] no user found, falling through to anonymous");
+  } catch (err: unknown) {
+    console.error("[usage] supabase error, falling back to anonymous:", err);
   }
 
   const remaining: number = getAnonymousRemaining(deviceUsage);
@@ -182,7 +188,10 @@ export async function spendMessageCredit(): Promise<{
         "spend_message_credit",
       );
 
+      console.log("[usage] spendMessageCredit user:", user.id, "remainingCredits:", remainingCredits, "error:", error);
+
       if (error) {
+        console.error("[usage] spend_message_credit RPC error:", error.message);
         return {
           ok: false,
           response: NextResponse.json(

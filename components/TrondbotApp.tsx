@@ -567,6 +567,29 @@ function TrondbotAppContent() {
       ...previous,
       remaining: previous.remaining + creditsAdded,
     }));
+    void fetch("/api/credits/add", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ amount: creditsToAdd }),
+    })
+      .then((response) => response.json())
+      .then((data: unknown) => {
+        if (
+          typeof data === "object" &&
+          data !== null &&
+          "usage" in data
+        ) {
+          const parsed: UsageSnapshot | null = parseUsageSnapshot(
+            (data as { usage: unknown }).usage,
+          );
+          if (parsed) {
+            setUsage(parsed);
+          }
+        }
+      })
+      .catch(() => {
+        refreshUsage();
+      });
     return creditsAdded;
   }
 
