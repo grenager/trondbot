@@ -10,7 +10,7 @@ import {
   spendMessageCredit,
 } from "@/lib/usage/quota";
 
-const MODEL: string = "claude-sonnet-4-20250514";
+const MODEL: string = "claude-sonnet-5";
 
 interface TokenizeRequestBody {
   text: string;

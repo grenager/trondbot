@@ -31,7 +31,7 @@ import {
   toAnthropicMessages,
 } from "@/lib/validation";
 
-const MODEL: string = "claude-sonnet-4-20250514";
+const MODEL: string = "claude-sonnet-5";
 const MAX_TOKENS: number = 1024;
 const STORY_MAX_TOKENS: number = 1500;
 const RETRY_SYSTEM_SUFFIX: string =
