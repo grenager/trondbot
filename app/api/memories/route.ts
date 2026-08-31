@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/env";
 import type { ChatMessage } from "@/lib/types";
 
-const MODEL: string = "claude-sonnet-4-20250514";
+const MODEL: string = "claude-sonnet-5";
 const MAX_TOKENS: number = 256;
 
 const MEMORY_SYSTEM_PROMPT: string = `You are a memory extraction assistant. Given a conversation transcript between a language learner and their tutor, produce a brief memory (2-3 sentences max) summarizing any personal details learned about the user — their interests, life situation, preferences, plans, family, work, hobbies, or anything else that would help personalize future conversations.
